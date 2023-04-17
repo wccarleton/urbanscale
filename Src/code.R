@@ -39,8 +39,8 @@ not_mon_idx <- grep(not_monumental, Monuments$Structure)
 monument_counts_all <- table(Monuments[, 1])
 monument_counts_filt <- table(Monuments[-c(not_mon_idx), 1])
 
-MonumentCount_all <- data.frame(Cities = names(monument_counts),
-                            Monuments = as.vector(monument_counts))
+MonumentCount_all <- data.frame(Cities = names(monument_counts_all),
+                            Monuments = as.vector(monument_counts_all))
 
 names(MonumentCount_all) <- c("Primary Key", "Monuments")
 
@@ -458,14 +458,14 @@ ggsave("./Output/scaling_results_filt.pdf",
 
 # plot all scaling parameters
 
-plt_all_scale <- plt3 + plt6 + plt9
+plt_all_scale <- (plt3 + plt + plt2) / (plt6 + plt4 + plt5) / (plt9 + plt7 + plt8)
 plt_all_scale
 
 ggsave("./Output/scaling_results_all.pdf",
         height = 8,
         width = 15,
         units = "cm",
-        scale = 1.5,
+        scale = 3,
         device = "pdf")
 
 # RJ for variable selection
