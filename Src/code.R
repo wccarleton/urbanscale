@@ -39,8 +39,8 @@ not_mon_idx <- grep(not_monumental, Monuments$Structure)
 monument_counts_all <- table(Monuments[, 1])
 monument_counts_filt <- table(Monuments[-c(not_mon_idx), 1])
 
-MonumentCount_all <- data.frame(Cities = names(monument_counts),
-                            Monuments = as.vector(monument_counts))
+MonumentCount_all <- data.frame(Cities = names(monument_counts_all),
+                            Monuments = as.vector(monument_counts_all))
 
 names(MonumentCount_all) <- c("Primary Key", "Monuments")
 
@@ -48,6 +48,27 @@ MonumentCount_filt <- data.frame(Cities = names(monument_counts_filt),
                             Monuments = as.vector(monument_counts_filt))
 
 names(MonumentCount_filt) <- c("Primary Key", "Monuments_filt")
+
+# look at only counting temples
+
+temples_idx <- grep("temple|Temple", Monuments$Structure)
+
+temple_counts <- table(Monuments[temples_idx, 1])
+
+TempleCount <- data.frame(Cities = names(temple_counts),
+                        Monuments = as.vector(temple_counts))
+
+names(TempleCount) <- c("Primary Key", "Temples")
+
+# everything but the temples
+
+nottemple_counts <- table(Monuments[-temples_idx, 1])
+
+NotTempleCount <- data.frame(Cities = names(nottemple_counts),
+                        Monuments = as.vector(nottemple_counts))
+
+names(NotTempleCount) <- c("Primary Key", "NotTemples")
+
 
 RomanUrban <- left_join(Cities_Areas, 
                         MonumentCount_all, 
@@ -57,20 +78,46 @@ RomanUrban <- left_join(RomanUrban,
                         MonumentCount_filt,
                         by = 'Primary Key')
 
+RomanUrban <- left_join(RomanUrban,
+                        TempleCount,
+                        by = 'Primary Key')
+
+RomanUrban <- left_join(RomanUrban,
+                        NotTempleCount,
+                        by = 'Primary Key')
+
 # identify cases where Area is determined by walls
 walls_idx <- grep("Walls|walls", 
                 RomanUrban$Basis)
 
 # isolate only relevant columns for further analyses
-col_idx <- grep("Primary\ Key|Area|Monuments|Monuments_filt", 
+col_idx <- grep("Primary\ Key|Area|Monuments|Monuments_filt|Temples|NotTemples", 
                 colnames(RomanUrban))
 
 RomanUrban <- RomanUrban[, col_idx]
 names(RomanUrban)[1] <- "City"
 
-# from here on this dataframe is the main dataset
+#isolate only case where we have area estimates
+RomanUrban <- subset(RomanUrban, !is.na(Area))
 
-# initial plot, all three subsets
+# get sample size
+n_roman <- dim(RomanUrban)[1]
+n_roman
+
+# now the UK church data
+
+Churches <- read.csv("Data/churches.csv")
+
+# obvious data checks...
+sum(Churches$churches == 0)
+any(is.na(Churches$churches))
+any(is.na(Churches$area))
+
+n_churches <- dim(Churches)[1]
+
+# from here on these dataframes are the main datasets
+
+# initial plot, all four datasets
 plot(y = log(RomanUrban$Monuments),
     x = log(RomanUrban$Area))
 
@@ -94,12 +141,20 @@ p3 <- ggplot(RomanUrban[walls_idx, ]) +
                     alpha = 0.7) +
         labs(title = "Walled Cities\nFiltered Monuments") +
         theme_minimal()
-plt_data <- p1 + p2 + p3
+
+p4 <- ggplot(Churches) +
+        geom_point(mapping = aes(x = log(area), y = log(churches)),
+                    colour = "green",
+                    alpha = 0.7) +
+        labs(title = "CoE Churches") +
+        theme_minimal()
+
+plt_data <- p1 + p2 + p3 + p4
 
 plt_data
 
 ggsave("./Output/point_scatters.pdf",
-        height = 8,
+        height = 15,
         width = 15,
         units = "cm",
         device = "pdf")
@@ -114,25 +169,42 @@ glm_2 <- summary(lm(log(Monuments) ~ log(Area),
 glm_3 <- summary(lm(log(Monuments_filt) ~ log(Area), 
                 data = RomanUrban[walls_idx, ]))
 
-glm_coefs <- as.data.frame(
-                rbind(round(glm_1$coefficients, 4), 
-                    round(glm_2$coefficients, 4), 
-                    round(glm_3$coefficients, 4)))
+glm_4 <- summary(lm(log(Temples) ~ log(Area), 
+                data = RomanUrban[walls_idx, ]))
+
+glm_5 <- summary(lm(log(NotTemples) ~ log(Area), 
+                data = RomanUrban[walls_idx, ]))
+
+glm_6 <- summary(lm(log(churches) ~ log(area), 
+                data = Churches))
+
+glm_coefs <- data.frame(model = c("Complete", 
+                                "Complete", 
+                                "Walled",
+                                "Walled",
+                                "Walled and Filtered",
+                                "Walled and Filtered",
+                                "Walled and Temples",
+                                "Walled and Temples",
+                                "Churches",
+                                "Churches"))
 
 glm_coefs$param <- rep(c("Intercept", 
                             "Scaling"),
-                        times = 3)
+                        times = 5)
 
-glm_coefs$model <- c("Complete", 
-                    "Complete", 
-                    "Walled",
-                    "Walled",
-                    "Walled and Filtered",
-                    "Walled and Filtered")
+glm_coefs <- cbind(glm_coefs,
+                    rbind(round(glm_1$coefficients, 4), 
+                        round(glm_2$coefficients, 4), 
+                        round(glm_3$coefficients, 4),
+                        round(glm_4$coefficients, 4), 
+                        round(glm_6$coefficients, 4)))
 
 glm_coefs$r_squared <- c(round(glm_1$r.squared, 2), NA, 
                         round(glm_2$r.squared, 2), NA,
-                        round(glm_3$r.squared, 2), NA) 
+                        round(glm_3$r.squared, 2), NA,
+                        round(glm_4$r.squared, 2), NA,
+                        round(glm_6$r.squared, 2), NA) 
 
 write.table(glm_coefs, 
             file = "Output/glm_results.csv", 
@@ -159,14 +231,10 @@ scalingCode <- nimbleCode({
     }
 })
 
-complete_idx <- complete.cases(RomanUrban)
-
-RomanUrbanComplete <- RomanUrban[complete_idx, ]
-
-N <- dim(RomanUrbanComplete)[1]
-y <- log(RomanUrbanComplete$Monuments)
+N <- dim(RomanUrban)[1]
+y <- log(RomanUrban$Monuments)
 x <- data.frame(intercept = rep(1, N),
-                area = log(RomanUrbanComplete$Area))
+                area = log(RomanUrban$Area))
 
 J = dim(x)[2]
 
@@ -206,11 +274,11 @@ if(J > 1){
 y_pred_mean = as.matrix(x) %*% b_mean
 predictions$y_mean <- y_pred_mean
 
-RomanUrbanComplete$L05 <- predictions$'5%'
-RomanUrbanComplete$U95 <- predictions$'95%'
-RomanUrbanComplete$Mean <- predictions$y_mean
+RomanUrban$L05 <- predictions$'5%'
+RomanUrban$U95 <- predictions$'95%'
+RomanUrban$Mean <- predictions$y_mean
 
-plt <- ggplot(data = RomanUrbanComplete) +
+plt <- ggplot(data = RomanUrban) +
             geom_ribbon(aes(x = log(Area), ymin = L05, ymax = U95),
                 fill = "steelblue",
                 alpha = 0.5) +
@@ -222,7 +290,7 @@ plt <- ggplot(data = RomanUrbanComplete) +
             theme_minimal()
 plt
 
-plt2 <- ggplot(data = RomanUrbanComplete) +
+plt2 <- ggplot(data = RomanUrban) +
             geom_ribbon(aes(x = log(Area), ymin = exp(L05), ymax = exp(U95)),
                 fill = "steelblue",
                 alpha = 0.5) +
