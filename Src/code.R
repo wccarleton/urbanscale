@@ -526,14 +526,14 @@ ggsave("./Output/scaling_results_filt.pdf",
 
 # plot all scaling parameters
 
-plt_all_scale <- plt3 + plt6 + plt9
+plt_all_scale <- (plt3 + plt + plt2) / (plt6 + plt4 + plt5) / (plt9 + plt7 + plt8)
 plt_all_scale
 
 ggsave("./Output/scaling_results_all.pdf",
         height = 8,
         width = 15,
         units = "cm",
-        scale = 1.5,
+        scale = 3,
         device = "pdf")
 
 # RJ for variable selection
