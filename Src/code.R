@@ -39,8 +39,8 @@ not_mon_idx <- grep(not_monumental, Monuments$Structure)
 monument_counts_all <- table(Monuments[, 1])
 monument_counts_filt <- table(Monuments[-c(not_mon_idx), 1])
 
-MonumentCount_all <- data.frame(Cities = names(monument_counts_all),
-                            Monuments = as.vector(monument_counts_all))
+MonumentCount_all <- data.frame(Cities = names(monument_counts),
+                            Monuments = as.vector(monument_counts))
 
 names(MonumentCount_all) <- c("Primary Key", "Monuments")
 
