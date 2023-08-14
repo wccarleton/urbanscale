@@ -6,6 +6,7 @@ library(ggplot2)
 library(readxl)
 #library(patchwork)
 library(coda)
+library(dplyr)
 
 # data wrangling
 # pull in the data from Excel sheets and CSVs as needed
