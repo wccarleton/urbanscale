@@ -153,7 +153,7 @@ scalingCode <- nimbleCode({
 })
 
 # get row indeces for different data subsets/filters excluding 
-# NAs because these are logged count data (NA here means the raw
+# NAs because these will be logged count data (NA here means the raw
 # count was zero). The MCMC would treat them as missing otherwise,
 # and in such circumstances a decision always has to be made regarding
 # how to handle 0's in data that is later log-transformed.
@@ -397,3 +397,103 @@ posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_temples.csv")
+
+# now the UK Churches data
+
+coe_churches <- read.csv("./Data/churches.csv")
+# get sheet names
+data_path <- "./Data/nomis_2023_08_14_102454.xlsx"
+sheets <- excel_sheets(data_path)
+uk_pop <- read_excel(data_path, 
+                    sheet = sheets[1],
+                    skip = 6)
+names(uk_pop)[2] <- "population_2020"
+coe_churches <- left_join(coe_churches,
+                uk_pop,
+                by = join_by('TCITY15NM' == 'major town and city'))
+
+# find 0 count for churches---these will be excluded
+no_churches_idx <- which(coe_churches$churches == 0)
+
+scalingCode2 <- nimbleCode({
+    # monument scaling params
+    intercept ~ dnorm(mean = 0, sd = 100)
+    scaling ~ dnorm(mean = 0, sd = 100)
+    sigma ~ dunif(1e-07, 100)
+    # main model
+    for(n in 1:N){
+        mu[n] <- intercept + scaling * pop[n]
+        y[n] ~ dnorm(mean = mu[n], sd = sigma)
+        #y_hat[n] ~ dnorm(mean = mu[n], sd = sigma)
+    }
+})
+
+N <- dim(coe_churches[-no_churches_idx,])[1]
+y <- log(coe_churches[-no_churches_idx,]$churches)
+pop <- log(coe_churches[-no_churches_idx,]$population_2020)
+
+Consts <- list(N = N)
+
+Data <- list(y = y,
+            pop = pop)
+
+Inits <- list(scaling = 0,
+            intercept = 0,
+            sigma = 1)
+
+scalingModel2 <- nimbleModel(code = scalingCode2,
+                name = "urbanscaling2",
+                constants = Consts,
+                data = Data,
+                inits = Inits)
+
+params_to_track <- c("intercept", 
+                    "scaling", 
+                    "sigma")
+
+niter <- 1000000
+nburnin <- 5000
+thin <- 10
+
+mcmc_out <- nimbleMCMC(model = scalingModel2, 
+            monitors = params_to_track, thin = thin,
+            niter = niter, nburnin = nburnin)
+
+# summarize
+# convergence check with Geweke diagnostic
+convergence <- geweke.diag(mcmc_out)$z
+convergence <- t(c("coe", convergence))
+colnames(convergence)[1] <- "analysis"
+write.table(convergence, 
+        file="Output/geweke_coe.csv",
+        row.names = F,
+        col.names = F,
+        sep = ",")
+
+# add iteration index to chain matrix for plotting
+iter <- seq(nburnin + 1, niter, thin)
+
+mcmc_out <- cbind(iter, mcmc_out)
+
+# chain traceplots
+long_mcmc <- pivot_longer(as.data.frame(mcmc_out), 
+                names_to = "param",
+                values_to = "sample",
+                cols = 2:dim(mcmc_out)[2])
+
+tplot <- ggplot(long_mcmc) +
+            geom_line(mapping = aes(x = iter, y = sample)) +
+            facet_grid(param ~ ., scale = "free")
+tplot
+
+ggsave(filename = "Output/tplots_coe.pdf", 
+        plot = tplot, 
+        device = "pdf")
+
+# summarize the results
+posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1])))
+posterior_summary$mean <- apply(mcmc_out[,-1], 2, mean)
+posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
+
+write.csv(round(posterior_summary,2), 
+        file = "Output/posterior_summary_coe.csv")
