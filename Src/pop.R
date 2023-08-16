@@ -497,3 +497,33 @@ posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_coe.csv")
+
+# scatter plots
+plt1 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = log(Area), y = log(Monuments))) +
+                labs(title = "All Monuments") +
+                theme_minimal()
+plt2 <- ggplot(RomanUrban[walls_idx, ]) +
+                geom_point(mapping = aes(x = log(Area), y = log(Monuments))) +
+                labs(title = "All Monuments (walls only)") +
+                theme_minimal()
+plt3 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = log(Area), y = log(Monuments_filt))) +
+                labs(title = "Above-groud Monuments") +
+                theme_minimal()
+plt4 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = log(Area), y = log(Temples))) +
+                labs(title = "Temples") +
+                theme_minimal()
+plt5 <- ggplot(coe_churches) +
+                geom_point(mapping = aes(x = log(area), y = log(churches))) +
+                labs(title = "Churches (UK)") +
+                theme_minimal()
+plt1 + plt2 + plt3 + plt4 + plt5 + plot_layout(ncol = 3, byrow = TRUE)
+
+ggsave("Output/point_scatters.pdf",
+        height = 15,
+        width = 15,
+        units = "cm",
+        scale = 1.5,
+        device = "pdf")
