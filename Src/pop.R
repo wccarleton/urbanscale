@@ -209,7 +209,7 @@ params_to_track <- c("intercept",
 
 mcmc_out <- nimbleMCMC(model = scalingModel, 
             monitors = params_to_track, thin = thin,
-            niter = 100000, nburnin = nburnin)
+            niter = niter, nburnin = nburnin)
 
 # estimate r-squared for compatibility with previous research
 
@@ -232,6 +232,8 @@ write.table(rsq_summary,
         file="Output/rsquared.csv",
         row.names = F,
         sep = ",")
+
+mcmc_out <- mcmc_out[, -mu_idx]
 
 # convergence check with Geweke diagnostic
 convergence <- geweke.diag(mcmc_out)$z
@@ -324,6 +326,8 @@ write.table(rsq_summary,
         append = T,
         sep = ",")
 
+mcmc_out <- mcmc_out[, -mu_idx]
+
 # convergence check with Geweke diagnostic
 convergence <- geweke.diag(mcmc_out)$z
 convergence <- t(c("allwalls", convergence))
@@ -415,6 +419,8 @@ write.table(rsq_summary,
         col.names = F,
         append = T,
         sep = ",")
+
+mcmc_out <- mcmc_out[, -mu_idx]
 
 # summarize
 # convergence check with Geweke diagnostic
@@ -509,6 +515,8 @@ write.table(rsq_summary,
         col.names = F,
         append = T,
         sep = ",")
+
+mcmc_out <- mcmc_out[, -mu_idx]
 
 # summarize
 # convergence check with Geweke diagnostic
@@ -627,6 +635,8 @@ write.table(rsq_summary,
         col.names = F,
         append = T,
         sep = ",")
+
+mcmc_out <- mcmc_out[, -mu_idx]
 
 # summarize
 # convergence check with Geweke diagnostic
