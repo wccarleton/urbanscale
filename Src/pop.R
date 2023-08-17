@@ -4,7 +4,7 @@ library(tidyverse)
 library(ggplot2)
 #library(ggpubr)
 library(readxl)
-#library(patchwork)
+library(patchwork)
 library(coda)
 library(dplyr)
 
@@ -204,11 +204,34 @@ params_to_track <- c("intercept",
                     "b0", 
                     "b1", 
                     #"pop", 
-                    "sigma_pop")
+                    "sigma_pop",
+                    "mu")
 
 mcmc_out <- nimbleMCMC(model = scalingModel, 
             monitors = params_to_track, thin = thin,
-            niter = niter, nburnin = nburnin)
+            niter = 100000, nburnin = nburnin)
+
+# estimate r-squared for compatibility with previous research
+
+# function for calculating it
+rsquared <- function(y_hat, y){
+       rsq <- 1 - ( sum( (y - y_hat)^2 ) / sum( (y - mean(y))^2 ))
+       return(rsq)
+}
+
+# isolate the columns from mcmc output containing samples of the 
+# mean prediction for the log-log model (y_hat)
+mu_idx <- grep("mu",colnames(mcmc_out))
+
+# calculate r-squared
+rsq <- apply(mcmc_out[, mu_idx], 1, rsquared, y = y)
+
+# summarize and save
+rsq_summary <- data.frame(analysis = "allmonuments", rsq = round(mean(rsq), 2))
+write.table(rsq_summary, 
+        file="Output/rsquared.csv",
+        row.names = F,
+        sep = ",")
 
 # convergence check with Geweke diagnostic
 convergence <- geweke.diag(mcmc_out)$z
@@ -278,11 +301,28 @@ params_to_track <- c("intercept",
                     "b0", 
                     "b1", 
                     #"pop", 
-                    "sigma_pop")
+                    "sigma_pop",
+                    "mu")
 
 mcmc_out <- nimbleMCMC(model = scalingModel, 
             monitors = params_to_track, thin = thin,
             niter = niter, nburnin = nburnin)
+
+# isolate the columns from mcmc output containing samples of the 
+# mean prediction for the log-log model (y_hat)
+mu_idx <- grep("mu",colnames(mcmc_out))
+
+# calculate r-squared
+rsq <- apply(mcmc_out[, mu_idx], 1, rsquared, y = y)
+
+# summarize and save
+rsq_summary <- data.frame(analysis = "allwalls", rsq = round(mean(rsq), 2))
+write.table(rsq_summary, 
+        file="Output/rsquared.csv",
+        row.names = F,
+        col.names = F,
+        append = T,
+        sep = ",")
 
 # convergence check with Geweke diagnostic
 convergence <- geweke.diag(mcmc_out)$z
@@ -353,11 +393,28 @@ params_to_track <- c("intercept",
                     "b0", 
                     "b1", 
                     #"pop", 
-                    "sigma_pop")
+                    "sigma_pop",
+                    "mu")
 
 mcmc_out <- nimbleMCMC(model = scalingModel, 
             monitors = params_to_track, thin = thin,
             niter = niter, nburnin = nburnin)
+
+# isolate the columns from mcmc output containing samples of the 
+# mean prediction for the log-log model (y_hat)
+mu_idx <- grep("mu",colnames(mcmc_out))
+
+# calculate r-squared
+rsq <- apply(mcmc_out[, mu_idx], 1, rsquared, y = y)
+
+# summarize and save
+rsq_summary <- data.frame(analysis = "filtmonuments", rsq = round(mean(rsq), 2))
+write.table(rsq_summary, 
+        file="Output/rsquared.csv",
+        row.names = F,
+        col.names = F,
+        append = T,
+        sep = ",")
 
 # summarize
 # convergence check with Geweke diagnostic
@@ -430,11 +487,28 @@ params_to_track <- c("intercept",
                     "b0", 
                     "b1", 
                     #"pop", 
-                    "sigma_pop")
+                    "sigma_pop",
+                    "mu")
 
 mcmc_out <- nimbleMCMC(model = scalingModel, 
             monitors = params_to_track, thin = thin,
             niter = niter, nburnin = nburnin)
+
+# isolate the columns from mcmc output containing samples of the 
+# mean prediction for the log-log model (y_hat)
+mu_idx <- grep("mu",colnames(mcmc_out))
+
+# calculate r-squared
+rsq <- apply(mcmc_out[, mu_idx], 1, rsquared, y = y)
+
+# summarize and save
+rsq_summary <- data.frame(analysis = "temples", rsq = round(mean(rsq), 2))
+write.table(rsq_summary, 
+        file="Output/rsquared.csv",
+        row.names = F,
+        col.names = F,
+        append = T,
+        sep = ",")
 
 # summarize
 # convergence check with Geweke diagnostic
@@ -527,7 +601,8 @@ scalingModel2 <- nimbleModel(code = scalingCode2,
 
 params_to_track <- c("intercept", 
                     "scaling", 
-                    "sigma")
+                    "sigma",
+                    "mu")
 
 niter <- 1000000
 nburnin <- 5000
@@ -536,6 +611,22 @@ thin <- 10
 mcmc_out <- nimbleMCMC(model = scalingModel2, 
             monitors = params_to_track, thin = thin,
             niter = niter, nburnin = nburnin)
+
+# isolate the columns from mcmc output containing samples of the 
+# mean prediction for the log-log model (y_hat)
+mu_idx <- grep("mu",colnames(mcmc_out))
+
+# calculate r-squared
+rsq <- apply(mcmc_out[, mu_idx], 1, rsquared, y = y)
+
+# summarize and save
+rsq_summary <- data.frame(analysis = "churches", rsq = round(mean(rsq), 2))
+write.table(rsq_summary, 
+        file="Output/rsquared.csv",
+        row.names = F,
+        col.names = F,
+        append = T,
+        sep = ",")
 
 # summarize
 # convergence check with Geweke diagnostic
