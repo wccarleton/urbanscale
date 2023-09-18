@@ -72,20 +72,86 @@ tallest_ctbuh <- read_excel(data_path,
 tallest_ctbuh <- drop_na(tallest_ctbuh, all_of('Rank'))
 
 names(tallest_ctbuh)[5:7] <- c("m150","m200","m300")
-tallest_ctbuh$un_pop <- NA
+tallest_ctbuh$geonames_pop <- NA
+
+# population data
+
+data_path <- "Data/worldcities.xlsx"
+sheets <- excel_sheets(data_path)
+sheets
+
+geonames_population <- read_excel(data_path, 
+                    sheet = sheets[1])
+                    #n_max = 1530,
+                    #guess_max = 1530)
+
+city_proper_idx <- grep('City prop', un_population$'City type')
+
+geonames_population[grep(tallest_ctbuh$City[dupes[2]], 
+            geonames_population$'ASCII Name', 
+            ignore.case = T),] #'Population']
+
 
 n <- dim(tallest_ctbuh)[1]
+dupes <- c()
 for(j in 1:n){
-    pop_idx <- grep(tallest_ctbuh$City[j], 
-                    un_population$'Urban Agglomeration')
+    pattern <- paste("\\b", tallest_ctbuh$City[j], "\\b", sep = "")
+    pop_idx <- grep(pattern, 
+                    geonames_population$'ASCII Name',
+                    ignore.case = TRUE)
     if(any(pop_idx)){
-        tallest_ctbuh$un_pop[j] <- un_population$'2020'[pop_idx] * 1000
+        if(length(pop_idx) > 1){
+            message(paste("duplicate(s) found for row", j, 'of', n))
+            dupes <- c(dupes, j)
+            print_cols <- c('ASCII Name', 'Country name EN', 'Alternate Names', 'Population')
+            print(geonames_population[pop_idx, print_cols], n = Inf)
+            user_choice <- readline("select an option: ")
+            selection_idx <- as.numeric(unlist(strsplit(user_choice, ",")))
+            tallest_ctbuh$geonames_pop[j] <- geonames_population$Population[pop_idx[selection_idx]]
+        }else{
+            tallest_ctbuh$geonames_pop[j] <- geonames_population$Population[pop_idx]
+        }
     }else{
-        warning(paste("city name not found for iteration", j))
+        warning(paste("city name not found for row ", j))
     }
 }
 
-zero_idx <- tallest_ctbuh$m200 == 0
 
-summary(lm(log(m150) ~ log(Population),
-            data = tallest_ctbuh[!zero_idx,]))
+n <- dim(tallest_ctbuh)[1]
+dupes <- c()
+for(j in 1:n){
+    pattern <- paste("\\b", tallest_ctbuh$City[j], "\\b", sep = "")
+    pop_idx <- grep(pattern, 
+                    geonames_population$'city_ascii',
+                    ignore.case = TRUE)
+    if(any(pop_idx)){
+        if(length(pop_idx) > 1){
+            message(paste("duplicate(s) found for row", j, 'of', n))
+            dupes <- c(dupes, j)
+            print_cols <- c('city_ascii', 'country', 'population')
+            print(geonames_population[pop_idx, print_cols], n = Inf)
+            user_choice <- readline("select an option: ")
+            selection_idx <- as.numeric(unlist(strsplit(user_choice, ",")))
+            tallest_ctbuh$geonames_pop[j] <- geonames_population$population[pop_idx[selection_idx]]
+        }else{
+            tallest_ctbuh$geonames_pop[j] <- geonames_population$population[pop_idx]
+        }
+    }else{
+        warning(paste("city name not found for row ", j))
+    }
+}
+
+tallest_ctbuh[which(tallest_ctbuh$geonames_pop == 0), 'geonames_pop'] <- NA
+tallest_ctbuh$check_me[is.na(tallest_ctbuh$geonames_pop)] <- 1
+
+tallest_ctbuh$pop_combined <- tallest_ctbuh$Population
+na_idx <- which(is.na(tallest_ctbuh$Population))
+tallest_ctbuh[na_idx, 'pop_combined'] <- tallest_ctbuh[na_idx, 'geonames_pop']
+
+check_these_idx <- which(is.na(tallest_ctbuh$Population) & 
+                                tallest_ctbuh$check_me == 1)
+
+zero_idx <- which(tallest_ctbuh$m200 == 0)
+
+skyscrape_scale <- lm(log(m150)~log(pop_combined), 
+                        data = tallest_ctbuh[-zero_idx,])
