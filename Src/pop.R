@@ -575,6 +575,28 @@ coe_churches <- left_join(coe_churches,
 # find 0 count for churches---these will be excluded
 no_churches_idx <- which(coe_churches$churches == 0)
 
+# adding monuments
+uk_monuments <- read.csv("./Data/uk_monuments.csv")
+uk_monuments <- left_join(uk_monuments,
+                uk_pop,
+                by = join_by('TCITY15NM' == 'major town and city'))
+no_monuments_idx <- which(uk_monuments$NUMPOINTS == 0)
+
+# listed buildings
+uk_listed_G1 <- read.csv("./Data/uk_listed_grdI.csv")
+uk_listed_G1 <- left_join(uk_listed_G1,
+                uk_pop,
+                by = join_by('TCITY15NM' == 'major town and city'))
+no_listedG1_idx <- which(uk_listed_G1$n_listed_I == 0)
+
+# statues
+uk_statues <- read.csv("./Data/uk_statues.csv")
+uk_statues <- left_join(uk_statues,
+                uk_pop,
+                by = join_by('TCITY15NM' == 'major town and city'))
+no_statues_idx <- which(uk_statues$statues == 0)
+
+
 scalingCode2 <- nimbleCode({
     # monument scaling params
     intercept ~ dnorm(mean = 0, sd = 100)
@@ -588,9 +610,13 @@ scalingCode2 <- nimbleCode({
     }
 })
 
-N <- dim(coe_churches[-no_churches_idx,])[1]
-y <- log(coe_churches[-no_churches_idx,]$churches)
-pop <- log(coe_churches[-no_churches_idx,]$population_2020)
+#N <- dim(coe_churches[-no_churches_idx,])[1]
+#y <- log(coe_churches[-no_churches_idx,]$churches)
+#pop <- log(coe_churches[-no_churches_idx,]$population_2020)
+
+N <- dim(uk_statues[-no_statues_idx,])[1]
+y <- log(uk_statues[-no_statues_idx,]$statues)
+pop <- log(uk_statues[-no_statues_idx,]$population_2020)
 
 Consts <- list(N = N)
 
@@ -688,7 +714,7 @@ plt2 <- ggplot(RomanUrban[walls_idx, ]) +
                 theme_minimal()
 plt3 <- ggplot(RomanUrban) +
                 geom_point(mapping = aes(x = log(Area), y = log(Monuments_filt))) +
-                labs(title = "Above-groud Monuments") +
+                labs(title = "Symbolic Monuments") +
                 theme_minimal()
 plt4 <- ggplot(RomanUrban) +
                 geom_point(mapping = aes(x = log(Area), y = log(Temples))) +
@@ -698,11 +724,197 @@ plt5 <- ggplot(coe_churches) +
                 geom_point(mapping = aes(x = log(area), y = log(churches))) +
                 labs(title = "Churches (UK)") +
                 theme_minimal()
-plt1 + plt2 + plt3 + plt4 + plt5 + plot_layout(ncol = 3, byrow = TRUE)
+plt1 + plt2 + plt3 + plot_layout(ncol = 3, byrow = TRUE)
 
 ggsave("Output/point_scatters.pdf",
-        height = 15,
+        height = 5,
         width = 15,
         units = "cm",
-        scale = 1.5,
+        scale = 2.5,
         device = "pdf")
+
+# urban wealth
+data_path <- "Data/hnwi_by_city.xlsx"
+sheets <- excel_sheets(data_path)
+sheets
+
+# pull in raw Excel data
+global_hnwi <- read_excel(data_path, 
+                    sheet = sheets[1])
+# remove duplicates in country names column
+pattern <- "(.+?)\\1+"
+global_hnwi$Country_cleaned <- sub(pattern, "\\1", global_hnwi$Country)
+
+# manually change country name entry "Hong Kong (SAR China)" to "Hong Kong" for consistency with other database 
+# similar revisions were made following manual checking for consistency between the two dataframe naming
+# conventions (see below)
+row_idx <- grep("Hong Kong", global_hnwi$Country_cleaned)
+global_hnwi[row_idx, "Country_cleaned"] <- "Hong Kong"
+row_idx <- grep("UK", global_hnwi$Country_cleaned)
+global_hnwi[row_idx, "Country_cleaned"] <- "United Kingdom"
+row_idx <- grep("UAE", global_hnwi$Country_cleaned)
+global_hnwi[row_idx, "Country_cleaned"] <- "United Arab Emirates"
+row_idx <- grep("Russian Federation", global_hnwi$Country_cleaned)
+global_hnwi[row_idx, "Country_cleaned"] <- "Russia"
+row_idx <- grep("Türkiye", global_hnwi$Country_cleaned)
+global_hnwi[row_idx, "Country_cleaned"] <- "Turkey"
+row_idx <- grep("The Bay Area", global_hnwi$City)
+global_hnwi[row_idx, "City"] <- "San Francisco"
+row_idx <- grep("St. Petersburg", global_hnwi$City)
+global_hnwi[row_idx, "City"] <- "Saint Petersburg"
+row_idx <- grep("Herzliya", global_hnwi$City)
+global_hnwi[row_idx, "City"] <- "Herzliyya"
+row_idx <- grep("Bengaluru", global_hnwi$City)
+global_hnwi[row_idx, "City"] <- "Bangalore"
+row_idx <- grep("Santa Barbara", global_hnwi$City)
+global_hnwi[row_idx, "City"] <- "Santa Barbara"
+row_idx <- grep("Dar Es Salaam", global_hnwi$City)
+global_hnwi[row_idx, "City"] <- "Dar es Salaam"
+
+global_hnwi$population <- NA
+global_hnwi$check_me <- 0
+
+# pull in population data from https://simplemaps.com/data/world-cities
+global_pop_by_city <- as_tibble(read.csv("./Data/worldcities.csv"))
+
+global_pop_by_city[grep("Moscow", global_pop_by_city$city_ascii),]
+
+# slow, manual matching because merge wasn't working
+# make a new column for searching country names/iso variables all at once
+global_pop_by_city$country_labels <- apply(global_pop_by_city, 1, function(x)paste(x[5], x[6], x[7], sep = " "))
+
+for(j in 1:dim(global_hnwi)[1]){
+        city <- global_hnwi[j, "City"]
+        country <- global_hnwi[j, "Country_cleaned"]
+        city_matches <- global_pop_by_city[grep(city, global_pop_by_city$city_ascii), ]
+        city_and_country_matches <- grep(country, city_matches$country_labels)
+        # just take the top one but alert with a flag in a column
+        if(length(city_and_country_matches) > 1){
+                global_hnwi[j, "check_me"] <- 1
+        }
+        global_hnwi[j, "population"] <- city_matches[city_and_country_matches[1], "population"]
+}
+
+# still several matches failed and population sizes remain NA
+# these need to be checked manually
+# The following lines were used to check the rows with NA population and then changes were made 
+# to city name spellings in the global_hnwi dataframe in order to make them consistent with the 
+# population dataframe spellings. This resolved a number of NA cases, but there were ultimately
+# 5 that remained, three of which had no billionaires and so would be excluded from the
+# analysis for that reason anyway.
+
+na_pop <- which(is.na(global_hnwi[,"population"]))
+
+global_hnwi[na_pop, ]
+
+global_pop_by_city[grep("Cape", global_pop_by_city$city_ascii),]
+
+global_pop_by_city[grep("Israel", global_pop_by_city$country),]
+
+# with this cleaned/updated data, run the same Bayesian model
+
+scalingCode2 <- nimbleCode({
+    # monument scaling params
+    intercept ~ dnorm(mean = 0, sd = 100)
+    scaling ~ dnorm(mean = 0, sd = 100)
+    sigma ~ dunif(1e-07, 100)
+    # main model
+    for(n in 1:N){
+        mu[n] <- intercept + scaling * pop[n]
+        y[n] ~ dnorm(mean = mu[n], sd = sigma)
+        #y_hat[n] ~ dnorm(mean = mu[n], sd = sigma)
+    }
+})
+
+
+# remove rows from the HNWI dataframe with no pop values and no billionaires
+remove_rows_idx <- which(is.na(global_hnwi$population) | is.na(global_hnwi$Billionaires))
+
+N <- dim(global_hnwi[-remove_rows_idx,])[1]
+y <- log(global_hnwi[-remove_rows_idx,]$Billionaires)
+pop <- log(global_hnwi[-remove_rows_idx,]$population)
+
+Consts <- list(N = N)
+
+Data <- list(y = y,
+            pop = pop)
+
+Inits <- list(scaling = 0,
+            intercept = 0,
+            sigma = 1)
+
+scalingModel2 <- nimbleModel(code = scalingCode2,
+                name = "urbanscaling2",
+                constants = Consts,
+                data = Data,
+                inits = Inits)
+
+params_to_track <- c("intercept", 
+                    "scaling", 
+                    "sigma",
+                    "mu")
+
+niter <- 1000000
+nburnin <- 5000
+thin <- 10
+
+mcmc_out <- nimbleMCMC(model = scalingModel2, 
+            monitors = params_to_track, thin = thin,
+            niter = niter, nburnin = nburnin)
+
+# isolate the columns from mcmc output containing samples of the 
+# mean prediction for the log-log model (y_hat)
+mu_idx <- grep("mu",colnames(mcmc_out))
+
+# calculate r-squared
+rsq <- apply(mcmc_out[, mu_idx], 1, rsquared, y = y)
+
+# summarize and save
+rsq_summary <- data.frame(analysis = "hnwi", rsq = round(mean(rsq), 2))
+write.table(rsq_summary, 
+        file="Output/rsquared.csv",
+        row.names = F,
+        col.names = F,
+        append = T,
+        sep = ",")
+
+mcmc_out <- mcmc_out[, -mu_idx]
+
+# summarize
+# convergence check with Geweke diagnostic
+convergence <- geweke.diag(mcmc_out)$z
+convergence <- t(c("hnwi", convergence))
+colnames(convergence)[1] <- "analysis"
+write.table(convergence, 
+        file="Output/geweke_hnwi.csv",
+        row.names = F,
+        col.names = F,
+        sep = ",")
+
+# add iteration index to chain matrix for plotting
+iter <- seq(nburnin + 1, niter, thin)
+
+mcmc_out <- cbind(iter, mcmc_out)
+
+# chain traceplots
+long_mcmc <- pivot_longer(as.data.frame(mcmc_out), 
+                names_to = "param",
+                values_to = "sample",
+                cols = 2:dim(mcmc_out)[2])
+
+tplot <- ggplot(long_mcmc) +
+            geom_line(mapping = aes(x = iter, y = sample)) +
+            facet_grid(param ~ ., scale = "free")
+tplot
+
+ggsave(filename = "Output/tplots_hnwi.pdf", 
+        plot = tplot, 
+        device = "pdf")
+
+# summarize the results
+posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1])))
+posterior_summary$mean <- apply(mcmc_out[,-1], 2, mean)
+posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
+
+write.csv(round(posterior_summary,2), 
+        file = "Output/posterior_summary_hnwi.csv")
