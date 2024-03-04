@@ -102,7 +102,11 @@ RomanUrban <- left_join(RomanUrban,
                         by = 'Primary Key')
 
 # isolate only relevant columns for further analyses
-col_idx <- grep("Primary\ Key|Area|Basis|pop_est|Monuments|Monuments_filt|Temples|NotTemples|Province", 
+#col_idx <- grep("Primary\ Key|Area|Basis|pop_est|Monuments|Monuments_filt|Temples|NotTemples|Province", 
+#                colnames(RomanUrban))
+
+# isolate only relevant columns for further analyses
+col_idx <- grep("Primary\ Key|Area|Basis|pop_est|Monuments|Monuments_filt|Province|Longitude|Latitude", 
                 colnames(RomanUrban))
 
 RomanUrban <- RomanUrban[, col_idx]
@@ -759,3 +763,186 @@ posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_hnwi.csv")
+
+
+### Epigraphic Analysis
+## checking for consistency when looking at an epigaphic record database and isolating the 
+## instances of epigraphic monument/building dedications 
+# Load necessary libraries
+library(httr)
+library(jsonlite)
+
+# Set the URL
+url <- 'https://zenodo.org/record/4888168/files/EDH_text_cleaned_2021-01-21.json'
+
+# Make the HTTP request and read the content
+response <- GET(url)
+content <- content(response, "text", encoding = "UTF-8")
+
+# Parse the JSON content to a dataframe
+EDH <- fromJSON(content, flatten = TRUE)
+
+# extract relevant inscription types
+inscriptions <- "building/dedicatory inscription|
+                building/dedicatory inscription?"
+
+# View the dataframe
+inscriptions_idx <- grep(inscriptions, EDH$type_of_inscription)
+
+EDH_buildings <- EDH[inscriptions_idx,]
+
+valid_coords_idx <- unlist(lapply(EDH_buildings$coordinates, function(x)length(unlist(x))))
+valid_coords_idx[which(valid_coords_idx == 2)] <- 1
+
+EDH_buildings_cleaned <- EDH_buildings[valid_coords_idx==1,]
+
+# Convert 'coordinates' column from list of vectors to two separate columns
+coordinates <- do.call(rbind, EDH_buildings_cleaned$coordinates)
+
+EDH_buildings_cleaned$Longitude <- coordinates[, 1]
+EDH_buildings_cleaned$Latitude <- coordinates[, 2]
+
+RomanUrban$Radius <- sqrt(RomanUrban$Area / pi)
+
+library(geosphere)
+
+# Initialize a column for inscription counts
+RomanUrban$InscriptionCount <- 0
+
+epigraphic_points <- matrix(c(EDH_buildings_cleaned$Longitude, EDH_buildings_cleaned$Latitude), ncol = 2)
+
+for(i in 1:dim(RomanUrban)[1]) {
+  city_coords <- c(RomanUrban$`Longitude (X)`[i], RomanUrban$`Latitude (Y)`[i])
+  radius <- RomanUrban$Radius[i] * 1000 # Assuming radius needs to be in meters for distHaversine
+  
+  # Calculate distances from city to each inscription
+  distances <- distHaversine(p1 = city_coords, p2 = epigraphic_points)#apply(epigraphic_points, 1, distHaversine, p2=city_coords)
+  #print(distances)
+  # Count how many inscriptions fall within the city's radius
+  RomanUrban$InscriptionCount[i] <- sum(distances <= radius)
+}
+
+df_subset <- subset(RomanUrban, InscriptionCount > 0)
+summary(glm(log(InscriptionCount) ~ log(Area), data = df_subset))
+
+# Scaling simplified
+# set up a Nimble model
+scalingCodeSimple <- nimbleCode({
+    # monument scaling params
+    intercept ~ dnorm(mean = 0, sd = 100)
+    scaling ~ dnorm(mean = 0, sd = 100)
+    sigma ~ dunif(1e-07, 100)
+    # population--area linking params
+    b0 ~ dnorm(mean = 0, sd = 100)
+    b1 ~ dnorm(mean = 0, sd = 100)
+    sigma_pop ~ dunif(1e-07, 100)
+    # main model
+    for(n in 1:N){
+        pop_mu[n] <- b0 + b1 * x[n]
+        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
+        mu[n] <- intercept + scaling * pop[n]
+        y[n] ~ dnorm(mean = mu[n], sd = sigma)
+        #y_hat[n] ~ dnorm(mean = mu[n], sd = sigma)
+    }
+})
+
+# set common mcmc params
+niter <- 1000000
+nburnin <- 5000
+thin <- 10
+
+# run the first analysis: all monuments
+N <- dim(df_subset[,])[1]
+y <- log(df_subset[,]$InscriptionCount)
+x <- log(df_subset[,]$Area)
+pop <- log(df_subset[,]$pop_est)
+
+Consts <- list(N = N)
+
+Data <- list(y = y,
+            x = x,
+            pop = pop)
+
+Inits <- list(scaling = 0,
+            b0 = 0,
+            b1 = 0,
+            intercept = 0,
+            sigma = 1,
+            sigma_pop = 1)
+
+scalingModel <- nimbleModel(code = scalingCodeSimple,
+                name = "urbanscaling",
+                constants = Consts,
+                data = Data,
+                inits = Inits)
+
+params_to_track <- c("intercept", 
+                    "scaling", 
+                    "sigma", 
+                    "b0", 
+                    "b1", 
+                    #"pop", 
+                    "sigma_pop",
+                    "mu")
+
+mcmc_out <- nimbleMCMC(model = scalingModel, 
+            monitors = params_to_track, thin = thin,
+            niter = niter, nburnin = nburnin)
+
+# isolate the columns from mcmc output containing samples of the 
+# mean prediction for the log-log model (y_hat)
+mu_idx <- grep("mu",colnames(mcmc_out))
+
+# calculate r-squared
+rsq <- apply(mcmc_out[, mu_idx], 1, rsquared, y = y)
+
+# summarize and save
+rsq_summary <- data.frame(analysis = "epigraphy", rsq = round(mean(rsq), 2))
+write.table(rsq_summary, 
+        file="Output/rsquared.csv",
+        row.names = F,
+        col.names = F,
+        append = T,
+        sep = ",")
+
+mcmc_out <- mcmc_out[, -mu_idx]
+
+# summarize
+# convergence check with Geweke diagnostic
+convergence <- geweke.diag(mcmc_out)$z
+convergence <- t(c("epig", convergence))
+colnames(convergence)[1] <- "analysis"
+write.table(convergence, 
+        file="Output/geweke_epig.csv",
+        row.names = F,
+        col.names = F,
+        sep = ",")
+
+# add iteration index to chain matrix for plotting
+iter <- seq(nburnin + 1, niter, thin)
+
+mcmc_out <- cbind(iter, mcmc_out)
+
+# chain traceplots
+long_mcmc <- pivot_longer(as.data.frame(mcmc_out), 
+                names_to = "param",
+                values_to = "sample",
+                cols = 2:dim(mcmc_out)[2])
+
+tplot <- ggplot(long_mcmc) +
+            geom_line(mapping = aes(x = iter, y = sample)) +
+            facet_grid(param ~ ., scale = "free")
+tplot
+
+ggsave(filename = "Output/tplots_epig.pdf", 
+        plot = tplot, 
+        device = "pdf")
+
+
+# summarize the results
+posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,])))
+posterior_summary$mean <- apply(mcmc_out[,], 2, mean)
+posterior_summary$stdd <- apply(mcmc_out[,], 2, sd)
+
+write.csv(round(posterior_summary,2), 
+        file = "Output/posterior_summary_epigraphy.csv")

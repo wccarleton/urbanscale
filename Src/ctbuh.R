@@ -226,21 +226,27 @@ plt4 <- ggplot(global_hnwi) +
                 geom_point(mapping = aes(x = log(population), y = log(Billionaires))) +
                 labs(title = "Modern Wealthy Elite") +
                 theme_classic()
+plt5 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = log(Area), y = log(InscriptionCount))) +
+                labs(title = "Roman Dedication Inscriptions") +
+                theme_classic()
 
-layout = c(area(1,1,1,2),
-        area(1,3,1,4),
-        area(2,2,2,3))
+plt1 + plt5 + plt3 + plt4 + plot_layout(ncol = 2, byrow = TRUE)
 
-plot(layout)
+#layout = c(area(1,1,1,2),
+#        area(1,3,1,4),
+#        area(2,2,2,3))
 
-plt1 + plt3 + plt4 + plot_layout(design = layout)
+#plot(layout)
 
-ggsave("Output/point_scatters_wealthy_elite.pdf",
+#plt1 + plt3 + plt4 + plot_layout(design = layout)
+
+ggsave("Output/point_scatters_wealthy_elite.png",
         height = 15,
         width = 15,
         units = "cm",
-        #scale = 1.5,
-        device = "pdf")
+        scale = 1.5,
+        device = "png")
 
 # urban wealth
 data_path <- "Data/hnwi_by_city.xlsx"
