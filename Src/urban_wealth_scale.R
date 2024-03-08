@@ -2,11 +2,13 @@
 library(nimble)
 library(tidyverse)
 library(ggplot2)
-#library(ggpubr)
 library(readxl)
 library(patchwork)
 library(coda)
 library(dplyr)
+library(httr)
+library(jsonlite)
+library(geosphere)
 
 # data wrangling
 # pull in the data from Excel sheets and CSVs as needed
@@ -152,9 +154,13 @@ pop_link_sd = sd(residuals(glm_pop))
 # set up a Nimble model
 scalingCode <- nimbleCode({
     # monument scaling params
+    intercept0 ~ dnorm(mean = 0, sd = 100)
+    sd0 ~ dunif(1e-7, 100)
+    scaling0 ~ dnorm(mean = 0, sd = 100)
+    sd1 ~ dunif(1e-7, 100)
     for(k in 1:K){
-        intercept[k] ~ dnorm(mean = 0, sd = 100)
-        scaling[k] ~ dnorm(mean = 0, sd = 100)
+        intercept[k] ~ dnorm(mean = intercept0, sd = sd0)
+        scaling[k] ~ dnorm(mean = scaling0, sd = sd1)
     }
     sigma ~ dunif(1e-07, 100)
     # population--area linking params
@@ -206,9 +212,13 @@ Data <- list(y = y,
             pop = pop)
 
 Inits <- list(scaling = rep(0, N),
+            intercept = rep(0, N),
+            intercept0 = 0,
+            scaling0 = 0,
+            sd0 = 1,
+            sd1 = 1,
             b0 = 0,
             b1 = 0,
-            intercept = rep(0, N),
             sigma = 1,
             sigma_pop = 1)
 
@@ -218,8 +228,8 @@ scalingModel <- nimbleModel(code = scalingCode,
                 data = Data,
                 inits = Inits)
 
-params_to_track <- c("intercept", 
-                    "scaling", 
+params_to_track <- c("intercept0", 
+                    "scaling0", 
                     "sigma", 
                     "b0", 
                     "b1", 
@@ -292,22 +302,47 @@ posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_allmonuments.csv")
 
+#####################################################################
+#
+#
+#
 # run the second analysis: all monuments, areas defined by walls only
 N <- dim(RomanUrban[walls_idx,])[1]
 y <- log(RomanUrban[walls_idx,]$Monuments)
 x <- log(RomanUrban[walls_idx,]$Area)
 pop <- log(RomanUrban[walls_idx,]$pop_est)
+v <- RomanUrban[,]$ProvinceIdx
+K <- length(unique(RomanUrban$ProvinceIdx))
 
-Consts <- list(N = N)
+#Consts <- list(N = N)
+#
+#Data <- list(y = y,
+#            x = x,
+#            pop = pop)
+
+#Inits <- list(scaling = 0,
+#            b0 = 0,
+#            b1 = 0,
+#            intercept = 0,
+#            sigma = 1,
+#            sigma_pop = 1)
+
+Consts <- list(N = N,
+                v = v,
+                K = K)
 
 Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits <- list(scaling = 0,
+Inits <- list(scaling = rep(0, N),
+            intercept = rep(0, N),
+            intercept0 = 0,
+            scaling0 = 0,
+            sd0 = 1,
+            sd1 = 1,
             b0 = 0,
             b1 = 0,
-            intercept = 0,
             sigma = 1,
             sigma_pop = 1)
 
@@ -317,8 +352,8 @@ scalingModel <- nimbleModel(code = scalingCode,
                 data = Data,
                 inits = Inits)
 
-params_to_track <- c("intercept", 
-                    "scaling", 
+params_to_track <- c("intercept0", 
+                    "scaling0", 
                     "sigma", 
                     "b0", 
                     "b1", 
@@ -386,22 +421,34 @@ posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_all_walls.csv")
 
+#####################################################################
+#
+#
+#
 # third analysis: filtered monuments (ie, above-ground only)
 N <- dim(RomanUrban[filt_idx,])[1]
 y <- log(RomanUrban[filt_idx,]$Monuments_filt)
 x <- log(RomanUrban[filt_idx,]$Area)
 pop <- log(RomanUrban[filt_idx,]$pop_est)
+v <- RomanUrban[,]$ProvinceIdx
+K <- length(unique(RomanUrban$ProvinceIdx))
 
-Consts <- list(N = N)
+Consts <- list(N = N,
+                v = v,
+                K = K)
 
 Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits <- list(scaling = 0,
+Inits <- list(scaling = rep(0, N),
+            intercept = rep(0, N),
+            intercept0 = 0,
+            scaling0 = 0,
+            sd0 = 1,
+            sd1 = 1,
             b0 = 0,
             b1 = 0,
-            intercept = 0,
             sigma = 1,
             sigma_pop = 1)
 
@@ -411,8 +458,8 @@ scalingModel <- nimbleModel(code = scalingCode,
                 data = Data,
                 inits = Inits)
 
-params_to_track <- c("intercept", 
-                    "scaling", 
+params_to_track <- c("intercept0", 
+                    "scaling0", 
                     "sigma", 
                     "b0", 
                     "b1", 
@@ -768,9 +815,8 @@ write.csv(round(posterior_summary,2),
 ### Epigraphic Analysis
 ## checking for consistency when looking at an epigaphic record database and isolating the 
 ## instances of epigraphic monument/building dedications 
-# Load necessary libraries
-library(httr)
-library(jsonlite)
+
+
 
 # Set the URL
 url <- 'https://zenodo.org/record/4888168/files/EDH_text_cleaned_2021-01-21.json'
@@ -804,7 +850,7 @@ EDH_buildings_cleaned$Latitude <- coordinates[, 2]
 
 RomanUrban$Radius <- sqrt(RomanUrban$Area / pi)
 
-library(geosphere)
+
 
 # Initialize a column for inscription counts
 RomanUrban$InscriptionCount <- 0
