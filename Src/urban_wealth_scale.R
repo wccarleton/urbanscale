@@ -66,26 +66,6 @@ MonumentCount_filt <- data.frame(Cities = names(monument_counts_filt),
 
 names(MonumentCount_filt) <- c("Primary Key", "Monuments_filt")
 
-# look at only counting temples
-
-temples_idx <- grep("temple|Temple", Monuments$Structure)
-
-temple_counts <- table(Monuments[temples_idx, 1])
-
-TempleCount <- data.frame(Cities = names(temple_counts),
-                        Monuments = as.vector(temple_counts))
-
-names(TempleCount) <- c("Primary Key", "Temples")
-
-# everything but the temples
-
-nottemple_counts <- table(Monuments[-temples_idx, 1])
-
-NotTempleCount <- data.frame(Cities = names(nottemple_counts),
-                        Monuments = as.vector(nottemple_counts))
-
-names(NotTempleCount) <- c("Primary Key", "NotTemples")
-
 
 RomanUrban <- left_join(Cities_Areas, 
                         MonumentCount_all, 
@@ -94,18 +74,6 @@ RomanUrban <- left_join(Cities_Areas,
 RomanUrban <- left_join(RomanUrban, 
                         MonumentCount_filt,
                         by = 'Primary Key')
-
-RomanUrban <- left_join(RomanUrban,
-                        TempleCount,
-                        by = 'Primary Key')
-
-RomanUrban <- left_join(RomanUrban,
-                        NotTempleCount,
-                        by = 'Primary Key')
-
-# isolate only relevant columns for further analyses
-#col_idx <- grep("Primary\ Key|Area|Basis|pop_est|Monuments|Monuments_filt|Temples|NotTemples|Province", 
-#                colnames(RomanUrban))
 
 # isolate only relevant columns for further analyses
 col_idx <- grep("Primary\ Key|Area|Basis|pop_est|Monuments|Monuments_filt|Province|Longitude|Latitude", 
@@ -183,12 +151,8 @@ scalingCode <- nimbleCode({
 # and in such circumstances a decision always has to be made regarding
 # how to handle 0's in data that are later log-transformed.
 
-# temples only
-temple_idx <- which(!is.na(RomanUrban$Temples))
 # above-ground monuments only
 filt_idx <- which(!is.na(RomanUrban$Monuments_filt))
-# 
-not_temples_idx <- which(!is.na(RomanUrban$NotTemples))
 
 # set common mcmc params
 niter <- 1000000
@@ -313,19 +277,6 @@ x <- log(RomanUrban[walls_idx,]$Area)
 pop <- log(RomanUrban[walls_idx,]$pop_est)
 v <- RomanUrban[,]$ProvinceIdx
 K <- length(unique(RomanUrban$ProvinceIdx))
-
-#Consts <- list(N = N)
-#
-#Data <- list(y = y,
-#            x = x,
-#            pop = pop)
-
-#Inits <- list(scaling = 0,
-#            b0 = 0,
-#            b1 = 0,
-#            intercept = 0,
-#            sigma = 1,
-#            sigma_pop = 1)
 
 Consts <- list(N = N,
                 v = v,
@@ -529,103 +480,11 @@ posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_filtmonuments.csv")
 
-# fourth analysis: temples only
-N <- dim(RomanUrban[temple_idx,])[1]
-y <- log(RomanUrban[temple_idx,]$Temples)
-x <- log(RomanUrban[temple_idx,]$Area)
-pop <- log(RomanUrban[temple_idx,]$pop_est)
-
-Consts <- list(N = N)
-
-Data <- list(y = y,
-            x = x,
-            pop = pop)
-
-Inits <- list(scaling = 0,
-            b0 = 0,
-            b1 = 0,
-            intercept = 0,
-            sigma = 1,
-            sigma_pop = 1)
-
-scalingModel <- nimbleModel(code = scalingCode,
-                name = "urbanscaling",
-                constants = Consts,
-                data = Data,
-                inits = Inits)
-
-params_to_track <- c("intercept", 
-                    "scaling", 
-                    "sigma", 
-                    "b0", 
-                    "b1", 
-                    #"pop", 
-                    "sigma_pop",
-                    "mu")
-
-mcmc_out <- nimbleMCMC(model = scalingModel, 
-            monitors = params_to_track, thin = thin,
-            niter = niter, nburnin = nburnin)
-
-# isolate the columns from mcmc output containing samples of the 
-# mean prediction for the log-log model (y_hat)
-mu_idx <- grep("mu",colnames(mcmc_out))
-
-# calculate r-squared
-rsq <- apply(mcmc_out[, mu_idx], 1, rsquared, y = y)
-
-# summarize and save
-rsq_summary <- data.frame(analysis = "temples", rsq = round(mean(rsq), 2))
-write.table(rsq_summary, 
-        file="Output/rsquared.csv",
-        row.names = F,
-        col.names = F,
-        append = T,
-        sep = ",")
-
-mcmc_out <- mcmc_out[, -mu_idx]
-
-# summarize
-# convergence check with Geweke diagnostic
-convergence <- geweke.diag(mcmc_out)$z
-convergence <- t(c("temples", convergence))
-colnames(convergence)[1] <- "analysis"
-write.table(convergence, 
-        file="Output/geweke.csv",
-        row.names = F,
-        col.names = F,
-        append = T,
-        sep = ",")
-
-# add iteration index to chain matrix for plotting
-iter <- seq(nburnin + 1, niter, thin)
-
-mcmc_out <- cbind(iter, mcmc_out)
-
-# chain traceplots
-long_mcmc <- pivot_longer(as.data.frame(mcmc_out), 
-                names_to = "param",
-                values_to = "sample",
-                cols = 2:dim(mcmc_out)[2])
-
-tplot <- ggplot(long_mcmc) +
-            geom_line(mapping = aes(x = iter, y = sample)) +
-            facet_grid(param ~ ., scale = "free")
-tplot
-
-ggsave(filename = "Output/tplots_temples.pdf", 
-        plot = tplot, 
-        device = "pdf")
-
-# summarize the results
-posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1])))
-posterior_summary$mean <- apply(mcmc_out[,-1], 2, mean)
-posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
-
-write.csv(round(posterior_summary,2), 
-        file = "Output/posterior_summary_temples.csv")
-
-# urban wealth
+#####################################################################
+#
+#
+#
+# fourth analysis: modern urban wealth
 data_path <- "Data/hnwi_by_city.xlsx"
 sheets <- excel_sheets(data_path)
 sheets
@@ -816,8 +675,6 @@ write.csv(round(posterior_summary,2),
 ## checking for consistency when looking at an epigaphic record database and isolating the 
 ## instances of epigraphic monument/building dedications 
 
-
-
 # Set the URL
 url <- 'https://zenodo.org/record/4888168/files/EDH_text_cleaned_2021-01-21.json'
 
@@ -849,8 +706,6 @@ EDH_buildings_cleaned$Longitude <- coordinates[, 1]
 EDH_buildings_cleaned$Latitude <- coordinates[, 2]
 
 RomanUrban$Radius <- sqrt(RomanUrban$Area / pi)
-
-
 
 # Initialize a column for inscription counts
 RomanUrban$InscriptionCount <- 0
@@ -992,3 +847,41 @@ posterior_summary$stdd <- apply(mcmc_out[,], 2, sd)
 
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_epigraphy.csv")
+
+## Scatter plots
+# scatter plots
+plt1 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = log(Area), y = log(Monuments))) +
+                labs(title = "All Monuments") +
+                theme_minimal()
+plt2 <- ggplot(RomanUrban[walls_idx, ]) +
+                geom_point(mapping = aes(x = log(Area), y = log(Monuments))) +
+                labs(title = "All Monuments (walls only)") +
+                theme_minimal()
+plt3 <- ggplot(RomanUrban[filt_idx, ]) +
+                geom_point(mapping = aes(x = log(Area), y = log(Monuments_filt))) +
+                labs(title = "Symbolic Monuments") +
+                theme_minimal()
+
+plt4 <- ggplot(df_subset) +
+                geom_point(mapping = aes(x = log(Area), y = log(InscriptionCount))) +
+                labs(title = "Epigraphy") +
+                theme_minimal()
+plt5 <- ggplot(global_hnwi[-remove_rows_idx, ]) +
+                geom_point(mapping = aes(x = log(population), y = log(Billionaires))) +
+                labs(title = "Billionaires") +
+                theme_minimal()
+
+layout <- "
+AABBCC
+#EEFF#
+"
+
+plt1 + plt2 + plt3 + plt4 + plt5 + plot_layout(design = layout)
+
+ggsave("Output/point_scatters.pdf",
+        height = 10,
+        width = 15,
+        units = "cm",
+        scale = 2.5,
+        device = "pdf")
