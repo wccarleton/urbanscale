@@ -122,26 +122,27 @@ pop_link_sd = sd(residuals(glm_pop))
 # set up a Nimble model
 scalingCode <- nimbleCode({
     # monument scaling params
-    intercept0 ~ dnorm(mean = 0, sd = 100)
+    log_intercept0 ~ dnorm(mean = 0, sd = 100)
     sd0 ~ dunif(1e-7, 100)
     scaling0 ~ dnorm(mean = 0, sd = 100)
     sd1 ~ dunif(1e-7, 100)
     for(k in 1:K){
-        intercept[k] ~ dnorm(mean = intercept0, sd = sd0)
+        log_intercept[k] ~ dnorm(mean = log_intercept0, sd = sd0)
+        intercept[k] <- exp(log_intercept[k])
         scaling[k] ~ dnorm(mean = scaling0, sd = sd1)
     }
-    sigma ~ dunif(1e-07, 100)
+
     # population--area linking params
     b0 ~ dnorm(mean = 0, sd = 100)
     b1 ~ dnorm(mean = 0, sd = 100)
     sigma_pop ~ dunif(1e-07, 100)
+
     # main model
     for(n in 1:N){
         pop_mu[n] <- b0 + b1 * x[n]
         pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
-        mu[n] <- intercept[v[n]] + scaling[v[n]] * pop[n]
-        y[n] ~ dnorm(mean = mu[n], sd = sigma)
-        #y_hat[n] ~ dnorm(mean = mu[n], sd = sigma)
+        mu[n] <- intercept[v[n]] + exp(scaling[v[n]] * pop[n])
+        y[n] ~ dpois(lambda = mu[n])
     }
 })
 
@@ -161,7 +162,7 @@ thin <- 10
 
 # run the first analysis: all monuments
 N <- dim(RomanUrban[,])[1]
-y <- log(RomanUrban[,]$Monuments)
+y <- RomanUrban[,]$Monuments
 x <- log(RomanUrban[,]$Area)
 pop <- log(RomanUrban[,]$pop_est)
 v <- RomanUrban[,]$ProvinceIdx
@@ -176,8 +177,8 @@ Data <- list(y = y,
             pop = pop)
 
 Inits <- list(scaling = rep(0, N),
-            intercept = rep(0, N),
-            intercept0 = 0,
+            log_intercept = rep(0, N),
+            log_intercept0 = 0,
             scaling0 = 0,
             sd0 = 1,
             sd1 = 1,
@@ -192,12 +193,10 @@ scalingModel <- nimbleModel(code = scalingCode,
                 data = Data,
                 inits = Inits)
 
-params_to_track <- c("intercept0", 
+params_to_track <- c("log_intercept0", 
                     "scaling0", 
-                    "sigma", 
                     "b0", 
                     "b1", 
-                    #"pop", 
                     "sigma_pop",
                     "mu")
 
