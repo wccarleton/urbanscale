@@ -91,7 +91,7 @@ RomanUrban <- subset(RomanUrban, !is.na(Area))
 
 # removing cases with zero monuments because these create problems for log-log models
 # there are only 34 such cases in the set containg urban centers with Area estimates
-RomanUrban <- subset(RomanUrban, !is.na(Monuments))
+#RomanUrban <- subset(RomanUrban, !is.na(Monuments))
 
 # identify cases where Area is determined by walls
 walls_idx <- grep("Walls|walls", 
@@ -119,6 +119,13 @@ pop_link_sd = sd(residuals(glm_pop))
 # I've used a new variable 'v' to refer to a vector of Provinces (coded as integers)
 # that will be included in the Nimble model as 'data nodes'.
 
+# REVISED
+# In response to reviewer comments, we adapted the model to use a Poisson
+# distribution, which involves some tranformations between logged and non-logged
+# versions of certain parameters in order to arrive at a model equivalent to
+# the original log-log Gaussian model. This was done as an alternative
+# to censoring the zero-count data.
+
 # set up a Nimble model
 scalingCode <- nimbleCode({
     # monument scaling params
@@ -145,12 +152,6 @@ scalingCode <- nimbleCode({
         y[n] ~ dpois(lambda = mu[n])
     }
 })
-
-# get row indeces for different data subsets/filters excluding 
-# NAs because these will be logged count data (NA here means the raw
-# count was zero). The MCMC would treat them as missing otherwise,
-# and in such circumstances a decision always has to be made regarding
-# how to handle 0's in data that are later log-transformed.
 
 # above-ground monuments only
 filt_idx <- which(!is.na(RomanUrban$Monuments_filt))
@@ -564,24 +565,24 @@ global_pop_by_city[grep("Israel", global_pop_by_city$country),]
 # with this cleaned/updated data, run the same Bayesian model
 
 scalingCode2 <- nimbleCode({
-    # monument scaling params
-    intercept ~ dnorm(mean = 0, sd = 100)
+    # scaling params
+    log_intercept ~ dnorm(mean = 0, sd = 100)
     scaling ~ dnorm(mean = 0, sd = 100)
-    sigma ~ dunif(1e-07, 100)
+    sigma ~ dunif(1e-7, 100)
+    intercept <- exp(log_intercept)
+
     # main model
     for(n in 1:N){
-        mu[n] <- intercept + scaling * pop[n]
-        y[n] ~ dnorm(mean = mu[n], sd = sigma)
-        #y_hat[n] ~ dnorm(mean = mu[n], sd = sigma)
+        mu[n] <- intercept + exp(scaling * pop[n])
+        y[n] ~ dpois(lambda = mu[n])
     }
 })
 
-
-# remove rows from the HNWI dataframe with no pop values and no billionaires
-remove_rows_idx <- which(is.na(global_hnwi$population) | is.na(global_hnwi$Billionaires))
+# remove rows from the HNWI dataframe with no pop values
+remove_rows_idx <- which(is.na(global_hnwi$population))
 
 N <- dim(global_hnwi[-remove_rows_idx,])[1]
-y <- log(global_hnwi[-remove_rows_idx,]$Billionaires)
+y <- global_hnwi[-remove_rows_idx,]$Billionaires
 pop <- log(global_hnwi[-remove_rows_idx,]$population)
 
 Consts <- list(N = N)
@@ -717,32 +718,35 @@ for(i in 1:dim(RomanUrban)[1]) {
   
   # Calculate distances from city to each inscription
   distances <- distHaversine(p1 = city_coords, p2 = epigraphic_points)#apply(epigraphic_points, 1, distHaversine, p2=city_coords)
-  #print(distances)
   # Count how many inscriptions fall within the city's radius
   RomanUrban$InscriptionCount[i] <- sum(distances <= radius)
 }
 
-df_subset <- subset(RomanUrban, InscriptionCount > 0)
-summary(glm(log(InscriptionCount) ~ log(Area), data = df_subset))
+#df_subset <- subset(RomanUrban, InscriptionCount > 0)
+#summary(glm(log(InscriptionCount) ~ log(Area), data = df_subset))
 
-# Scaling simplified
+# Scaling simplified since province turned out to be irrelevant above
+# set up a Nimble model
+
 # set up a Nimble model
 scalingCodeSimple <- nimbleCode({
     # monument scaling params
-    intercept ~ dnorm(mean = 0, sd = 100)
+    log_intercept ~ dnorm(mean = 0, sd = 100)
     scaling ~ dnorm(mean = 0, sd = 100)
-    sigma ~ dunif(1e-07, 100)
+    sigma ~ dunif(1e-7, 100)
+    intercept <- exp(log_intercept)
+
     # population--area linking params
     b0 ~ dnorm(mean = 0, sd = 100)
     b1 ~ dnorm(mean = 0, sd = 100)
     sigma_pop ~ dunif(1e-07, 100)
+
     # main model
     for(n in 1:N){
         pop_mu[n] <- b0 + b1 * x[n]
         pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
-        mu[n] <- intercept + scaling * pop[n]
-        y[n] ~ dnorm(mean = mu[n], sd = sigma)
-        #y_hat[n] ~ dnorm(mean = mu[n], sd = sigma)
+        mu[n] <- intercept + exp(scaling * pop[n])
+        y[n] ~ dpois(lambda = mu[n])
     }
 })
 
@@ -752,10 +756,10 @@ nburnin <- 5000
 thin <- 10
 
 # run the first analysis: all monuments
-N <- dim(df_subset[,])[1]
-y <- log(df_subset[,]$InscriptionCount)
-x <- log(df_subset[,]$Area)
-pop <- log(df_subset[,]$pop_est)
+N <- dim(RomanUrban)[1]
+y <- RomanUrban$InscriptionCount
+x <- log(RomanUrban$Area)
+pop <- log(RomanUrban$pop_est)
 
 Consts <- list(N = N)
 
