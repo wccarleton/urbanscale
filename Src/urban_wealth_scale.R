@@ -82,16 +82,16 @@ col_idx <- grep("Primary\ Key|Area|Basis|pop_est|Monuments|Monuments_filt|Provin
 RomanUrban <- RomanUrban[, col_idx]
 names(RomanUrban)[1] <- "City"
 
-# We add an index variable column for refering to provinces in the model/analyses below
- 
-RomanUrban$ProvinceIdx = as.numeric(as.factor(RomanUrban$Province))
-
 #isolate only case where we have area estimates
 RomanUrban <- subset(RomanUrban, !is.na(Area))
 
 # removing cases with zero monuments because these create problems for log-log models
 # there are only 34 such cases in the set containg urban centers with Area estimates
 #RomanUrban <- subset(RomanUrban, !is.na(Monuments))
+
+# set momument NAs to 0
+RomanUrban[which(is.na(RomanUrban$Monuments)),"Monuments"] <- 0
+RomanUrban[which(is.na(RomanUrban$Monuments)),"Monuments_filt"] <- 0
 
 # identify cases where Area is determined by walls
 walls_idx <- grep("Walls|walls", 
@@ -115,7 +115,7 @@ pop_link_sd = sd(residuals(glm_pop))
 
 # after deciding to look for possible differences between/among the different Roman provinces,
 # I've added an index variable that allows for the mean scaling coefficient to vary 
-# by province alond with the intercept ('pre-factor'). Just for simplicity,
+# by province along with the intercept ('pre-factor'). Just for simplicity,
 # I've used a new variable 'v' to refer to a vector of Provinces (coded as integers)
 # that will be included in the Nimble model as 'data nodes'.
 
@@ -129,13 +129,12 @@ pop_link_sd = sd(residuals(glm_pop))
 # set up a Nimble model
 scalingCode <- nimbleCode({
     # monument scaling params
-    log_intercept0 ~ dnorm(mean = 0, sd = 100)
+    intercept0 ~ dnorm(mean = 0, sd = 100)
     sd0 ~ dunif(1e-7, 100)
     scaling0 ~ dnorm(mean = 0, sd = 100)
     sd1 ~ dunif(1e-7, 100)
     for(k in 1:K){
-        log_intercept[k] ~ dnorm(mean = log_intercept0, sd = sd0)
-        intercept[k] <- exp(log_intercept[k])
+        intercept[k] ~ dnorm(mean = intercept0, sd = sd0)
         scaling[k] ~ dnorm(mean = scaling0, sd = sd1)
     }
 
@@ -148,13 +147,11 @@ scalingCode <- nimbleCode({
     for(n in 1:N){
         pop_mu[n] <- b0 + b1 * x[n]
         pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
-        mu[n] <- intercept[v[n]] + exp(scaling[v[n]] * pop[n])
+        log_mu[n] <- intercept[v[n]] + scaling[v[n]] * pop[n]
+        mu[n] <- exp(log_mu[n])
         y[n] ~ dpois(lambda = mu[n])
     }
 })
-
-# above-ground monuments only
-filt_idx <- which(!is.na(RomanUrban$Monuments_filt))
 
 # set common mcmc params
 niter <- 1000000
@@ -166,8 +163,9 @@ N <- dim(RomanUrban[,])[1]
 y <- RomanUrban[,]$Monuments
 x <- log(RomanUrban[,]$Area)
 pop <- log(RomanUrban[,]$pop_est)
-v <- RomanUrban[,]$ProvinceIdx
-K <- length(unique(RomanUrban$ProvinceIdx))
+# get provinces as integer indeces instead of character/factor levels
+v <- as.numeric(as.factor(RomanUrban[,]$Province))
+K <- length(unique(RomanUrban[,]$Province))
 
 Consts <- list(N = N,
                 v = v,
@@ -177,25 +175,25 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits <- list(scaling = rep(0, N),
-            log_intercept = rep(0, N),
-            log_intercept0 = 0,
+Inits <- list(scaling = rep(0, K),
+            intercept = rep(0, K),
+            intercept0 = 0,
             scaling0 = 0,
             sd0 = 1,
             sd1 = 1,
             b0 = 0,
             b1 = 0,
-            sigma = 1,
             sigma_pop = 1)
 
 scalingModel <- nimbleModel(code = scalingCode,
-                name = "urbanscaling",
+                name = "allmonuments",
                 constants = Consts,
                 data = Data,
                 inits = Inits)
 
-params_to_track <- c("log_intercept0", 
-                    "scaling0", 
+params_to_track <- c("intercept0", 
+                    "scaling0",
+                    #"scaling", 
                     "b0", 
                     "b1", 
                     "sigma_pop",
@@ -243,6 +241,36 @@ iter <- seq(nburnin + 1, niter, thin)
 
 mcmc_out <- cbind(iter, mcmc_out)
 
+####
+# coda plot for the repeated chains of 'scaling0':
+# Assuming mcmc_out is your list of MCMC matrices
+mcmc_list <- lapply(mcmc_out, function(chain) {
+  as.mcmc(chain)
+})
+mcmc_list <- mcmc.list(mcmc_list)
+
+# Extract the parameter 'scaling0'
+scaling0_samples <- lapply(mcmc_list, function(chain) {
+  chain[, "scaling0", drop = FALSE]
+})
+scaling0_mcmc_list <- mcmc.list(scaling0_samples)
+
+# Plot only the traces
+plot(scaling0_mcmc_list[2:4], trace = TRUE, density = FALSE, main = "Trace Plots for 'scaling0'")
+
+# Plot autocorrelation for each chain
+autocorr.plot(scaling0_mcmc_list, main = "Autocorrelation for 'scaling0'")
+
+# Calculate Gelman-Rubin diagnostic
+gelman_diag <- gelman.diag(scaling0_mcmc_list)
+print(gelman_diag)
+
+
+# Calculate effective sample size
+effective_size <- effectiveSize(scaling0_mcmc_list)
+print(effective_size)
+
+
 # chain traceplots
 long_mcmc <- pivot_longer(as.data.frame(mcmc_out), 
                 names_to = "param",
@@ -259,7 +287,7 @@ ggsave(filename = "Output/tplots_allmonuments.pdf",
         device = "pdf")
 
 # summarize the results
-posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1])))
+posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1]), prob = 0.99))
 posterior_summary$mean <- apply(mcmc_out[,-1], 2, mean)
 posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 
@@ -272,11 +300,15 @@ write.csv(round(posterior_summary,2),
 #
 # run the second analysis: all monuments, areas defined by walls only
 N <- dim(RomanUrban[walls_idx,])[1]
-y <- log(RomanUrban[walls_idx,]$Monuments)
+y <- RomanUrban[walls_idx,]$Monuments
 x <- log(RomanUrban[walls_idx,]$Area)
 pop <- log(RomanUrban[walls_idx,]$pop_est)
-v <- RomanUrban[,]$ProvinceIdx
-K <- length(unique(RomanUrban$ProvinceIdx))
+# get provinces as integers again
+v <- as.numeric(as.factor(RomanUrban[walls_idx,]$Province))
+K <- length(unique(RomanUrban[walls_idx,]$Province))
+
+v <- RomanUrban[walls_idx,]$ProvinceIdx
+K <- length(unique(RomanUrban[walls_idx,]$ProvinceIdx))
 
 Consts <- list(N = N,
                 v = v,
@@ -286,8 +318,8 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits <- list(scaling = rep(0, N),
-            intercept = rep(0, N),
+Inits <- list(scaling = rep(0, K),
+            intercept = rep(0, K),
             intercept0 = 0,
             scaling0 = 0,
             sd0 = 1,
@@ -298,7 +330,7 @@ Inits <- list(scaling = rep(0, N),
             sigma_pop = 1)
 
 scalingModel <- nimbleModel(code = scalingCode,
-                name = "urbanscaling",
+                name = "allwalls",
                 constants = Consts,
                 data = Data,
                 inits = Inits)
@@ -308,7 +340,6 @@ params_to_track <- c("intercept0",
                     "sigma", 
                     "b0", 
                     "b1", 
-                    #"pop", 
                     "sigma_pop",
                     "mu")
 
@@ -365,7 +396,7 @@ ggsave(filename = "Output/tplots_all_walls.pdf",
         device = "pdf")
 
 # summarize the results
-posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1])))
+posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1]), prob = 0.99))
 posterior_summary$mean <- apply(mcmc_out[,-1], 2, mean)
 posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 
@@ -377,12 +408,16 @@ write.csv(round(posterior_summary,2),
 #
 #
 # third analysis: filtered monuments (ie, above-ground only)
+
+# above-ground monuments only
+filt_idx <- which(!is.na(RomanUrban$Monuments_filt))
+
 N <- dim(RomanUrban[filt_idx,])[1]
-y <- log(RomanUrban[filt_idx,]$Monuments_filt)
+y <- RomanUrban[filt_idx,]$Monuments_filt
 x <- log(RomanUrban[filt_idx,]$Area)
 pop <- log(RomanUrban[filt_idx,]$pop_est)
-v <- RomanUrban[,]$ProvinceIdx
-K <- length(unique(RomanUrban$ProvinceIdx))
+v <- RomanUrban[filt_idx,]$ProvinceIdx
+K <- length(unique(RomanUrban[,]$ProvinceIdx))
 
 Consts <- list(N = N,
                 v = v,
@@ -392,8 +427,8 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits <- list(scaling = rep(0, N),
-            intercept = rep(0, N),
+Inits <- list(scaling = rep(0, K),
+            intercept = rep(0, K),
             intercept0 = 0,
             scaling0 = 0,
             sd0 = 1,
@@ -404,7 +439,7 @@ Inits <- list(scaling = rep(0, N),
             sigma_pop = 1)
 
 scalingModel <- nimbleModel(code = scalingCode,
-                name = "urbanscaling",
+                name = "filtmonuments",
                 constants = Consts,
                 data = Data,
                 inits = Inits)
@@ -473,7 +508,7 @@ ggsave(filename = "Output/tplots_filtmonuments.pdf",
         device = "pdf")
 
 # summarize the results
-posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1])))
+posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1]), prob = 0.99))
 posterior_summary$mean <- apply(mcmc_out[,-1], 2, mean)
 posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 
@@ -566,14 +601,13 @@ global_pop_by_city[grep("Israel", global_pop_by_city$country),]
 
 scalingCode2 <- nimbleCode({
     # scaling params
-    log_intercept ~ dnorm(mean = 0, sd = 100)
+    intercept ~ dnorm(mean = 0, sd = 100)
     scaling ~ dnorm(mean = 0, sd = 100)
-    sigma ~ dunif(1e-7, 100)
-    intercept <- exp(log_intercept)
 
     # main model
     for(n in 1:N){
-        mu[n] <- intercept + exp(scaling * pop[n])
+        log_mu[n] <- intercept + scaling * pop[n]
+        mu[n] <- exp(log_mu[n]) 
         y[n] ~ dpois(lambda = mu[n])
     }
 })
@@ -595,17 +629,16 @@ Inits <- list(scaling = 0,
             sigma = 1)
 
 scalingModel2 <- nimbleModel(code = scalingCode2,
-                name = "urbanscaling2",
+                name = "hnwi",
                 constants = Consts,
                 data = Data,
                 inits = Inits)
 
 params_to_track <- c("intercept", 
                     "scaling", 
-                    "sigma",
                     "mu")
 
-niter <- 1000000
+niter <- 1500000
 nburnin <- 5000
 thin <- 10
 
@@ -663,7 +696,7 @@ ggsave(filename = "Output/tplots_hnwi.pdf",
         device = "pdf")
 
 # summarize the results
-posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1])))
+posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1]), prob = 0.99))
 posterior_summary$mean <- apply(mcmc_out[,-1], 2, mean)
 posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 
@@ -729,24 +762,28 @@ for(i in 1:dim(RomanUrban)[1]) {
 # set up a Nimble model
 
 # set up a Nimble model
-scalingCodeSimple <- nimbleCode({
-    # monument scaling params
-    log_intercept ~ dnorm(mean = 0, sd = 100)
-    scaling ~ dnorm(mean = 0, sd = 100)
-    sigma ~ dunif(1e-7, 100)
-    intercept <- exp(log_intercept)
+scalingCode3 <- nimbleCode({
+    # Priors for monument scaling parameters
+    intercept ~ dnorm(0, 100)  # intercept on log scale
+    scaling ~ dnorm(0, 100)    # Scaling factor for logged population
+    sigma ~ dunif(1e-7, 100)   # Standard deviation for population model
 
-    # population--area linking params
-    b0 ~ dnorm(mean = 0, sd = 100)
-    b1 ~ dnorm(mean = 0, sd = 100)
-    sigma_pop ~ dunif(1e-07, 100)
+    # Priors for population-area linking parameters
+    b0 ~ dnorm(0, 100)         # Intercept for population model
+    b1 ~ dnorm(0, 100)         # Slope for population model
+    sigma_pop ~ dunif(1e-7, 100) # Standard deviation for population link
 
-    # main model
-    for(n in 1:N){
+    # Main model loop
+    for(n in 1:N) {
+        # Population model: Predictive model for log-population
+        # the iput variables are already log-transformed (see below)
         pop_mu[n] <- b0 + b1 * x[n]
-        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
-        mu[n] <- intercept + exp(scaling * pop[n])
-        y[n] ~ dpois(lambda = mu[n])
+        pop[n] ~ dnorm(pop_mu[n], sigma_pop)
+
+        # Poisson model for count data with log-log scaling
+        log_mu[n] <- intercept + scaling * pop[n]  # log model, pop is on log-scale
+        mu[n] <- exp(log_mu[n])  # Convert from log scale to linear scale
+        y[n] ~ dpois(mu[n])  # Poisson distribution for count data
     }
 })
 
@@ -774,18 +811,16 @@ Inits <- list(scaling = 0,
             sigma = 1,
             sigma_pop = 1)
 
-scalingModel <- nimbleModel(code = scalingCodeSimple,
-                name = "urbanscaling",
+scalingModel <- nimbleModel(code = scalingCode3,
+                name = "epigraphy",
                 constants = Consts,
                 data = Data,
                 inits = Inits)
 
 params_to_track <- c("intercept", 
                     "scaling", 
-                    "sigma", 
                     "b0", 
                     "b1", 
-                    #"pop", 
                     "sigma_pop",
                     "mu")
 
@@ -844,12 +879,138 @@ ggsave(filename = "Output/tplots_epig.pdf",
 
 
 # summarize the results
-posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,])))
+posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,]), prob = 0.99))
 posterior_summary$mean <- apply(mcmc_out[,], 2, mean)
 posterior_summary$stdd <- apply(mcmc_out[,], 2, sd)
 
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_epigraphy.csv")
+
+
+#####################################################################
+#
+#
+#
+# sixth analysis: modern tall buildings
+
+## Here we anlyze another, exclusive global dataset of tall buildings
+## These are usually indicative of wealth and and are frequently 
+## monumental in the sense that the sheer height/size of these
+## buildings has frequently been a display of an individual or
+## group's wealth and engineering prowess.
+
+# get data
+data_path <- "Data/MPI_150m_Dataset.xlsx"
+sheets <- excel_sheets(data_path)
+sheets
+
+# pull in raw Excel data
+tall_buildings <- read_excel(data_path, 
+                    sheet = sheets[1])
+
+scalingCode2 <- nimbleCode({
+    # scaling params
+    intercept ~ dnorm(mean = 0, sd = 100)
+    scaling ~ dnorm(mean = 0, sd = 100)
+
+    # main model
+    for(n in 1:N){
+        log_mu[n] <- intercept + scaling * pop[n]
+        mu[n] <- exp(log_mu[n]) 
+        y[n] ~ dpois(lambda = mu[n])
+    }
+})
+
+# remove rows from the dataframe with no pop values
+remove_rows_idx <- which(is.na(tall_buildings$Population))
+
+N <- dim(tall_buildings[-remove_rows_idx,])[1]
+y <- tall_buildings[-remove_rows_idx,]$`150 m+ Buildings`
+pop <- log(tall_buildings[-remove_rows_idx,]$Population)
+
+Consts <- list(N = N)
+
+Data <- list(y = y,
+            pop = pop)
+
+Inits <- list(scaling = 0,
+            intercept = 0,
+            sigma = 1)
+
+scalingModel2 <- nimbleModel(code = scalingCode2,
+                name = "tallbuildings",
+                constants = Consts,
+                data = Data,
+                inits = Inits)
+
+params_to_track <- c("intercept", 
+                    "scaling", 
+                    "mu")
+
+niter <- 1500000
+nburnin <- 5000
+thin <- 10
+
+mcmc_out <- nimbleMCMC(model = scalingModel2, 
+            monitors = params_to_track, thin = thin,
+            niter = niter, nburnin = nburnin)
+
+# isolate the columns from mcmc output containing samples of the 
+# mean prediction for the log-log model (y_hat)
+mu_idx <- grep("mu",colnames(mcmc_out))
+
+# calculate r-squared
+rsq <- apply(mcmc_out[, mu_idx], 1, rsquared, y = y)
+
+# summarize and save
+rsq_summary <- data.frame(analysis = "tallbuildings", rsq = round(mean(rsq), 2))
+write.table(rsq_summary, 
+        file="Output/rsquared.csv",
+        row.names = F,
+        col.names = F,
+        append = T,
+        sep = ",")
+
+mcmc_out <- mcmc_out[, -mu_idx]
+
+# summarize
+# convergence check with Geweke diagnostic
+convergence <- geweke.diag(mcmc_out)$z
+convergence <- t(c("tallbuildings", convergence))
+colnames(convergence)[1] <- "analysis"
+write.table(convergence, 
+        file="Output/geweke_tallbuildings.csv",
+        row.names = F,
+        col.names = F,
+        sep = ",")
+
+# add iteration index to chain matrix for plotting
+iter <- seq(nburnin + 1, niter, thin)
+
+mcmc_out <- cbind(iter, mcmc_out)
+
+# chain traceplots
+long_mcmc <- pivot_longer(as.data.frame(mcmc_out), 
+                names_to = "param",
+                values_to = "sample",
+                cols = 2:dim(mcmc_out)[2])
+
+tplot <- ggplot(long_mcmc) +
+            geom_line(mapping = aes(x = iter, y = sample)) +
+            facet_grid(param ~ ., scale = "free")
+tplot
+
+ggsave(filename = "Output/tplots_tallbuildings.pdf", 
+        plot = tplot, 
+        device = "pdf")
+
+# summarize the results
+posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1]), prob = 0.99))
+posterior_summary$mean <- apply(mcmc_out[,-1], 2, mean)
+posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
+
+write.csv(round(posterior_summary,2), 
+        file = "Output/posterior_summary_tallbuildings.csv")
 
 ## Scatter plots
 # scatter plots
