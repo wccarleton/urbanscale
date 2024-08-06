@@ -363,19 +363,14 @@ write.table(convergence,
         sep = ",")
 
 # summarize the results
-posterior_summary <- as.data.frame(HPDinterval(mcmc(mcmc_out[,-1]), prob = 0.99))
-posterior_summary$mean <- apply(mcmc_out[,-1], 2, mean)
-posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
+posterior_summary <- as.data.frame(HPDinterval(mcmc_out, prob = 0.99))
+posterior_summary$mean <- apply(mcmc_out, 2, mean)
+posterior_summary$stdd <- apply(mcmc_out, 2, sd)
 
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_allmonuments.csv")
 
 #################### SECOND AMALYSIS: WALLED ONLY #####################
-
-# set common mcmc params
-niter <- 100000
-nburnin <- 5000
-thin <- 10
 
 N <- dim(RomanUrban[walls_idx,])[1]
 y <- RomanUrban[walls_idx,]$Monuments
@@ -506,7 +501,7 @@ posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_all_walls.csv")
 
-#################### THIRD AMALYSIS: ABOVE GROUND ONLY #####################
+#################### THIRD ANALYSIS: ABOVE GROUND ONLY #####################
 
 filt_idx <- which(!is.na(RomanUrban$Monuments_filt))
 
@@ -613,7 +608,7 @@ posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_filtmonuments.csv")
 
-#################### FOURTH AMALYSIS: HNWI #####################
+#################### FOURTH ANALYSIS: HNWI #####################
 
 data_path <- "Data/hnwi_by_city.xlsx"
 sheets <- excel_sheets(data_path)
@@ -739,10 +734,6 @@ params_to_track <- c("intercept",
                     "scaling", 
                     "mu")
 
-niter <- 100000
-nburnin <- 5000
-thin <- 10
-
 mcmc_out <- nimbleMCMC(model = scalingModel2, 
             monitors = params_to_track, thin = thin,
             niter = niter, nburnin = nburnin)
@@ -808,7 +799,7 @@ posterior_summary$stdd <- apply(mcmc_out[,-1], 2, sd)
 write.csv(round(posterior_summary,2), 
         file = "Output/posterior_summary_hnwi.csv")
 
-#################### FIFTH AMALYSIS: EPIGRAPHY #####################
+#################### FIFTH ANALYSIS: EPIGRAPHY #####################
 
 ## checking for consistency when looking at an epigaphic record database and isolating the 
 ## instances of epigraphic monument/building dedications 
@@ -895,11 +886,6 @@ scalingCode3 <- nimbleCode({
         y[n] ~ dnegbin(prob = size / (size + mu[n]), size = size)
     }
 })
-
-# set common mcmc params
-niter <- 500000
-nburnin <- 5000
-thin <- 10
 
 N <- dim(RomanUrban)[1]
 y <- RomanUrban$InscriptionCount
@@ -1000,7 +986,7 @@ write.csv(round(posterior_summary,2),
         file = "Output/posterior_summary_epigraphy.csv")
 
 
-#################### SIXTH AMALYSIS: TALL BUILDINGS #####################
+#################### SIXTH ANALYSIS: TALL BUILDINGS #####################
 
 ## Here we anlyze another, exclusive global dataset of tall buildings
 ## These are usually indicative of wealth and and are frequently 
