@@ -308,9 +308,9 @@ scalingCode <- nimbleCode({
         pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
         log_mu[n] <- intercept[v[n]] + scaling[v[n]] * pop[n]
         mu[n] <- exp(log_mu[n])
-        p[n] <- size / (size + mu[n])#size[v[n]] / (size[v[n]] + mu[n])#
-        y[n] ~ dnegbin(prob = p[n], size = size)#dnegbin(prob = p[n], size = size[v[n]])#
-        y_hat[n] <- (size * (1 - p[n])) / p[n]#(size[v[n]] * (1 - p[n])) / p[n]#
+        p[n] <- size / (size + mu[n])
+        y[n] ~ dnegbin(prob = p[n], size = size)
+        y_hat[n] <- (size * (1 - p[n])) / p[n]
     }
 })
 
