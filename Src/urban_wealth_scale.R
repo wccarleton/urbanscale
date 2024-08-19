@@ -2080,3 +2080,30 @@ ggsave("Output/scaling_posteriors.pdf",
         units = "cm",
         scale = 2.5,
         device = "pdf")
+
+### Collate Main Results Table #################################################
+
+output_file_paths <- list.files("Output/", full.names = TRUE)
+posterior_summary_files <- output_file_paths[grep("post_", output_file_paths)]
+
+rsq_csv <- tibble(read.csv(file = "Output/rsquared.csv"))
+
+output_df <- data.frame()
+
+for(j in 1:length(posterior_summary_files)){
+        analysis_file_name <- tools::file_path_sans_ext(basename(posterior_summary_files[j]))
+        analysis_name <- gsub("post_summary_", "", analysis_file_name)
+        post_csv <- tibble(read.csv(file = posterior_summary_files[j]))
+        scaling_row_idx <- grep("scaling0$|scaling$", post_csv$X)
+        rsq_row_idx <- grep(paste(analysis_name, "$", sep = ""), rsq_csv$'analysis')
+        temp_output_df <- post_csv[scaling_row_idx, -1]
+        temp_output_df$'analysis' <- analysis_name
+        temp_output_df$'r_squared' <- rsq_csv[rsq_row_idx, 'rsq']$rsq
+        output_df <- rbind(output_df, temp_output_df)
+}
+output_df <- select(output_df, analysis, everything(), r_squared)
+
+write.table(output_df, 
+        file = "Output/analysis_results_summary.csv",
+        row.names = F,
+        sep = ",")
