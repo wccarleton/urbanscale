@@ -1270,7 +1270,7 @@ mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 
 # Block sampling for b0 and b1
 mcmc_config$removeSamplers(c('b0', 'b1'))
-mcmc_config$addSampler(target = c('b0', 'b1'), type = 'RW_block')#'AF_slice')
+mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
 
 # Optionally, block sampling for each group's intercept and scaling
 for (k in 1:Consts$K) {
