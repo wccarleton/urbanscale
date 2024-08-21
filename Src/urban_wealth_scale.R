@@ -281,6 +281,8 @@ tall_buildings <- tall_buildings[-remove_rows_idx,]
 # to be overdispersed, we opted for the Negative-Binomial distribution.
 
 # set up a Nimble model
+
+# spatialized, hierarchical
 scalingCode <- nimbleCode({
     # monument scaling params
     intercept0 ~ dnorm(mean = 0, sd = 5)
@@ -552,6 +554,24 @@ output_rsquared <- function(y = y,
                 append = append)
 }
 
+# output WAIC
+output_waic <- function(waic = waic,
+                        modelname, 
+                        outpath = "Output/waic.csv"){
+
+        append <- file.exists(outpath)
+
+        waic_out <- data.frame(model = modelname,
+                                waic = round(waic$WAIC))
+
+        write.table(waic_out, 
+                file = outpath,
+                row.names = F,
+                col.names = !append,
+                sep = ",",
+                append = append)
+}
+
 # extract target scaling parameter mcmc samples and write to csv in long format
 # for plotting with the others later
 
@@ -615,6 +635,88 @@ DDEEFF
 scatter_plots <- plt1 + plt2 + plt3 + plt4 + plt5 + plt6 + plot_layout(design = layout)
 
 ggsave("Output/point_scatters.pdf",
+        plot = scatter_plots,
+        height = 10,
+        width = 15,
+        units = "cm",
+        scale = 2.5,
+        device = "pdf")
+
+# scatter plots, linear
+plt1 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = Area, y = Monuments)) +
+                labs(title = "All Monuments") +
+                theme_minimal()
+plt2 <- ggplot(RomanUrban[walls_idx, ]) +
+                geom_point(mapping = aes(x = Area, y = Monuments)) +
+                labs(title = "All Monuments (walls only)") +
+                theme_minimal()
+plt3 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = Area, y = Monuments_filt)) +
+                labs(title = "Symbolic Monuments") +
+                theme_minimal()
+plt4 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = Area, y = InscriptionCount)) +
+                labs(title = "Epigraphy") +
+                theme_minimal()
+plt5 <- ggplot(global_hnwi) +
+                geom_point(mapping = aes(x = population, y = Billionaires)) +
+                labs(title = "Billionaires") +
+                theme_minimal()
+plt6 <- ggplot(tall_buildings) +
+                geom_point(mapping = aes(x = Population, y = `150 m+ Buildings`)) +
+                labs(title = "Tall Buildings") +
+                theme_minimal()
+
+layout <- "
+AABBCC
+DDEEFF
+"
+
+scatter_plots <- plt1 + plt2 + plt3 + plt4 + plt5 + plt6 + plot_layout(design = layout)
+
+ggsave("Output/point_scatters_linear.pdf",
+        plot = scatter_plots,
+        height = 10,
+        width = 15,
+        units = "cm",
+        scale = 2.5,
+        device = "pdf")
+
+# scatter plots, linear-log, with +1 offset to manage zeros
+plt1 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = Area, y = log(Monuments + 1))) +
+                labs(title = "All Monuments") +
+                theme_minimal()
+plt2 <- ggplot(RomanUrban[walls_idx, ]) +
+                geom_point(mapping = aes(x = Area, y = log(Monuments + 1))) +
+                labs(title = "All Monuments (walls only)") +
+                theme_minimal()
+plt3 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = Area, y = log(Monuments_filt + 1))) +
+                labs(title = "Symbolic Monuments") +
+                theme_minimal()
+plt4 <- ggplot(RomanUrban) +
+                geom_point(mapping = aes(x = Area, y = log(InscriptionCount + 1))) +
+                labs(title = "Epigraphy") +
+                theme_minimal()
+plt5 <- ggplot(global_hnwi) +
+                geom_point(mapping = aes(x = population, y = log(Billionaires + 1))) +
+                labs(title = "Billionaires") +
+                theme_minimal()
+plt6 <- ggplot(tall_buildings) +
+                geom_point(mapping = aes(x = Population, y = log(`150 m+ Buildings` + 1))) +
+                labs(title = "Tall Buildings") +
+                theme_minimal()
+
+layout <- "
+AABBCC
+DDEEFF
+"
+
+scatter_plots <- plt1 + plt2 + plt3 + plt4 + plt5 + plt6 + plot_layout(design = layout)
+
+ggsave("Output/point_scatters_linear_log.pdf",
         plot = scatter_plots,
         height = 10,
         width = 15,
@@ -2081,7 +2183,7 @@ ggsave("Output/scaling_posteriors.pdf",
         scale = 2.5,
         device = "pdf")
 
-### Collate Main Results Table #################################################
+### COLLATE MAIN RESULTS TABLE #################################################
 
 output_file_paths <- list.files("Output/", full.names = TRUE)
 posterior_summary_files <- output_file_paths[grep("post_", output_file_paths)]
@@ -2107,3 +2209,284 @@ write.table(output_df,
         file = "Output/analysis_results_summary.csv",
         row.names = F,
         sep = ",")
+
+### SUPPLEMENTAL WAIC COMPARISON ###############################################
+# Here we aim to check whether the power-law model is more appropriate than
+# a reasonable alternative, namely a linear model. 
+
+#### Simplified Nimble Models ##################################################
+# We opted for a non-hierarchical version of the model because in none of the 
+# analyses above did the group level posteriors of the scaling parameters 
+# differ significantly, indicating that we could apply a simpler model and
+# save on unnecessary computational/estimation complexity
+
+# simplified, power-law model
+scalingCode_power <- nimbleCode({
+    # monument scaling params
+    intercept ~ dnorm(mean = 0, sd = 5)
+    scaling ~ dnorm(mean = 0, sd = 5)
+
+    # prior for negbinom size parameter (dispersion)
+    size ~ dexp(rate = 1)
+
+    # population--area linking params
+    b0 ~ dnorm(mean = 4, sd = 1)
+    b1 ~ dnorm(mean = 0.8, sd = 0.2)
+    sigma_pop ~ dexp(rate = 0.5)
+
+    # main model
+    for(n in 1:N){
+        # population estimation model
+        pop_mu[n] <- b0 + b1 * x[n]
+        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
+        # urban scaling model
+        log_mu[n] <- intercept + scaling * pop[n]
+        mu[n] <- exp(log_mu[n])
+        p[n] <- size / (size + mu[n])
+        y[n] ~ dnegbin(prob = p[n], size = size)
+        y_hat[n] <- (size * (1 - p[n])) / p[n]
+    }
+})
+
+# simplified, linear-log model for comparison
+scalingCode_linear_log <- nimbleCode({
+    # monument scaling params
+    intercept ~ dnorm(mean = 0, sd = 5)
+    scaling ~ dnorm(mean = 0, sd = 5)
+
+    # prior for negbinom size parameter (dispersion)
+    size ~ dexp(rate = 1)
+
+    # population--area linking params
+    b0 ~ dnorm(mean = 4, sd = 1)
+    b1 ~ dnorm(mean = 0.8, sd = 0.2)
+    sigma_pop ~ dexp(rate = 0.5)
+
+    # main model
+    for(n in 1:N){
+        # population estimation model
+        pop_mu[n] <- b0 + b1 * x[n]
+        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
+        # urban linear-log model
+        mu[n] <- intercept + scaling * pop[n]
+        p[n] <- size / (size + mu[n])
+        y[n] ~ dnegbin(prob = p[n], size = size)
+        y_hat[n] <- (size * (1 - p[n])) / p[n]
+    }
+})
+
+# linear model for modern data (no population estimation component)
+scalingCode2_linear <- nimbleCode({
+    # scaling params
+    intercept ~ dnorm(mean = 0, sd = 5)
+    scaling ~ dnorm(mean = 0, sd = 5)
+    
+    size ~ dexp(rate = 1)
+
+    # main model
+    for(n in 1:N){
+        mu[n] <- intercept + scaling * pop[n]
+        p[n] <- size / (size + mu[n])
+        y[n] ~ dnegbin(prob = p[n], size = size)
+        y_hat[n] <- (size * (1 - p[n])) / p[n]
+    }
+})
+
+# global mcmc params for these runs
+
+niter = 30000
+nburnin = floor(niter * 0.3)
+nchains = 1
+thin = 5
+
+#### FIRST ANALYSIS, ALL MONUMENTS #############################################
+
+modelname = "allmonuments_power"
+
+# using full dataset
+df <- RomanUrban
+
+N <- dim(df)[1]
+y <- df$Monuments
+x <- log(df$Area)
+pop <- log(df$pop_est)
+
+Consts <- list(N = N)
+
+Data <- list(y = y,
+            x = x,
+            pop = pop)
+
+Inits <- list(intercept = 0,
+                scaling = 0,
+                size = 1,
+                b0 = 4,
+                b1 = 0.8,
+                sigma_pop = 0.5)
+
+# Create the Nimble model
+scalingModel <- nimbleModel(code = scalingCode_power,
+                            name = modelname,
+                            constants = Consts,
+                            data = Data,
+                            inits = Inits)
+
+# Compile the model
+compiled_model <- compileNimble(scalingModel)
+
+# Configure the MCMC
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
+
+# Replace samplers for correlated parameters
+# Block sampling for intercept and scaling
+mcmc_config$removeSamplers(c('intercept', 'scaling'))
+mcmc_config$addSampler(target = c('intercept', 'scaling'), type = 'AF_slice')
+
+# Block sampling for b0 and b1
+mcmc_config$removeSamplers(c('b0', 'b1'))
+mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
+
+# Select parameters to track
+params_to_track <- c("intercept",
+                "scaling",
+                "size",
+                "b0", 
+                "b1",
+                "sigma_pop",
+                "y_hat")
+mcmc_config$monitors <- params_to_track
+
+# Build and compile the MCMC
+mcmc_object <- buildMCMC(mcmc_config)
+compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
+
+# Run the MCMC
+mcmc_out <- runMCMC(compiled_mcmc, 
+                niter = niter, 
+                nburnin = nburnin, 
+                thin = thin, 
+                nchains = nchains, 
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# Trace plots for key parameters
+top_lvl_param_names <- c("intercept", 
+                        "scaling",
+                        "b0", 
+                        "b1",
+                        "sigma_pop",
+                        "size")
+
+tplot <- stacked_traceplot(mcmc_out$samples, top_lvl_param_names)
+
+ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
+        plot = tplot, 
+        device = "pdf")
+
+waic_output <- mcmc_out$WAIC
+
+# now again with the linear-log model
+
+modelname = "allmonuments_linear_log"
+
+# using full dataset
+df <- RomanUrban
+
+N <- dim(df)[1]
+y <- df$Monuments
+x <- log(df$Area)
+pop <- log(df$pop_est)
+
+Consts <- list(N = N)
+
+Data <- list(y = y,
+            x = x,
+            pop = pop)
+
+Inits <- list(intercept = 0,
+                scaling = 0,
+                size = 1,
+                b0 = 4,
+                b1 = 0.8,
+                sigma_pop = 0.5)
+
+# Create the Nimble model
+scalingModel <- nimbleModel(code = scalingCode_linear_log,
+                            name = modelname,
+                            constants = Consts,
+                            data = Data,
+                            inits = Inits)
+
+# Compile the model
+compiled_model <- compileNimble(scalingModel)
+
+# Configure the MCMC
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
+
+# Replace samplers for correlated parameters
+# Block sampling for intercept and scaling
+mcmc_config$removeSamplers(c('intercept', 'scaling'))
+mcmc_config$addSampler(target = c('intercept', 'scaling'), type = 'AF_slice')
+
+# Block sampling for b0 and b1
+mcmc_config$removeSamplers(c('b0', 'b1'))
+mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
+
+# Select parameters to track
+params_to_track <- c("intercept",
+                "scaling",
+                "size",
+                "b0", 
+                "b1",
+                "sigma_pop",
+                "y_hat")
+mcmc_config$monitors <- params_to_track
+
+# Build and compile the MCMC
+mcmc_object <- buildMCMC(mcmc_config)
+compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
+
+# Run the MCMC
+mcmc_out <- runMCMC(compiled_mcmc, 
+                niter = niter, 
+                nburnin = nburnin, 
+                thin = thin, 
+                nchains = nchains, 
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# Trace plots for key parameters
+top_lvl_param_names <- c("intercept", 
+                        "scaling",
+                        "b0", 
+                        "b1",
+                        "sigma_pop",
+                        "size")
+
+tplot <- stacked_traceplot(mcmc_out$samples, top_lvl_param_names)
+
+ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
+        plot = tplot, 
+        device = "pdf")
+
+output_waic(waic = mcmc_out$WAIC,
+                modelname = modelname)
+
+#### SECOND ANALYSIS, WALLS ONLY ###############################################
+
+modelname = "allwalls_power"
+
+df <- RomanUrban[walls_idx,]
+
+N <- dim(df)[1]
+y <- df$Monuments
+x <- log(df$Area)
+pop <- log(df$pop_est)
+
+#### THIRD ANALYSIS, ABOVE GROUND ONLY #########################################
+
+#### FOURTH ANALYSIS, EPIGRAPHIC ###############################################
+
+#### FIFTH ANALYSIS, HNWI ######################################################
+
+#### SIXTH ANALYSIS, TALL BUILDINGS ############################################
