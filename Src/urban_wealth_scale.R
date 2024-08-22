@@ -258,7 +258,7 @@ tall_buildings <- read_excel(data_path,
 remove_rows_idx <- which(is.na(tall_buildings$Population))
 tall_buildings <- tall_buildings[-remove_rows_idx,]
 
-### MAIN BAYESIAN/NIMBLE MODEL #################################################
+### MAIN BAYESIAN/NIMBLE MODELS #################################################
 
 # Now use a Bayesian approach to simultaneously estimate missing
 # population sizes from the available data and then use the 
@@ -310,6 +310,39 @@ scalingCode <- nimbleCode({
         pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
         log_mu[n] <- intercept[v[n]] + scaling[v[n]] * pop[n]
         mu[n] <- exp(log_mu[n])
+        p[n] <- size / (size + mu[n])
+        y[n] ~ dnegbin(prob = p[n], size = size)
+        y_hat[n] <- (size * (1 - p[n])) / p[n]
+    }
+})
+
+scalingCode_linear_log2 <- nimbleCode({
+    # monument scaling params
+    intercept0 ~ dnorm(mean = 0, sd = 5)
+    sd0 ~ dexp(rate = 1)
+    scaling0 ~ dnorm(mean = 0, sd = 5)
+    sd1 ~ dexp(rate = 1)
+    for(k in 1:K){
+        intercept_raw[k] ~ dnorm(0, 1)
+        intercept[k] <- intercept0 + intercept_raw[k] * sd0
+        scaling_raw[k] ~ dnorm(0, 1)
+        scaling[k] <- scaling0 + scaling_raw[k] * sd1
+    }
+
+    # prior for negbinom size parameter (dispersion)
+    size ~ dexp(rate = 1)
+
+    # population--area linking params
+    b0 ~ dnorm(mean = 4, sd = 1)
+    b1 ~ dnorm(mean = 0.8, sd = 0.2)
+    sigma_pop ~ dexp(rate = 0.5)
+
+    # main model
+    for(n in 1:N){
+        pop_mu[n] <- b0 + b1 * x[n]
+        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
+        mu[n] <- intercept[v[n]] + scaling[v[n]] * pop[n]
+        #mu[n] <- exp(log_mu[n])
         p[n] <- size / (size + mu[n])
         y[n] ~ dnegbin(prob = p[n], size = size)
         y_hat[n] <- (size * (1 - p[n])) / p[n]
@@ -758,7 +791,7 @@ Inits$intercept_raw <- rep(0, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
-                            name = "allmonuments",
+                            name = modelname,
                             constants = Consts,
                             data = Data,
                             inits = Inits)
@@ -822,7 +855,7 @@ top_lvl_param_names <- c("intercept0",
 
 tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
 
-ggsave(filename = "Output/tplots_allmonuments.pdf", 
+ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
         plot = tplot, 
         device = "pdf")
 
@@ -835,7 +868,7 @@ if(is.mcmc.list(mcmc_out)){
 
 tplot_provinces <- stacked_traceplot(mcmc_out, province_scaling_names, mode = "stacked", thin = 10)
 
-ggsave(filename = "Output/tplots_allmonuments_provinces.pdf", 
+ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = ""), 
         plot = tplot_provinces, 
         device = "pdf")
 
@@ -2275,8 +2308,8 @@ scalingCode_linear_log <- nimbleCode({
     }
 })
 
-# linear model for modern data (no population estimation component)
-scalingCode2_linear <- nimbleCode({
+# linear-log model for modern data (no population estimation component)
+scalingCode2_linear_log <- nimbleCode({
     # scaling params
     intercept ~ dnorm(mean = 0, sd = 5)
     scaling ~ dnorm(mean = 0, sd = 5)
@@ -2386,6 +2419,166 @@ ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""),
 waic_output <- mcmc_out$WAIC
 
 # now again with the linear-log model
+
+modelname = "allmonuments_linear_log"
+
+# using full dataset
+df <- RomanUrban
+
+N <- dim(df)[1]
+y <- df$Monuments
+x <- log(df$Area)
+pop <- log(df$pop_est)
+# get provinces as integer indeces instead of character/factor levels
+v <- as.numeric(as.factor(df$Province))
+K <- length(unique(df$Province))
+
+Consts <- list(N = N,
+                v = v,
+                K = K)
+
+Data <- list(y = y,
+            x = x,
+            pop = pop)
+
+Inits <- list(scaling = NA,
+            scaling_raw = NA,
+            intercept = NA,
+            intercept_raw = NA,
+            intercept0 = 0,
+            scaling0 = 0,
+            size = 1,
+            sd0 = 1,
+            sd1 = 1,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
+
+Inits$scaling <- rep(0, K)
+Inits$intercept <- rep(0, K)
+Inits$scaling_raw <- rep(0, K)
+Inits$intercept_raw <- rep(0, K)
+
+# given the additional complexity of the new model we
+# needed to employ more sophisticated samplers in oder 
+# to produce well-mixed mcmc chains
+
+# Create the Nimble model
+scalingModel <- nimbleModel(code = scalingCode,
+                            name = modelname,
+                            constants = Consts,
+                            data = Data,
+                            inits = Inits)
+
+# Compile the model
+compiled_model <- compileNimble(scalingModel)
+
+# Configure the MCMC
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
+
+# Replace samplers for correlated parameters
+# Block sampling for intercept0 and scaling0
+mcmc_config$removeSamplers(c('intercept0', 'scaling0'))
+mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
+
+# Block sampling for b0 and b1
+mcmc_config$removeSamplers(c('b0', 'b1'))
+mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
+
+# Optionally, block sampling for each group's intercept and scaling
+for (k in 1:Consts$K) {
+  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
+  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
+}
+
+# Select parameters to track
+params_to_track <- c("intercept0",
+                "scaling0",
+                "sd0",
+                "sd1",
+                "size",
+                "scaling", 
+                "intercept",
+                "b0", 
+                "b1",
+                "sigma_pop",
+                "y_hat")
+mcmc_config$monitors <- params_to_track
+
+# Build and compile the MCMC
+mcmc_object <- buildMCMC(mcmc_config)
+compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
+
+# Run the MCMC
+mcmc_out <- runMCMC(compiled_mcmc, 
+                niter = niter, 
+                nburnin = nburnin, 
+                thin = thin, 
+                nchains = nchains, 
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# Trace plots for key parameters
+top_lvl_param_names <- c("intercept0", 
+                        "scaling0",
+                        "sd0",
+                        "sd1", 
+                        "b0", 
+                        "b1",
+                        "sigma_pop",
+                        "size")
+
+tplot <- stacked_traceplot(mcmc_out$samples, top_lvl_param_names)
+
+ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
+        plot = tplot, 
+        device = "pdf")
+
+# and now to look at variability in scaling parameter among provinces
+if(is.mcmc.list(mcmc_out)){
+        province_scaling_names <- colnames(mcmc_out[[1]])[grep("scaling\\[", colnames(mcmc_out[[1]]))]
+}else{
+        province_scaling_names <- colnames(mcmc_out)[grep("scaling\\[", colnames(mcmc_out))]
+}
+
+tplot_provinces <- stacked_traceplot(mcmc_out, province_scaling_names, mode = "stacked", thin = 10)
+
+ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = ""), 
+        plot = tplot_provinces, 
+        device = "pdf")
+
+# convergence checking
+
+# ignore y_hat from the chain variables
+if(is.mcmc.list(mcmc_out)){
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out[[1]]))
+        mcmc_out_subset <- lapply(mcmc_out, function(x, pidx){x[, -c(pidx)]}, y_hat_idx)
+        mcmc_out_subset <- as.mcmc.list(mcmc_out_subset)
+}else{
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out))
+        mcmc_out_subset <- mcmc_out[,-y_hat_idx]
+}
+
+# convergence
+g <- geweke.diag(mcmc_out_subset)
+
+output_geweke(g, modelname, "Output/")
+
+if(is.mcmc.list(mcmc_out_subset)){
+        output_gr_rhat(mcmc_out_subset, modelname)
+}
+
+# posterior summaries
+output_posterior_summary(mcmc_out_subset,
+                        modelname,
+                        outfolder = "Output/")
+
+# pseudo r-sqaured
+output_rsquared(y = y,
+                y_hat_idx = y_hat_idx,
+                mcmc_out = mcmc_out,
+                modelname = modelname,
+                thin = nchains)
 
 modelname = "allmonuments_linear_log"
 
