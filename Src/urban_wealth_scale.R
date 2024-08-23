@@ -11,6 +11,7 @@ library(jsonlite)
 library(geosphere)
 library(RColorBrewer)
 library(ggpattern)
+library(loo)
 
 ### DATA WRANGLING #############################################################
 
@@ -258,7 +259,7 @@ tall_buildings <- read_excel(data_path,
 remove_rows_idx <- which(is.na(tall_buildings$Population))
 tall_buildings <- tall_buildings[-remove_rows_idx,]
 
-### MAIN BAYESIAN/NIMBLE MODELS #################################################
+### MAIN BAYESIAN/NIMBLE MODELS ################################################
 
 # Now use a Bayesian approach to simultaneously estimate missing
 # population sizes from the available data and then use the 
@@ -280,15 +281,22 @@ tall_buildings <- tall_buildings[-remove_rows_idx,]
 # to censoring the zero-count data. Since the count data appear in each case below
 # to be overdispersed, we opted for the Negative-Binomial distribution.
 
+# set common mcmc params
+niter <- 80000
+nburnin <- floor(niter * 0.25)
+thin <- 3
+nchains = 4
+
 # set up a Nimble model
 
-# spatialized, hierarchical
+#### ARCHAEOLOGICAL MODELS #####################################################
+# power law
 scalingCode <- nimbleCode({
     # monument scaling params
     intercept0 ~ dnorm(mean = 0, sd = 5)
-    sd0 ~ dexp(rate = 1)
+    sd0 ~ dexp(rate = 0.5)
     scaling0 ~ dnorm(mean = 0, sd = 5)
-    sd1 ~ dexp(rate = 1)
+    sd1 ~ dexp(rate = 0.5)
     for(k in 1:K){
         intercept_raw[k] ~ dnorm(0, 1)
         intercept[k] <- intercept0 + intercept_raw[k] * sd0
@@ -297,31 +305,34 @@ scalingCode <- nimbleCode({
     }
 
     # prior for negbinom size parameter (dispersion)
-    size ~ dexp(rate = 1)
+    size ~ dexp(rate = 0.5)
 
     # population--area linking params
     b0 ~ dnorm(mean = 0, sd = 10)
     b1 ~ dnorm(mean = 0, sd = 10)
-    sigma_pop ~ dexp(rate = 0.5)
+    sigma_pop ~ dexp(rate = 1)
 
     # main model
     for(n in 1:N){
-        pop_mu[n] <- b0 + b1 * x[n]
-        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
-        log_mu[n] <- intercept[v[n]] + scaling[v[n]] * pop[n]
-        mu[n] <- exp(log_mu[n])
+        pop_mu[n] <- b0 + b1 * x[n] # pop_mu, x are on log scale
+        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop) # pop is on log scale
+        log_mu[n] <- intercept[v[n]] + scaling[v[n]] * pop[n] # log_mu, is on 
+                                                              # log scale
+        mu[n] <- exp(log_mu[n]) # mu is now on original, non-log scale
         p[n] <- size / (size + mu[n])
-        y[n] ~ dnegbin(prob = p[n], size = size)
+        y[n] ~ dnegbin(prob = p[n], size = size) # original scale for count data, 
+                                                 # but power-law model for mean
         y_hat[n] <- (size * (1 - p[n])) / p[n]
     }
 })
 
-scalingCode_linear_log2 <- nimbleCode({
+# linear-log
+scalingCode_linlog <- nimbleCode({
     # monument scaling params
     intercept0 ~ dnorm(mean = 0, sd = 5)
-    sd0 ~ dexp(rate = 1)
+    sd0 ~ dexp(rate = 0.5)
     scaling0 ~ dnorm(mean = 0, sd = 5)
-    sd1 ~ dexp(rate = 1)
+    sd1 ~ dexp(rate = 0.5)
     for(k in 1:K){
         intercept_raw[k] ~ dnorm(0, 1)
         intercept[k] <- intercept0 + intercept_raw[k] * sd0
@@ -330,30 +341,25 @@ scalingCode_linear_log2 <- nimbleCode({
     }
 
     # prior for negbinom size parameter (dispersion)
-    size ~ dexp(rate = 1)
+    size ~ dexp(rate = 0.5)
 
     # population--area linking params
-    b0 ~ dnorm(mean = 4, sd = 1)
-    b1 ~ dnorm(mean = 0.8, sd = 0.2)
-    sigma_pop ~ dexp(rate = 0.5)
+    b0 ~ dnorm(mean = 0, sd = 10)
+    b1 ~ dnorm(mean = 0, sd = 10)
+    sigma_pop ~ dexp(rate = 1)
 
     # main model
     for(n in 1:N){
-        pop_mu[n] <- b0 + b1 * x[n]
-        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
-        mu[n] <- intercept[v[n]] + scaling[v[n]] * pop[n]
-        #mu[n] <- exp(log_mu[n])
+        pop_mu[n] <- b0 + b1 * x[n] # pop_mu, x are on log scale
+        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop) # pop is on log scale
+        mu[n] <- intercept[v[n]] + scaling[v[n]] * pop[n] # mu is log scale
         p[n] <- size / (size + mu[n])
-        y[n] ~ dnegbin(prob = p[n], size = size)
+        y[n] ~ dnegbin(prob = p[n], size = size) # original scale for count data, 
+                                                # but linear-log model for mean 
+                                                # (mu is still on log-scale)
         y_hat[n] <- (size * (1 - p[n])) / p[n]
     }
 })
-
-# set common mcmc params
-niter <- 100000
-nburnin <- floor(niter * 0.25)
-thin <- 10
-nchains = 4
 
 # these initial values will be used in the first 8 Nimble models, but
 # in each case the K variable can be different owing to different subsetting
@@ -365,16 +371,53 @@ Inits <- list(scaling = NA,
             intercept_raw = NA,
             intercept0 = 0,
             scaling0 = 0,
-            size = 1,
-            sd0 = 1,
-            sd1 = 1,
-            b0 = 0,
-            b1 = 0,
-            sigma_pop = 1)
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
+
+#### MODERN MODELS #############################################################
+# power-law
+scalingCode2 <- nimbleCode({
+    # scaling params
+    intercept ~ dnorm(mean = 0, sd = 5)
+    scaling ~ dnorm(mean = 0, sd = 5)
+    
+    size ~ dexp(rate = 0.5)
+
+    # main model
+    for(n in 1:N){
+        log_mu[n] <- intercept + scaling * pop[n]
+        mu[n] <- exp(log_mu[n]) 
+        p[n] <- size / (size + mu[n])
+        y[n] ~ dnegbin(prob = p[n], size = size)
+        y_hat[n] <- (size * (1 - p[n])) / p[n]
+    }
+})
+
+# linear-log
+scalingCode2_linlog <- nimbleCode({
+    # scaling params
+    intercept ~ dnorm(mean = 0, sd = 5)
+    scaling ~ dnorm(mean = 0, sd = 5)
+    
+    size ~ dexp(rate = 0.5)
+
+    # main model
+    for(n in 1:N){
+        log_mu[n] <- intercept + scaling * pop[n] 
+        p[n] <- size / (size + mu[n])
+        y[n] ~ dnegbin(prob = p[n], size = size)
+        y_hat[n] <- (size * (1 - p[n])) / p[n]
+    }
+})
 
 ### UTILITY FUNCTIONS ##########################################################
 
-# Function to create trace plots with mode switch for stacked or faceted visualization
+# Function to create trace plots with mode switch for stacked or faceted 
+# visualization
 stacked_traceplot <- function(mcmc_obj, params, mode = "facet", thin = 1) {
   # Check if the input is an mcmc.list or a single mcmc object
   if (is.mcmc.list(mcmc_obj)) {
@@ -382,9 +425,11 @@ stacked_traceplot <- function(mcmc_obj, params, mode = "facet", thin = 1) {
         # Thinning the chains
         mcmc_df <- mcmc_df[seq(1, nrow(mcmc_df), by = thin), ]
         # Add iteration numbers for each chain
-        mcmc_df$Iteration <- rep(seq(1, nrow(mcmc_obj[[1]]), by = thin), times = length(mcmc_obj))
+        mcmc_df$Iteration <- rep(seq(1, nrow(mcmc_obj[[1]]), by = thin), 
+                                times = length(mcmc_obj))
         # Add a Chain identifier
-        mcmc_df$Chain <- rep(seq_along(mcmc_obj), each = length(seq(1, nrow(mcmc_obj[[1]]), by = thin)))
+        mcmc_df$Chain <- rep(seq_along(mcmc_obj), 
+                        each = length(seq(1, nrow(mcmc_obj[[1]]), by = thin)))
   } else if (is.mcmc(mcmc_obj)) {
         mcmc_df <- as.data.frame(mcmc_obj)
         # Thinning the chain
@@ -400,7 +445,8 @@ stacked_traceplot <- function(mcmc_obj, params, mode = "facet", thin = 1) {
   # Check if all specified parameters exist in the data
   missing_params <- setdiff(params, colnames(mcmc_df))
   if (length(missing_params) > 0) {
-    stop("The following parameters are missing in the MCMC output: ", paste(missing_params, collapse = ", "))
+    stop("The following parameters are missing in the MCMC output: ", 
+        paste(missing_params, collapse = ", "))
   }
 
   # Transform data to long format for specified parameters
@@ -411,7 +457,9 @@ stacked_traceplot <- function(mcmc_obj, params, mode = "facet", thin = 1) {
 
   # Plotting based on mode selection
   if (mode == "facet") {
-    plot <- ggplot(long_mcmc, aes(x = Iteration, y = Sample, color = factor(Chain))) +
+    plot <- ggplot(long_mcmc, aes(x = Iteration, 
+                                y = Sample, 
+                                color = factor(Chain))) +
       geom_line(alpha = 0.7) +
       facet_grid(Parameter ~ ., scales = "free_y") +
       labs(title = "Trace Plots for Selected Parameters (Facet Mode)",
@@ -421,7 +469,10 @@ stacked_traceplot <- function(mcmc_obj, params, mode = "facet", thin = 1) {
       theme_minimal() +
       theme(legend.position = "bottom")
   } else if (mode == "stacked") {
-    plot <- ggplot(long_mcmc, aes(x = Iteration, y = Sample, color = Parameter, group = interaction(Parameter, Chain))) +
+    plot <- ggplot(long_mcmc, aes(x = Iteration, 
+                                y = Sample, 
+                                color = Parameter, 
+                                group = interaction(Parameter, Chain))) +
       geom_line(alpha = 0.7) +
       labs(title = "Trace Plots for Selected Parameters (Stacked Mode)",
            x = "Iteration",
@@ -436,8 +487,91 @@ stacked_traceplot <- function(mcmc_obj, params, mode = "facet", thin = 1) {
   return(plot)
 }
 
-# convergence checking and diagnostics
+# residuals plot
+plot_residual_intervals <- function(mcmc_obj, 
+                                y, 
+                                y_hat_param = "y_hat", 
+                                cr_level = 0.95) {
+  if (is.mcmc.list(mcmc_obj)) {
+    mcmc_df <- do.call(rbind, lapply(mcmc_obj, as.data.frame))
+    mcmc_df$Chain <- rep(seq_along(mcmc_obj), each = nrow(mcmc_obj[[1]]))
+  } else if (is.mcmc(mcmc_obj)) {
+    mcmc_df <- as.data.frame(mcmc_obj)
+    mcmc_df$Chain <- 1
+  } else {
+    stop("Input object must be of class 'mcmc' or 'mcmc.list'")
+  }
 
+  y_hat_idx <- grep(y_hat_param, colnames(mcmc_df))
+  if (length(y_hat_idx) == 0) stop(paste("The parameter", 
+                                y_hat_param, 
+                                "is missing in the MCMC output."))
+
+  mcmc_residuals <- t(apply(mcmc_df[, y_hat_idx], 1, function(yhat, y) y - yhat, y = y))
+  
+  mean_y_hat <- colMeans(mcmc_df[, y_hat_idx])
+  
+  # Calculate credible intervals for residuals
+  lower_bound <- (1 - cr_level) / 2
+  upper_bound <- 1 - lower_bound
+  
+  lower_cr <- apply(mcmc_residuals, 2, quantile, probs = lower_bound)
+  upper_cr <- apply(mcmc_residuals, 2, quantile, probs = upper_bound)
+
+  # Prepare data for the plot
+  residuals_df <- data.frame(
+    mean_y_hat = mean_y_hat,
+    lower_cr = lower_cr,
+    upper_cr = upper_cr
+  )
+
+  # Plot the 95% CR for residuals with vertical line at zero
+  plot <- ggplot(residuals_df, aes(y = mean_y_hat)) +
+    geom_linerange(aes(xmin = lower_cr, xmax = upper_cr), color = "blue", linewidth = 1.5) +
+    geom_point(aes(x = (lower_cr + upper_cr) / 2), color = "blue", size = 2) + # Add points at the mean of the CRs
+    geom_vline(xintercept = 0, color = "grey", linetype = "dashed", linewidth = 1.2) +
+    labs(title = paste0(100 * cr_level, "% Credible Intervals for Residuals Across Predicted Values"),
+         x = "Residuals", y = "Predicted Values (y_hat)") +
+    theme_minimal()
+
+  return(plot)
+}
+
+get_residual_summaries <- function(mcmc_obj, y, y_hat_param = "y_hat") {
+  if (is.mcmc.list(mcmc_obj)) {
+    mcmc_df <- do.call(rbind, lapply(mcmc_obj, as.data.frame))
+    mcmc_df$Chain <- rep(seq_along(mcmc_obj), each = nrow(mcmc_obj[[1]]))
+  } else if (is.mcmc(mcmc_obj)) {
+    mcmc_df <- as.data.frame(mcmc_obj)
+    mcmc_df$Chain <- 1
+  } else {
+    stop("Input object must be of class 'mcmc' or 'mcmc.list'")
+  }
+
+  y_hat_idx <- grep(y_hat_param, colnames(mcmc_df))
+  if (length(y_hat_idx) == 0) stop(paste("The parameter", y_hat_param, "is missing in the MCMC output."))
+
+  # Calculate residuals
+  mcmc_residuals <- t(apply(mcmc_df[, y_hat_idx], 1, function(yhat, y) y - yhat, y = y))
+  
+  # Calculate mean and median residuals for each data point
+  mean_residuals <- colMeans(mcmc_residuals)
+  median_residuals <- apply(mcmc_residuals, 2, median)
+
+  # Prepare the output
+  residuals_summary <- data.frame(
+    Data_Point = 1:length(y),
+    Mean_Residual = mean_residuals,
+    Median_Residual = median_residuals
+  )
+  
+  return(residuals_summary)
+}
+
+# Example usage
+# residual_summaries <- get_residual_summaries(mcmc_out$samples, y, y_hat_param = "y_hat")
+
+# convergence checking and diagnostics
 # Geweke
 output_geweke <- function(g, 
                         modelname, 
@@ -605,6 +739,62 @@ output_waic <- function(waic = waic,
                 append = append)
 }
 
+# output lppd
+output_lppd <- function(waic_dets = waic_dets,
+                        modelname,
+                        modeltype,
+                        outpath = "Output/lppd.csv",
+                        node_idx = NULL){
+        append <- file.exists(outpath)
+        
+        if(!is.null(node_idx)){
+                lppd_elements <- waic_dets$lppd_elements[node_idx]
+        }else {
+                lppd_elements <- waic_dets$lppd_elements
+        }
+        n_lppd <- length(lppd_elements)
+        
+        lppd_df <- data.frame(modelname = rep(modelname, n_lppd),
+                        modeltype = modeltype,
+                        lppd = lppd_elements)
+        
+        write.table(lppd_df, 
+                file = outpath,
+                row.names = F,
+                col.names = !append,
+                sep = ",",
+                append = append)
+}
+
+# output the pointwise lppd-based model comparison scores
+output_lppd_diff <- function(modelname,
+                        outpath = "Output/model_comparison.csv"){
+        append <- file.exists(outpath)
+
+        lppds <- tibble(read.csv("Output/lppd.csv"))
+        modelname1 <- sub("_.*", "", modelname)
+
+        power_model_lppd <- lppds[which(lppds[,'modelname'] == modelname1), 'lppd']
+        linlog_model_lppd <- lppds[which(lppds[,'modelname'] == modelname), 'lppd']
+
+        lppd_diff <- power_model_lppd - linlog_model_lppd
+
+        power_model_pref <- round(mean(lppd_diff > 0), 2)
+        linlog_model_pref <- round(mean(lppd_diff < 0), 2)
+
+        models_compared <- data.frame(model_1 = paste(modelname1, "_power", sep = ""),
+                                        model_2 = modelname,
+                                        p_model_1 = power_model_pref,
+                                        p_model_2 = linlog_model_pref)
+
+        write.table(models_compared, 
+                file = outpath,
+                row.names = F,
+                col.names = !append,
+                sep = ",",
+                append = append)
+}
+
 # extract target scaling parameter mcmc samples and write to csv in long format
 # for plotting with the others later
 
@@ -675,6 +865,14 @@ ggsave("Output/point_scatters.pdf",
         scale = 2.5,
         device = "pdf")
 
+ggsave("Output/point_scatters.png",
+        plot = scatter_plots,
+        height = 10,
+        width = 15,
+        units = "cm",
+        scale = 2.5,
+        device = "png")
+
 # scatter plots, linear
 plt1 <- ggplot(RomanUrban) +
                 geom_point(mapping = aes(x = Area, y = Monuments)) +
@@ -715,6 +913,14 @@ ggsave("Output/point_scatters_linear.pdf",
         units = "cm",
         scale = 2.5,
         device = "pdf")
+
+ggsave("Output/point_scatters_linear.png",
+        plot = scatter_plots,
+        height = 10,
+        width = 15,
+        units = "cm",
+        scale = 2.5,
+        device = "png")
 
 # scatter plots, linear-log, with +1 offset to manage zeros
 plt1 <- ggplot(RomanUrban) +
@@ -757,9 +963,18 @@ ggsave("Output/point_scatters_linear_log.pdf",
         scale = 2.5,
         device = "pdf")
 
+ggsave("Output/point_scatters_linear_log.png",
+        plot = scatter_plots,
+        height = 10,
+        width = 15,
+        units = "cm",
+        scale = 2.5,
+        device = "png")
+
 ### FIRST ANALYSIS: ALL MONUMENTS ##############################################
 
 modelname = "allmonuments"
+modeltype = "power_law"
 
 # using full dataset
 df <- RomanUrban
@@ -782,12 +997,8 @@ Data <- list(y = y,
 
 Inits$scaling <- rep(0, K)
 Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0, K)
-Inits$intercept_raw <- rep(0, K)
-
-# given the additional complexity of the new model we
-# needed to employ more sophisticated samplers in oder 
-# to produce well-mixed mcmc chains
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
@@ -800,7 +1011,7 @@ scalingModel <- nimbleModel(code = scalingCode,
 compiled_model <- compileNimble(scalingModel)
 
 # Configure the MCMC
-mcmc_config <- configureMCMC(scalingModel)
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
 
 # Replace samplers for correlated parameters
 # Block sampling for intercept0 and scaling0
@@ -812,10 +1023,10 @@ mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
 
 # Optionally, block sampling for each group's intercept and scaling
-for (k in 1:Consts$K) {
-  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
-  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
-}
+#for (k in 1:Consts$K) {
+#  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
+#  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
+#}
 
 # Select parameters to track
 params_to_track <- c("intercept0",
@@ -830,6 +1041,7 @@ params_to_track <- c("intercept0",
                 "sigma_pop",
                 "y_hat")
 mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
 
 # Build and compile the MCMC
 mcmc_object <- buildMCMC(mcmc_config)
@@ -841,7 +1053,60 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 nburnin = nburnin, 
                 thin = thin, 
                 nchains = nchains, 
-                samplesAsCodaMCMC = TRUE)
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+# output the city identifiers that correspond with extreme Pareto k diagnostics
+outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
+append = file.exists("Output/city_outliers_roman.csv")
+write.table(df[outliers_idx, ], 
+                file = "Output/city_outliers_roman.csv",
+                row.names = FALSE,
+                col.names = !append,
+                sep = ",",
+                append = append)
+rm(append)
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
@@ -858,6 +1123,9 @@ tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
 ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
         plot = tplot, 
         device = "pdf")
+ggsave(filename = paste("Output/tplots_", modelname, ".png", sep = ""), 
+        plot = tplot, 
+        device = "png")
 
 # and now to look at variability in scaling parameter among provinces
 if(is.mcmc.list(mcmc_out)){
@@ -871,6 +1139,9 @@ tplot_provinces <- stacked_traceplot(mcmc_out, province_scaling_names, mode = "s
 ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = ""), 
         plot = tplot_provinces, 
         device = "pdf")
+ggsave(filename = paste("Output/tplots_", modelname, "_provinces.png", sep = ""), 
+        plot = tplot_provinces, 
+        device = "png")
 
 # convergence checking
 
@@ -913,6 +1184,19 @@ output_scaling(mcmc_out = mcmc_out,
                 parameter = "scaling0",
                 outpath = "Output/scaling_samples.csv")
 
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
 #### Exluding Zeros ############################################################
 
 # model name for paths
@@ -939,12 +1223,12 @@ Data <- list(y = y,
 
 Inits$scaling <- rep(0, K)
 Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0, K)
-Inits$intercept_raw <- rep(0, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
-                            name = "allmonuments_nozero",
+                            name = modelname,
                             constants = Consts,
                             data = Data,
                             inits = Inits)
@@ -963,12 +1247,6 @@ mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 # Block sampling for b0 and b1
 mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
-
-# Optionally, block sampling for each group's intercept and scaling
-for (k in 1:Consts$K) {
-  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
-  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
-}
 
 # Select parameters to track
 params_to_track <- c("intercept0",
@@ -1067,6 +1345,7 @@ output_scaling(mcmc_out = mcmc_out,
 ### SECOND ANALYSIS: WALLED ONLY ###############################################
 
 modelname = "allwalls"
+modeltype = "power_law"
 
 df <- RomanUrban[walls_idx,]
 
@@ -1088,12 +1367,12 @@ Data <- list(y = y,
 
 Inits$scaling <- rep(0, K)
 Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0, K)
-Inits$intercept_raw <- rep(0, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
-                            name = "allwalls",
+                            name = modelname,
                             constants = Consts,
                             data = Data,
                             inits = Inits)
@@ -1102,7 +1381,7 @@ scalingModel <- nimbleModel(code = scalingCode,
 compiled_model <- compileNimble(scalingModel)
 
 # Configure the MCMC
-mcmc_config <- configureMCMC(scalingModel)
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
 
 # Replace samplers for correlated parameters
 # Block sampling for intercept0 and scaling0
@@ -1112,12 +1391,6 @@ mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 # Block sampling for b0 and b1
 mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
-
-# Optionally, block sampling for each group's intercept and scaling
-for (k in 1:Consts$K) {
-  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
-  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
-}
 
 # Select parameters to track
 params_to_track <- c("intercept0",
@@ -1132,6 +1405,7 @@ params_to_track <- c("intercept0",
                 "sigma_pop",
                 "y_hat")
 mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
 
 # Build and compile the MCMC
 mcmc_object <- buildMCMC(mcmc_config)
@@ -1143,7 +1417,60 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 nburnin = nburnin, 
                 thin = thin, 
                 nchains = nchains, 
-                samplesAsCodaMCMC = TRUE)
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+# output the city identifiers that correspond with extreme Pareto k diagnostics
+outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
+append = file.exists("Outpath/roman_city_outliers.csv")
+write.table(df[outliers_idx, ], 
+                file = "Outpath/roman_city_outliers.csv",
+                row.names = F,
+                col.names = !append,
+                sep = ",",
+                append = append)
+rm(append)
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
@@ -1209,6 +1536,19 @@ output_scaling(mcmc_out = mcmc_out,
                 parameter = "scaling0",
                 outpath = "Output/scaling_samples.csv")
 
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
 #### Excluding Zeros ###########################################################
 
 modelname = "allwalls_nozero"
@@ -1236,12 +1576,12 @@ Data <- list(y = y,
 
 Inits$scaling <- rep(0, K)
 Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0, K)
-Inits$intercept_raw <- rep(0, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
-                            name = "allwalls_nozero",
+                            name = modelname,
                             constants = Consts,
                             data = Data,
                             inits = Inits)
@@ -1260,12 +1600,6 @@ mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 # Block sampling for b0 and b1
 mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
-
-# Optionally, block sampling for each group's intercept and scaling
-for (k in 1:Consts$K) {
-  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
-  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
-}
 
 # Select parameters to track
 params_to_track <- c("intercept0",
@@ -1361,6 +1695,7 @@ output_scaling(mcmc_out = mcmc_out,
 ### THIRD ANALYSIS: ABOVE GROUND ONLY ##########################################
 
 modelname <- "filtmonuments"
+modeltype = "power_law"
 
 df <- RomanUrban
 
@@ -1382,12 +1717,12 @@ Data <- list(y = y,
 
 Inits$scaling <- rep(0, K)
 Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0, K)
-Inits$intercept_raw <- rep(0, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
-                            name = "filtmonuments",
+                            name = modelname,
                             constants = Consts,
                             data = Data,
                             inits = Inits)
@@ -1396,7 +1731,7 @@ scalingModel <- nimbleModel(code = scalingCode,
 compiled_model <- compileNimble(scalingModel)
 
 # Configure the MCMC
-mcmc_config <- configureMCMC(scalingModel)
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
 
 # Replace samplers for correlated parameters
 # Block sampling for intercept0 and scaling0
@@ -1406,12 +1741,6 @@ mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 # Block sampling for b0 and b1
 mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
-
-# Optionally, block sampling for each group's intercept and scaling
-for (k in 1:Consts$K) {
-  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
-  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
-}
 
 # Select parameters to track
 params_to_track <- c("intercept0",
@@ -1426,6 +1755,7 @@ params_to_track <- c("intercept0",
                 "sigma_pop",
                 "y_hat")
 mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
 
 # Build and compile the MCMC
 mcmc_object <- buildMCMC(mcmc_config)
@@ -1437,7 +1767,49 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 nburnin = nburnin, 
                 thin = thin, 
                 nchains = nchains, 
-                samplesAsCodaMCMC = TRUE)
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
@@ -1504,6 +1876,19 @@ output_scaling(mcmc_out = mcmc_out,
                 parameter = "scaling0",
                 outpath = "Output/scaling_samples.csv")
 
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
 #### Excluding Zeros ###########################################################
 
 modelname = "filtmonuments_nozero"
@@ -1529,12 +1914,12 @@ Data <- list(y = y,
 
 Inits$scaling <- rep(0, K)
 Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0, K)
-Inits$intercept_raw <- rep(0, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
-                            name = "filtmonuments_nozero",
+                            name = modelname,
                             constants = Consts,
                             data = Data,
                             inits = Inits)
@@ -1553,12 +1938,6 @@ mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 # Block sampling for b0 and b1
 mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
-
-# Optionally, block sampling for each group's intercept and scaling
-for (k in 1:Consts$K) {
-  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
-  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
-}
 
 # Select parameters to track
 params_to_track <- c("intercept0",
@@ -1654,6 +2033,7 @@ output_scaling(mcmc_out = mcmc_out,
 ### FOURTH ANALYSIS: EPIGRAPHY #################################################
 
 modelname = "epigraphy"
+modeltype = "power_law"
 
 df <- RomanUrban
 
@@ -1675,12 +2055,12 @@ Data <- list(y = y,
 
 Inits$scaling <- rep(0, K)
 Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0, K)
-Inits$intercept_raw <- rep(0, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
-                            name = "epigraphy",
+                            name = modelname,
                             constants = Consts,
                             data = Data,
                             inits = Inits)
@@ -1689,7 +2069,7 @@ scalingModel <- nimbleModel(code = scalingCode,
 compiled_model <- compileNimble(scalingModel)
 
 # Configure the MCMC
-mcmc_config <- configureMCMC(scalingModel)
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
 
 # Replace samplers for correlated parameters
 # Block sampling for intercept0 and scaling0
@@ -1699,12 +2079,6 @@ mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 # Block sampling for b0 and b1
 mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
-
-# Optionally, block sampling for each group's intercept and scaling
-for (k in 1:Consts$K) {
-  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
-  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
-}
 
 # Select parameters to track
 params_to_track <- c("intercept0",
@@ -1719,6 +2093,7 @@ params_to_track <- c("intercept0",
                 "sigma_pop",
                 "y_hat")
 mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
 
 # Build and compile the MCMC
 mcmc_object <- buildMCMC(mcmc_config)
@@ -1730,7 +2105,49 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 nburnin = nburnin, 
                 thin = thin, 
                 nchains = nchains, 
-                samplesAsCodaMCMC = TRUE)
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
@@ -1797,6 +2214,19 @@ output_scaling(mcmc_out = mcmc_out,
                 parameter = "scaling0",
                 outpath = "Output/scaling_samples.csv")
 
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
 #### Excluding Zeros ###########################################################
 
 modelname = "epigraphy_nozero"
@@ -1821,12 +2251,12 @@ Data <- list(y = y,
 
 Inits$scaling <- rep(0, K)
 Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0, K)
-Inits$intercept_raw <- rep(0, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
-                            name = "epigraphy_nozero",
+                            name = modelname,
                             constants = Consts,
                             data = Data,
                             inits = Inits)
@@ -1835,7 +2265,7 @@ scalingModel <- nimbleModel(code = scalingCode,
 compiled_model <- compileNimble(scalingModel)
 
 # Configure the MCMC
-mcmc_config <- configureMCMC(scalingModel)
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
 
 # Replace samplers for correlated parameters
 # Block sampling for intercept0 and scaling0
@@ -1845,12 +2275,6 @@ mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 # Block sampling for b0 and b1
 mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
-
-# Optionally, block sampling for each group's intercept and scaling
-for (k in 1:Consts$K) {
-  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
-  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
-}
 
 # Select parameters to track
 params_to_track <- c("intercept0",
@@ -1876,7 +2300,13 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 nburnin = nburnin, 
                 thin = thin, 
                 nchains = nchains, 
-                samplesAsCodaMCMC = TRUE)
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
@@ -1946,26 +2376,7 @@ output_scaling(mcmc_out = mcmc_out,
 ### FIFTH ANALYSIS: HNWI #######################################################
 
 modelname = "hnwi"
-
-# with this cleaned/updated data, run the same Bayesian model, though of course 
-# not divided by Roman provinces, which simplifies the model substantially
-
-scalingCode2 <- nimbleCode({
-    # scaling params
-    intercept ~ dnorm(mean = 0, sd = 5)
-    scaling ~ dnorm(mean = 0, sd = 5)
-    
-    size ~ dexp(rate = 0.5)
-
-    # main model
-    for(n in 1:N){
-        log_mu[n] <- intercept + scaling * pop[n]
-        mu[n] <- exp(log_mu[n]) 
-        p[n] <- size / (size + mu[n])
-        y[n] ~ dnegbin(prob = p[n], size = size)
-        y_hat[n] <- (size * (1 - p[n])) / p[n]
-    }
-})
+modeltype = "power_law"
 
 N <- dim(global_hnwi)[1]
 y <- global_hnwi$Billionaires
@@ -1981,7 +2392,7 @@ Inits <- list(scaling = 0,
             size = 1)
 
 scalingModel2 <- nimbleModel(code = scalingCode2,
-                name = "hnwi",
+                name = modelname,
                 constants = Consts,
                 data = Data,
                 inits = Inits)
@@ -1990,7 +2401,7 @@ scalingModel2 <- nimbleModel(code = scalingCode2,
 compiled_model <- compileNimble(scalingModel2)
 
 # Configure the MCMC
-mcmc_config <- configureMCMC(scalingModel2)
+mcmc_config <- configureMCMC(scalingModel2, enableWAIC = TRUE)
 
 # Replace samplers for correlated parameters
 # Block sampling for intercept0 and scaling0
@@ -2004,6 +2415,7 @@ params_to_track <- c("intercept",
                     "y_hat")
 
 mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
 
 # Build and compile the MCMC
 mcmc_object <- buildMCMC(mcmc_config)
@@ -2015,7 +2427,57 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 nburnin = nburnin, 
                 thin = thin, 
                 nchains = nchains, 
-                samplesAsCodaMCMC = TRUE)
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+# output the city identifiers that correspond with extreme Pareto k diagnostics
+outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
+write.table(global_hnwi[outliers_idx, ], 
+                file = "Output/city_outliers_hnwi.csv",
+                row.names = FALSE,
+                col.names = FALSE,
+                sep = ",")
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept", "scaling", "size")
@@ -2063,6 +2525,19 @@ output_scaling(mcmc_out = mcmc_out,
                 parameter = "scaling",
                 outpath = "Output/scaling_samples.csv")
 
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
 ### SIXTH ANALYSIS: TALL BUILDINGS #############################################
 
 # Here we anlyze another, exclusive global dataset of tall buildings
@@ -2072,6 +2547,7 @@ output_scaling(mcmc_out = mcmc_out,
 # group's wealth and engineering prowess.
 
 modelname = "tallbuildings"
+modeltype = "power_law"
 
 N <- dim(tall_buildings)[1]
 y <- tall_buildings$`150 m+ Buildings`
@@ -2087,7 +2563,7 @@ Inits <- list(scaling = 0,
             size = 1)
 
 scalingModel2 <- nimbleModel(code = scalingCode2,
-                name = "tallbuildings",
+                name = modelname,
                 constants = Consts,
                 data = Data,
                 inits = Inits)
@@ -2096,7 +2572,7 @@ scalingModel2 <- nimbleModel(code = scalingCode2,
 compiled_model <- compileNimble(scalingModel2)
 
 # Configure the MCMC
-mcmc_config <- configureMCMC(scalingModel2)
+mcmc_config <- configureMCMC(scalingModel2, enableWAIC = TRUE)
 
 # Replace samplers for correlated parameters
 # Block sampling for intercept0 and scaling0
@@ -2110,6 +2586,7 @@ params_to_track <- c("intercept",
                     "y_hat")
 
 mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
 
 # Build and compile the MCMC
 mcmc_object <- buildMCMC(mcmc_config)
@@ -2119,9 +2596,60 @@ compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
 mcmc_out <- runMCMC(compiled_mcmc, 
                 niter = niter, 
                 nburnin = nburnin, 
-                thin = thin, 
+                thin = thin,
+                thin2 = thin,
                 nchains = nchains, 
-                samplesAsCodaMCMC = TRUE)
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+# output the city identifiers that correspond with extreme Pareto k diagnostics
+outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
+write.table(tall_buildings[outliers_idx, ], 
+                file = "Output/city_outliers_tallbuildings.csv",
+                row.names = FALSE,
+                col.names = FALSE,
+                sep = ",")
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept", "scaling", "size")
@@ -2169,9 +2697,23 @@ output_scaling(mcmc_out = mcmc_out,
                 parameter = "scaling",
                 outpath = "Output/scaling_samples.csv")
 
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
 ### PLOT SCALING PARAM POSTERIOR DENSITIES #####################################
 
 scaling_samples_all_analyses <- tibble(read.csv(file = "Output/scaling_samples.csv"))
+names(scaling_samples_all_analyses)[2] <- "scaling"
 
 # High-contrast color palette with 5 distinct colors
 color_palette <- c("#E69F00", 
@@ -2216,6 +2758,13 @@ ggsave("Output/scaling_posteriors.pdf",
         scale = 2.5,
         device = "pdf")
 
+ggsave("Output/scaling_posteriors.png",
+        height = 10,
+        width = 15,
+        units = "cm",
+        scale = 2.5,
+        device = "png")
+
 ### COLLATE MAIN RESULTS TABLE #################################################
 
 output_file_paths <- list.files("Output/", full.names = TRUE)
@@ -2243,184 +2792,20 @@ write.table(output_df,
         row.names = F,
         sep = ",")
 
-### SUPPLEMENTAL WAIC COMPARISON ###############################################
+### SUPPLEMENTAL MODEL COMPARISON ##############################################
 # Here we aim to check whether the power-law model is more appropriate than
-# a reasonable alternative, namely a linear model. 
+# a reasonable alternative, namely a linear model.
 
-#### Simplified Nimble Models ##################################################
-# We opted for a non-hierarchical version of the model because in none of the 
-# analyses above did the group level posteriors of the scaling parameters 
-# differ significantly, indicating that we could apply a simpler model and
-# save on unnecessary computational/estimation complexity
-
-# simplified, power-law model
-scalingCode_power <- nimbleCode({
-    # monument scaling params
-    intercept ~ dnorm(mean = 0, sd = 5)
-    scaling ~ dnorm(mean = 0, sd = 5)
-
-    # prior for negbinom size parameter (dispersion)
-    size ~ dexp(rate = 1)
-
-    # population--area linking params
-    b0 ~ dnorm(mean = 4, sd = 1)
-    b1 ~ dnorm(mean = 0.8, sd = 0.2)
-    sigma_pop ~ dexp(rate = 0.5)
-
-    # main model
-    for(n in 1:N){
-        # population estimation model
-        pop_mu[n] <- b0 + b1 * x[n]
-        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
-        # urban scaling model
-        log_mu[n] <- intercept + scaling * pop[n]
-        mu[n] <- exp(log_mu[n])
-        p[n] <- size / (size + mu[n])
-        y[n] ~ dnegbin(prob = p[n], size = size)
-        y_hat[n] <- (size * (1 - p[n])) / p[n]
-    }
-})
-
-# simplified, linear-log model for comparison
-scalingCode_linear_log <- nimbleCode({
-    # monument scaling params
-    intercept ~ dnorm(mean = 0, sd = 5)
-    scaling ~ dnorm(mean = 0, sd = 5)
-
-    # prior for negbinom size parameter (dispersion)
-    size ~ dexp(rate = 1)
-
-    # population--area linking params
-    b0 ~ dnorm(mean = 4, sd = 1)
-    b1 ~ dnorm(mean = 0.8, sd = 0.2)
-    sigma_pop ~ dexp(rate = 0.5)
-
-    # main model
-    for(n in 1:N){
-        # population estimation model
-        pop_mu[n] <- b0 + b1 * x[n]
-        pop[n] ~ dnorm(mean = pop_mu[n], sd = sigma_pop)
-        # urban linear-log model
-        mu[n] <- intercept + scaling * pop[n]
-        p[n] <- size / (size + mu[n])
-        y[n] ~ dnegbin(prob = p[n], size = size)
-        y_hat[n] <- (size * (1 - p[n])) / p[n]
-    }
-})
-
-# linear-log model for modern data (no population estimation component)
-scalingCode2_linear_log <- nimbleCode({
-    # scaling params
-    intercept ~ dnorm(mean = 0, sd = 5)
-    scaling ~ dnorm(mean = 0, sd = 5)
-    
-    size ~ dexp(rate = 1)
-
-    # main model
-    for(n in 1:N){
-        mu[n] <- intercept + scaling * pop[n]
-        p[n] <- size / (size + mu[n])
-        y[n] ~ dnegbin(prob = p[n], size = size)
-        y_hat[n] <- (size * (1 - p[n])) / p[n]
-    }
-})
-
-# global mcmc params for these runs
-
-niter = 30000
+#### global mcmc params ########################################################
+niter = 60000
 nburnin = floor(niter * 0.3)
 nchains = 1
-thin = 5
+thin = 2
 
 #### FIRST ANALYSIS, ALL MONUMENTS #############################################
 
-modelname = "allmonuments_power"
-
-# using full dataset
-df <- RomanUrban
-
-N <- dim(df)[1]
-y <- df$Monuments
-x <- log(df$Area)
-pop <- log(df$pop_est)
-
-Consts <- list(N = N)
-
-Data <- list(y = y,
-            x = x,
-            pop = pop)
-
-Inits <- list(intercept = 0,
-                scaling = 0,
-                size = 1,
-                b0 = 4,
-                b1 = 0.8,
-                sigma_pop = 0.5)
-
-# Create the Nimble model
-scalingModel <- nimbleModel(code = scalingCode_power,
-                            name = modelname,
-                            constants = Consts,
-                            data = Data,
-                            inits = Inits)
-
-# Compile the model
-compiled_model <- compileNimble(scalingModel)
-
-# Configure the MCMC
-mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
-
-# Replace samplers for correlated parameters
-# Block sampling for intercept and scaling
-mcmc_config$removeSamplers(c('intercept', 'scaling'))
-mcmc_config$addSampler(target = c('intercept', 'scaling'), type = 'AF_slice')
-
-# Block sampling for b0 and b1
-mcmc_config$removeSamplers(c('b0', 'b1'))
-mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
-
-# Select parameters to track
-params_to_track <- c("intercept",
-                "scaling",
-                "size",
-                "b0", 
-                "b1",
-                "sigma_pop",
-                "y_hat")
-mcmc_config$monitors <- params_to_track
-
-# Build and compile the MCMC
-mcmc_object <- buildMCMC(mcmc_config)
-compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
-
-# Run the MCMC
-mcmc_out <- runMCMC(compiled_mcmc, 
-                niter = niter, 
-                nburnin = nburnin, 
-                thin = thin, 
-                nchains = nchains, 
-                samplesAsCodaMCMC = TRUE,
-                WAIC = TRUE)
-
-# Trace plots for key parameters
-top_lvl_param_names <- c("intercept", 
-                        "scaling",
-                        "b0", 
-                        "b1",
-                        "sigma_pop",
-                        "size")
-
-tplot <- stacked_traceplot(mcmc_out$samples, top_lvl_param_names)
-
-ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
-        plot = tplot, 
-        device = "pdf")
-
-waic_output <- mcmc_out$WAIC
-
-# now again with the linear-log model
-
-modelname = "allmonuments_linear_log"
+modelname = "allmonuments_linlog"
+modeltype = "linear_log"
 
 # using full dataset
 df <- RomanUrban
@@ -2445,8 +2830,8 @@ Inits <- list(scaling = NA,
             scaling_raw = NA,
             intercept = NA,
             intercept_raw = NA,
-            intercept0 = 0,
-            scaling0 = 0,
+            intercept0 = 1,
+            scaling0 = 1,
             size = 1,
             sd0 = 1,
             sd1 = 1,
@@ -2454,17 +2839,13 @@ Inits <- list(scaling = NA,
             b1 = 0.8,
             sigma_pop = 0.5)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0, K)
-Inits$intercept_raw <- rep(0, K)
-
-# given the additional complexity of the new model we
-# needed to employ more sophisticated samplers in oder 
-# to produce well-mixed mcmc chains
+Inits$scaling <- rep(1, K)
+Inits$intercept <- rep(1, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
-scalingModel <- nimbleModel(code = scalingCode,
+scalingModel <- nimbleModel(code = scalingCode_linear_log,
                             name = modelname,
                             constants = Consts,
                             data = Data,
@@ -2485,12 +2866,6 @@ mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
 
-# Optionally, block sampling for each group's intercept and scaling
-for (k in 1:Consts$K) {
-  mcmc_config$removeSamplers(c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')))
-  mcmc_config$addSampler(target = c(paste0('intercept[', k, ']'), paste0('scaling[', k, ']')), type = 'AF_slice')
-}
-
 # Select parameters to track
 params_to_track <- c("intercept0",
                 "scaling0",
@@ -2502,8 +2877,10 @@ params_to_track <- c("intercept0",
                 "b0", 
                 "b1",
                 "sigma_pop",
-                "y_hat")
+                "y_hat",
+                "pop")
 mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
 
 # Build and compile the MCMC
 mcmc_object <- buildMCMC(mcmc_config)
@@ -2518,6 +2895,47 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 samplesAsCodaMCMC = TRUE,
                 WAIC = TRUE)
 
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
                         "scaling0",
@@ -2528,7 +2946,7 @@ top_lvl_param_names <- c("intercept0",
                         "sigma_pop",
                         "size")
 
-tplot <- stacked_traceplot(mcmc_out$samples, top_lvl_param_names)
+tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
 
 ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
         plot = tplot, 
@@ -2548,7 +2966,6 @@ ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = "")
         device = "pdf")
 
 # convergence checking
-
 # ignore y_hat from the chain variables
 if(is.mcmc.list(mcmc_out)){
         y_hat_idx <- grep("y_hat",colnames(mcmc_out[[1]]))
@@ -2580,32 +2997,53 @@ output_rsquared(y = y,
                 modelname = modelname,
                 thin = nchains)
 
-modelname = "allmonuments_linear_log"
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
 
-# using full dataset
-df <- RomanUrban
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
+# output the final point-wise lppd diff based model comparison
+output_lppd_diff(modelname)
+
+#### SECOND ANALYSIS, WALLS ONLY ###############################################
+
+modelname = "allwalls_linlog"
+modeltype = "lin_log"
+
+df <- RomanUrban[walls_idx,]
 
 N <- dim(df)[1]
 y <- df$Monuments
 x <- log(df$Area)
 pop <- log(df$pop_est)
+# get provinces as integer indeces instead of character/factor levels
+v <- as.numeric(as.factor(df$Province))
+K <- length(unique(df$Province))
 
-Consts <- list(N = N)
+Consts <- list(N = N,
+                v = v,
+                K = K)
 
 Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits <- list(intercept = 0,
-                scaling = 0,
-                size = 1,
-                b0 = 4,
-                b1 = 0.8,
-                sigma_pop = 0.5)
+Inits$scaling <- rep(0, K)
+Inits$intercept <- rep(0, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode_linear_log,
-                            name = modelname,
+                            name = "allwalls",
                             constants = Consts,
                             data = Data,
                             inits = Inits)
@@ -2617,23 +3055,28 @@ compiled_model <- compileNimble(scalingModel)
 mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
 
 # Replace samplers for correlated parameters
-# Block sampling for intercept and scaling
-mcmc_config$removeSamplers(c('intercept', 'scaling'))
-mcmc_config$addSampler(target = c('intercept', 'scaling'), type = 'AF_slice')
+# Block sampling for intercept0 and scaling0
+mcmc_config$removeSamplers(c('intercept0', 'scaling0'))
+mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
 
 # Block sampling for b0 and b1
 mcmc_config$removeSamplers(c('b0', 'b1'))
 mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
 
 # Select parameters to track
-params_to_track <- c("intercept",
-                "scaling",
+params_to_track <- c("intercept0",
+                "scaling0",
+                "sd0",
+                "sd1",
+                "scaling", 
+                "intercept",
                 "size",
                 "b0", 
                 "b1",
                 "sigma_pop",
                 "y_hat")
 mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
 
 # Build and compile the MCMC
 mcmc_object <- buildMCMC(mcmc_config)
@@ -2648,38 +3091,875 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 samplesAsCodaMCMC = TRUE,
                 WAIC = TRUE)
 
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
 # Trace plots for key parameters
-top_lvl_param_names <- c("intercept", 
-                        "scaling",
+top_lvl_param_names <- c("intercept0", 
+                        "scaling0",
+                        "sd0",
+                        "sd1", 
                         "b0", 
                         "b1",
                         "sigma_pop",
                         "size")
-
-tplot <- stacked_traceplot(mcmc_out$samples, top_lvl_param_names)
+tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
 
 ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
         plot = tplot, 
         device = "pdf")
 
-output_waic(waic = mcmc_out$WAIC,
-                modelname = modelname)
+# and now to look at variability among provinces
+if(is.mcmc.list(mcmc_out)){
+        province_scaling_names <- colnames(mcmc_out[[1]])[grep("scaling\\[", colnames(mcmc_out[[1]]))]
+}else{
+        province_scaling_names <- colnames(mcmc_out)[grep("scaling\\[", colnames(mcmc_out))]
+}
+tplot_provinces <- stacked_traceplot(mcmc_out, province_scaling_names, mode = "stacked", thin = 10)
 
-#### SECOND ANALYSIS, WALLS ONLY ###############################################
+ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = ""), 
+        plot = tplot_provinces, 
+        device = "pdf")
 
-modelname = "allwalls_power"
+# ignore y_hat from the chain variables
+if(is.mcmc.list(mcmc_out)){
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out[[1]]))
+        mcmc_out_subset <- lapply(mcmc_out, function(x, pidx){x[, -c(pidx)]}, y_hat_idx)
+        mcmc_out_subset <- as.mcmc.list(mcmc_out_subset)
+}else{
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out))
+        mcmc_out_subset <- mcmc_out[,-y_hat_idx]
+}
 
-df <- RomanUrban[walls_idx,]
+# convergence
+g <- geweke.diag(mcmc_out_subset)
 
-N <- dim(df)[1]
-y <- df$Monuments
-x <- log(df$Area)
-pop <- log(df$pop_est)
+output_geweke(g, modelname, "Output/")
+
+if(is.mcmc.list(mcmc_out_subset)){
+        output_gr_rhat(mcmc_out_subset, modelname)
+}
+
+# posterior summaries
+
+output_posterior_summary(mcmc_out_subset,
+                        modelname = modelname,
+                        outfolder = "Output/")
+
+# pseudo r-sqaured
+output_rsquared(y = y,
+                y_hat_idx = y_hat_idx,
+                mcmc_out = mcmc_out,
+                modelname = modelname,
+                thin = nchains)
+
+output_scaling(mcmc_out = mcmc_out,
+                modelname = modelname,
+                parameter = "scaling0",
+                outpath = "Output/scaling_samples.csv")
+
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
+# output the final point-wise lppd diff based model comparison
+output_lppd_diff(modelname)
 
 #### THIRD ANALYSIS, ABOVE GROUND ONLY #########################################
 
+modelname <- "filtmonuments_loglin"
+modeltype = "log_lin"
+
+df <- RomanUrban
+
+N <- dim(df)[1]
+y <- df$Monuments_filt
+x <- log(df$Area)
+pop <- log(df$pop_est)
+# get provinces as integer indeces instead of character/factor levels
+v <- as.numeric(as.factor(df$Province))
+K <- length(unique(df$Province))
+
+Consts <- list(N = N,
+                v = v,
+                K = K)
+
+Data <- list(y = y,
+            x = x,
+            pop = pop)
+
+Inits$scaling <- rep(1, K)
+Inits$intercept <- rep(1, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
+
+# Create the Nimble model
+scalingModel <- nimbleModel(code = scalingCode_linear_log,
+                            name = "filtmonuments",
+                            constants = Consts,
+                            data = Data,
+                            inits = Inits)
+
+# Compile the model
+compiled_model <- compileNimble(scalingModel)
+
+# Configure the MCMC
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
+
+# Replace samplers for correlated parameters
+# Block sampling for intercept0 and scaling0
+mcmc_config$removeSamplers(c('intercept0', 'scaling0'))
+mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
+
+# Block sampling for b0 and b1
+mcmc_config$removeSamplers(c('b0', 'b1'))
+mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
+
+# Select parameters to track
+params_to_track <- c("intercept0",
+                "scaling0",
+                "sd0",
+                "sd1",
+                "size",
+                "scaling", 
+                "intercept",
+                "b0", 
+                "b1",
+                "sigma_pop",
+                "y_hat")
+mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
+
+# Build and compile the MCMC
+mcmc_object <- buildMCMC(mcmc_config)
+compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
+
+# Run the MCMC
+mcmc_out <- runMCMC(compiled_mcmc, 
+                niter = niter, 
+                nburnin = nburnin, 
+                thin = thin, 
+                nchains = nchains, 
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+# Trace plots for key parameters
+top_lvl_param_names <- c("intercept0", 
+                        "scaling0",
+                        "sd0",
+                        "sd1", 
+                        "b0", 
+                        "b1",
+                        "sigma_pop",
+                        "size")
+tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
+
+ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
+        plot = tplot, 
+        device = "pdf")
+
+# and now to look at variability among provinces
+if(is.mcmc.list(mcmc_out)){
+        province_scaling_names <- colnames(mcmc_out[[1]])[grep("scaling\\[", colnames(mcmc_out[[1]]))]
+}else{
+        province_scaling_names <- colnames(mcmc_out)[grep("scaling\\[", colnames(mcmc_out))]
+}
+tplot_provinces <- stacked_traceplot(mcmc_out, province_scaling_names, mode = "stacked", thin = 10)
+
+ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = ""), 
+        plot = tplot_provinces, 
+        device = "pdf")
+
+# ignore y_hat from the chain variables
+if(is.mcmc.list(mcmc_out)){
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out[[1]]))
+        mcmc_out_subset <- lapply(mcmc_out, function(x, pidx){x[, -c(pidx)]}, y_hat_idx)
+        mcmc_out_subset <- as.mcmc.list(mcmc_out_subset)
+}else{
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out))
+        mcmc_out_subset <- mcmc_out[,-y_hat_idx]
+}
+
+# convergence
+g <- geweke.diag(mcmc_out_subset)
+
+output_geweke(g, modelname, "Output/")
+
+if(is.mcmc.list(mcmc_out_subset)){
+        output_gr_rhat(mcmc_out_subset, modelname)
+}
+
+# posterior summaries
+
+output_posterior_summary(mcmc_out_subset,
+                        modelname = modelname,
+                        outfolder = "Output/")
+
+# pseudo r-sqaured
+output_rsquared(y = y,
+                y_hat_idx = y_hat_idx,
+                mcmc_out = mcmc_out,
+                modelname = modelname,
+                thin = nchains)
+
+# output scaling parameter samples
+output_scaling(mcmc_out = mcmc_out,
+                modelname = modelname,
+                parameter = "scaling0",
+                outpath = "Output/scaling_samples.csv")
+
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
+# output the final point-wise lppd diff based model comparison
+output_lppd_diff(modelname)
+
 #### FOURTH ANALYSIS, EPIGRAPHIC ###############################################
+
+modelname = "epigraphy_linlog"
+modeltype = "lin_log"
+
+df <- RomanUrban
+
+N <- dim(df)[1]
+y <- df$InscriptionCount
+x <- log(df$Area)
+pop <- log(df$pop_est)
+# get provinces as integer indeces instead of character/factor levels
+v <- as.numeric(as.factor(df$Province))
+K <- length(unique(df$Province))
+
+Consts <- list(N = N,
+                v = v,
+                K = K)
+
+Data <- list(y = y,
+            x = x,
+            pop = pop)
+
+Inits$scaling <- rep(1, K)
+Inits$intercept <- rep(1, K)
+Inits$scaling_raw <- rep(0.5, K)
+Inits$intercept_raw <- rep(0.5, K)
+
+# Create the Nimble model
+scalingModel <- nimbleModel(code = scalingCode_linear_log,
+                            name = "epigraphy",
+                            constants = Consts,
+                            data = Data,
+                            inits = Inits)
+
+# Compile the model
+compiled_model <- compileNimble(scalingModel)
+
+# Configure the MCMC
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
+
+# Replace samplers for correlated parameters
+# Block sampling for intercept0 and scaling0
+mcmc_config$removeSamplers(c('intercept0', 'scaling0'))
+mcmc_config$addSampler(target = c('intercept0', 'scaling0'), type = 'AF_slice')
+
+# Block sampling for b0 and b1
+mcmc_config$removeSamplers(c('b0', 'b1'))
+mcmc_config$addSampler(target = c('b0', 'b1'), type = 'AF_slice')
+
+# Select parameters to track
+params_to_track <- c("intercept0",
+                "scaling0",
+                "sd0",
+                "sd1",
+                "size",
+                "scaling", 
+                "intercept",
+                "b0", 
+                "b1",
+                "sigma_pop",
+                "y_hat")
+mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
+
+# Build and compile the MCMC
+mcmc_object <- buildMCMC(mcmc_config)
+compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
+
+# Run the MCMC
+mcmc_out <- runMCMC(compiled_mcmc, 
+                niter = niter, 
+                nburnin = nburnin, 
+                thin = thin, 
+                nchains = nchains, 
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+# Trace plots for key parameters
+top_lvl_param_names <- c("intercept0", 
+                        "scaling0",
+                        "sd0",
+                        "sd1", 
+                        "b0", 
+                        "b1",
+                        "sigma_pop",
+                        "size")
+tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
+
+ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
+        plot = tplot, 
+        device = "pdf")
+
+# and now to look at variability among provinces
+if(is.mcmc.list(mcmc_out)){
+        province_scaling_names <- colnames(mcmc_out[[1]])[grep("scaling\\[", colnames(mcmc_out[[1]]))]
+}else{
+        province_scaling_names <- colnames(mcmc_out)[grep("scaling\\[", colnames(mcmc_out))]
+}
+tplot_provinces <- stacked_traceplot(mcmc_out, province_scaling_names, mode = "stacked", thin = 10)
+
+ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = ""), 
+        plot = tplot_provinces, 
+        device = "pdf")
+
+# ignore y_hat from the chain variables
+if(is.mcmc.list(mcmc_out)){
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out[[1]]))
+        mcmc_out_subset <- lapply(mcmc_out, function(x, pidx){x[, -c(pidx)]}, y_hat_idx)
+        mcmc_out_subset <- as.mcmc.list(mcmc_out_subset)
+}else{
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out))
+        mcmc_out_subset <- mcmc_out[,-y_hat_idx]
+}
+
+# convergence
+g <- geweke.diag(mcmc_out_subset)
+
+output_geweke(g, modelname, "Output/")
+
+if(is.mcmc.list(mcmc_out_subset)){
+        output_gr_rhat(mcmc_out_subset, modelname)
+}
+
+# posterior summaries
+
+output_posterior_summary(mcmc_out_subset,
+                        modelname = modelname,
+                        outfolder = "Output/")
+
+# pseudo r-sqaured
+output_rsquared(y = y,
+                y_hat_idx = y_hat_idx,
+                mcmc_out = mcmc_out,
+                modelname = modelname,
+                thin = nchains)
+
+# output scaling parameter samples
+output_scaling(mcmc_out = mcmc_out,
+                modelname = modelname,
+                parameter = "scaling0",
+                outpath = "Output/scaling_samples.csv")
+
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
+# output the final point-wise lppd diff based model comparison
+output_lppd_diff(modelname)
 
 #### FIFTH ANALYSIS, HNWI ######################################################
 
+modelname = "hnwi_linlog"
+modeltype = "lin_log"
+
+# with this cleaned/updated data, run the same Bayesian model, though of course 
+# not divided by Roman provinces, which simplifies the model substantially
+
+scalingCode2 <- nimbleCode({
+    # scaling params
+    intercept ~ dnorm(mean = 0, sd = 5)
+    scaling ~ dnorm(mean = 0, sd = 5)
+    
+    size ~ dexp(rate = 0.5)
+
+    # main model
+    for(n in 1:N){
+        log_mu[n] <- intercept + scaling * pop[n]
+        mu[n] <- exp(log_mu[n]) 
+        p[n] <- size / (size + mu[n])
+        y[n] ~ dnegbin(prob = p[n], size = size)
+        y_hat[n] <- (size * (1 - p[n])) / p[n]
+    }
+})
+
+N <- dim(global_hnwi)[1]
+y <- global_hnwi$Billionaires
+pop <- log(global_hnwi$population)
+
+Consts <- list(N = N)
+
+Data <- list(y = y,
+            pop = pop)
+
+Inits <- list(scaling = 1,
+            intercept = 1,
+            size = 0.5)
+
+scalingModel2 <- nimbleModel(code = scalingCode2_linlog,
+                name = "hnwi",
+                constants = Consts,
+                data = Data,
+                inits = Inits)
+
+# Compile the model
+compiled_model <- compileNimble(scalingModel2)
+
+# Configure the MCMC
+mcmc_config <- configureMCMC(scalingModel2, enableWAIC = TRUE)
+
+# Replace samplers for correlated parameters
+# Block sampling for intercept0 and scaling0
+mcmc_config$removeSamplers(c('intercept', 'scaling'))
+mcmc_config$addSampler(target = c('intercept', 'scaling'), type = 'AF_slice')
+
+# Parameters to track
+params_to_track <- c("intercept", 
+                    "scaling",
+                    "size",
+                    "y_hat")
+
+mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
+
+# Build and compile the MCMC
+mcmc_object <- buildMCMC(mcmc_config)
+compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
+
+# Run the MCMC
+mcmc_out <- runMCMC(compiled_mcmc, 
+                niter = niter, 
+                nburnin = nburnin, 
+                thin = thin, 
+                nchains = nchains, 
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+# Trace plots for key parameters
+top_lvl_param_names <- c("intercept", "scaling", "size")
+tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
+
+ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
+        plot = tplot, 
+        device = "pdf")
+
+# ignore y_hat from the chain variables
+if(is.mcmc.list(mcmc_out)){
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out[[1]]))
+        mcmc_out_subset <- lapply(mcmc_out, function(x, pidx){x[, -c(pidx)]}, y_hat_idx)
+        mcmc_out_subset <- as.mcmc.list(mcmc_out_subset)
+}else{
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out))
+        mcmc_out_subset <- mcmc_out[,-y_hat_idx]
+}
+
+# convergence
+g <- geweke.diag(mcmc_out_subset)
+
+output_geweke(g, modelname, "Output/")
+
+if(is.mcmc.list(mcmc_out_subset)){
+        output_gr_rhat(mcmc_out_subset, modelname)
+}
+
+# posterior summaries
+
+output_posterior_summary(mcmc_out_subset,
+                        modelname = modelname,
+                        outfolder = "Output/")
+
+# pseudo r-sqaured
+output_rsquared(y = y,
+                y_hat_idx = y_hat_idx,
+                mcmc_out = mcmc_out,
+                modelname = modelname,
+                thin = nchains)
+
+# output scaling parameter samples
+output_scaling(mcmc_out = mcmc_out,
+                modelname = modelname,
+                parameter = "scaling",
+                outpath = "Output/scaling_samples.csv")
+
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
+# output the final point-wise lppd diff based model comparison
+output_lppd_diff(modelname)
+
 #### SIXTH ANALYSIS, TALL BUILDINGS ############################################
+
+modelname = "tallbuildings_linlog"
+modeltype = "lin_log"
+
+N <- dim(tall_buildings)[1]
+y <- tall_buildings$`150 m+ Buildings`
+pop <- log(tall_buildings$Population)
+
+Consts <- list(N = N)
+
+Data <- list(y = y,
+            pop = pop)
+
+Inits <- list(scaling = 1,
+            intercept = 1,
+            size = 0.5)
+
+scalingModel2 <- nimbleModel(code = scalingCode2_linlog,
+                name = "tallbuildings",
+                constants = Consts,
+                data = Data,
+                inits = Inits)
+
+# Compile the model
+compiled_model <- compileNimble(scalingModel2)
+
+# Configure the MCMC
+mcmc_config <- configureMCMC(scalingModel2, enableWAIC = TRUE)
+
+# Replace samplers for correlated parameters
+# Block sampling for intercept0 and scaling0
+mcmc_config$removeSamplers(c('intercept', 'scaling'))
+mcmc_config$addSampler(target = c('intercept', 'scaling'), type = 'AF_slice')
+
+# Parameters to track
+params_to_track <- c("intercept", 
+                    "scaling",
+                    "size",
+                    "y_hat")
+
+mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
+
+# Build and compile the MCMC
+mcmc_object <- buildMCMC(mcmc_config)
+compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
+
+# Run the MCMC
+mcmc_out <- runMCMC(compiled_mcmc, 
+                niter = niter, 
+                nburnin = nburnin, 
+                thin = thin, 
+                nchains = nchains, 
+                samplesAsCodaMCMC = TRUE,
+                WAIC = TRUE)
+
+# WAIC
+mcmc_waic <- mcmc_out$WAIC
+mcmc_out2 <- mcmc_out$samples2
+mcmc_out <- mcmc_out$samples
+output_waic(waic = mcmc_waic,
+                modelname = modelname)
+
+# lppd
+waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+# only want values for data nodes, 'y', lppd
+y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+output_lppd(waic_dets,
+        modelname,
+        modeltype,
+        node_idx = y_node_idx)
+
+# psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+if(is.mcmc.list(mcmc_out2)){
+        mcmc_out2_long <- do.call(rbind, mcmc_out2)
+        n_per_chain = nrow(mcmc_out2[[1]])
+        psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                chain_id = rep(1:nchains, each = n_per_chain)))
+}else{
+        psis_loo <- loo(as.matrix(mcmc_out2), 
+                r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                chain_id = rep(1, nrow(mcmc_out2))))
+}
+
+write.table(psis_loo$pointwise,
+        file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+write.table(psis_loo$estimates,
+        file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+        row.names = FALSE,
+        sep = ",")
+
+# Trace plots for key parameters
+top_lvl_param_names <- c("intercept", "scaling", "size")
+tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
+
+ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
+        plot = tplot, 
+        device = "pdf")
+
+# ignore y_hat from the chain variables
+if(is.mcmc.list(mcmc_out)){
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out[[1]]))
+        mcmc_out_subset <- lapply(mcmc_out, function(x, pidx){x[, -c(pidx)]}, y_hat_idx)
+        mcmc_out_subset <- as.mcmc.list(mcmc_out_subset)
+}else{
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out))
+        mcmc_out_subset <- mcmc_out[,-y_hat_idx]
+}
+
+# convergence
+g <- geweke.diag(mcmc_out_subset)
+
+output_geweke(g, modelname, "Output/")
+
+if(is.mcmc.list(mcmc_out_subset)){
+        output_gr_rhat(mcmc_out_subset, modelname)
+}
+
+# posterior summaries
+
+output_posterior_summary(mcmc_out_subset,
+                        modelname = modelname,
+                        outfolder = "Output/")
+
+# pseudo r-sqaured
+output_rsquared(y = y,
+                y_hat_idx = y_hat_idx,
+                mcmc_out = mcmc_out,
+                modelname = modelname,
+                thin = nchains)
+
+# output scaling parameter samples
+output_scaling(mcmc_out = mcmc_out,
+                modelname = modelname,
+                parameter = "scaling",
+                outpath = "Output/scaling_samples.csv")
+
+# residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+resid_plot <- plot_residual_intervals(mcmc_out, 
+                                        y, 
+                                        y_hat_param = "y_hat", 
+                                        cr_level = 0.95)
+                                        
+ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+        plot = resid_plot, 
+        device = "pdf")
+ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+        plot = resid_plot, 
+        device = "png")
+
+# output the final point-wise lppd diff based model comparison
+output_lppd_diff(modelname)
+
+### SUPPLEMENTAL OUTLIER EFFECTS ###############################################
+# Here we have a look at the main models in terms of whether extreme outliers 
+# have significantly affected the main scaling parameter estimates for key 
+# models.
+
+# Rome and Athens are massive outliers
+
+# df <- RomanUrban[-c(612, 7),]
+
+# collect influential points
+# outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
