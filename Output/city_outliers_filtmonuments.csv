@@ -1,0 +1,5 @@
+"City","Province","Longitude (X)","Latitude (Y)","pop_est","Area","Basis","Monuments","Monuments_filt","Radius","InscriptionCount"
+"Hanson2016_14","Achaea",23.726559,37.971119,NA,225,"Walls of Themistocles and Valerian",107,97,8.46284375321634,1
+"Hanson2016_210","Africa Proconsularis",9.2202,36.4237,NA,25,"Inhabited area",33,31,2.82094791773878,3
+"Hanson2016_500","Dacia",22.809406,45.509997,NA,32,"Urban grid",25,21,3.19153824321146,37
+"Hanson2016_992","Italia (VII Etruria)",12.485098,41.892777,NA,1783,"Fourteen Augustan regions",236,221,23.8232350251954,146

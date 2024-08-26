@@ -281,11 +281,15 @@ tall_buildings <- tall_buildings[-remove_rows_idx,]
 # to censoring the zero-count data. Since the count data appear in each case below
 # to be overdispersed, we opted for the Negative-Binomial distribution.
 
-# set common mcmc params
+#### Common mcmc params
 niter <- 80000
 nburnin <- floor(niter * 0.25)
-thin <- 3
+thin <- 3       # given the above, this results in 20K samples per chain
+thin2 <- 3
 nchains = 4
+
+# note that for some of the processes below, additional thinning is performed
+# because of memory limitations, especially for plotting
 
 # set up a Nimble model
 
@@ -487,11 +491,16 @@ stacked_traceplot <- function(mcmc_obj, params, mode = "facet", thin = 1) {
   return(plot)
 }
 
-# residuals plot
+# plot model residuals
 plot_residual_intervals <- function(mcmc_obj, 
-                                y, 
-                                y_hat_param = "y_hat", 
-                                cr_level = 0.95) {
+                                    y, 
+                                    y_hat_param = "y_hat", 
+                                    cr_level = 0.95,
+                                    additional_thin = NULL,
+                                    outlier_indices = NULL,  # Indices of outliers
+                                    df = NULL,  # Dataframe containing the database IDs
+                                    id_col = "id") {  # Column name for database IDs in df
+  # if mcmc is a list, then there are multiple chains; combine them
   if (is.mcmc.list(mcmc_obj)) {
     mcmc_df <- do.call(rbind, lapply(mcmc_obj, as.data.frame))
     mcmc_df$Chain <- rep(seq_along(mcmc_obj), each = nrow(mcmc_obj[[1]]))
@@ -500,6 +509,10 @@ plot_residual_intervals <- function(mcmc_obj,
     mcmc_df$Chain <- 1
   } else {
     stop("Input object must be of class 'mcmc' or 'mcmc.list'")
+  }
+
+  if(!is.null(additional_thin)){
+        mcmc_df <- mcmc_df[seq(1, nrow(mcmc_df), additional_thin), ]
   }
 
   y_hat_idx <- grep(y_hat_param, colnames(mcmc_df))
@@ -522,21 +535,34 @@ plot_residual_intervals <- function(mcmc_obj,
   residuals_df <- data.frame(
     mean_y_hat = mean_y_hat,
     lower_cr = lower_cr,
-    upper_cr = upper_cr
+    upper_cr = upper_cr,
+    outlier_id = NA  # Initialize column for outlier IDs
   )
+  
+  # Assign outlier IDs based on the indices
+  if (!is.null(outlier_indices) && !is.null(df)) {
+    residuals_df[outlier_indices, 'outlier_id'] <- as.vector(df[outlier_indices, id_col])
+  }
 
   # Plot the 95% CR for residuals with vertical line at zero
   plot <- ggplot(residuals_df, aes(y = mean_y_hat)) +
     geom_linerange(aes(xmin = lower_cr, xmax = upper_cr), color = "blue", linewidth = 1.5) +
-    geom_point(aes(x = (lower_cr + upper_cr) / 2), color = "blue", size = 2) + # Add points at the mean of the CRs
+    geom_point(aes(x = (lower_cr + upper_cr) / 2), color = "blue", size = 2) +
     geom_vline(xintercept = 0, color = "grey", linetype = "dashed", linewidth = 1.2) +
     labs(title = paste0(100 * cr_level, "% Credible Intervals for Residuals Across Predicted Values"),
          x = "Residuals", y = "Predicted Values (y_hat)") +
     theme_minimal()
+  
+  # Add labels for outliers
+  plot <- plot +
+    geom_text(aes(x = (lower_cr + upper_cr) / 2, 
+                  label = outlier_id), 
+              hjust = -0.1, vjust = 0, size = 3, color = "red", na.rm = TRUE)
 
   return(plot)
 }
 
+# extract residual summaries
 get_residual_summaries <- function(mcmc_obj, y, y_hat_param = "y_hat") {
   if (is.mcmc.list(mcmc_obj)) {
     mcmc_df <- do.call(rbind, lapply(mcmc_obj, as.data.frame))
@@ -822,6 +848,263 @@ output_scaling <- function(mcmc_out,
                 append = append)
 }
 
+### CORE ANALYSIS WRAPPER ######################################################
+
+run_scaling_analysis <- function(df = df,
+                                modelname = modelname,
+                                modeltype = modeltype,
+                                modern = FALSE,
+                                fit_diagnostics = TRUE,
+                                scalingCode = scalingCode,
+                                Consts = Consts,
+                                Data = Data,
+                                inits = Inits,
+                                niter = niter,
+                                thin = thin,
+                                thin2 = thin2,
+                                nchains = nchains){
+
+# Create the Nimble model
+scalingModel <- nimbleModel(code = scalingCode,
+                            name = modelname,
+                            constants = Consts,
+                            data = Data,
+                            inits = Inits)
+
+# Compile the model
+compiled_model <- compileNimble(scalingModel)
+
+# Configure the MCMC
+mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
+
+if(modern){
+        # Replace samplers for correlated parameters
+        # Block sampling for intercept and scaling
+        mcmc_config$removeSamplers(c('intercept', 'scaling'))
+        mcmc_config$addSampler(target = c('intercept', 'scaling'), type = 'AF_slice')
+
+        # Parameters to track
+        params_to_track <- c("intercept", 
+                        "scaling",
+                        "size",
+                        "y_hat")
+}else{
+        # Replace samplers for correlated parameters
+        # Block sampling for intercept0 and scaling0
+        mcmc_config$removeSamplers(c('intercept0', 'scaling0'))
+        mcmc_config$addSampler(target = c('intercept0', 'scaling0'), 
+                                type = 'AF_slice')
+
+        # Block sampling for b0 and b1
+        mcmc_config$removeSamplers(c('b0', 'b1'))
+        mcmc_config$addSampler(target = c('b0', 'b1'), 
+                                type = 'AF_slice')
+
+        # Select parameters to track
+        params_to_track <- c("intercept0",
+                        "scaling0",
+                        "sd0",
+                        "sd1",
+                        "size",
+                        "scaling", 
+                        "intercept",
+                        "b0", 
+                        "b1",
+                        "sigma_pop",
+                        "y_hat")
+
+}
+
+mcmc_config$monitors <- params_to_track
+mcmc_config$addMonitors2("logProb_y")
+
+# Build and compile the MCMC
+mcmc_object <- buildMCMC(mcmc_config)
+compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
+
+if(fit_diagnostics){
+        # Run the MCMC
+        mcmc_out <- runMCMC(compiled_mcmc, 
+                        niter = niter, 
+                        nburnin = nburnin, 
+                        thin = thin,
+                        thin2 = thin2, 
+                        nchains = nchains, 
+                        samplesAsCodaMCMC = TRUE,
+                        WAIC = TRUE)
+
+        # WAIC
+        mcmc_waic <- mcmc_out$WAIC
+        mcmc_out2 <- mcmc_out$samples2
+        mcmc_out <- mcmc_out$samples
+        output_waic(waic = mcmc_waic,
+                        modelname = modelname)
+
+        # lppd
+        waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
+
+        # only want values for data nodes, 'y', lppd
+        y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
+
+        output_lppd(waic_dets,
+                modelname,
+                modeltype,
+                node_idx = y_node_idx)
+
+        # psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+        if(is.mcmc.list(mcmc_out2)){
+                mcmc_out2_long <- do.call(rbind, mcmc_out2)
+                n_per_chain = nrow(mcmc_out2[[1]])
+                psis_loo <- loo(as.matrix(mcmc_out2_long), 
+                        r_eff = relative_eff(as.matrix(mcmc_out2_long), 
+                                        chain_id = rep(1:nchains, each = n_per_chain)))
+        }else{
+                psis_loo <- loo(as.matrix(mcmc_out2), 
+                        r_eff = relative_eff(as.matrix(mcmc_out2), 
+                                        chain_id = rep(1, nrow(mcmc_out2))))
+        }
+
+        write.table(psis_loo$pointwise,
+                file = paste("Output/loo_pw_", modelname, ".csv", sep = ""),
+                row.names = FALSE,
+                sep = ",")
+
+        write.table(psis_loo$estimates,
+                file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
+                sep = ",")
+
+        # output the city identifiers that correspond with extreme Pareto k diagnostics
+        outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
+
+        outpath <- paste("Output/city_outliers_", modelname, ".csv", sep = "")
+
+        write.table(df[outliers_idx, ], 
+                        file = outpath,
+                        row.names = FALSE,
+                        sep = ",")
+        rm(outpath)
+}else{
+        # Run the MCMC
+        mcmc_out <- runMCMC(compiled_mcmc, 
+                        niter = niter, 
+                        nburnin = nburnin, 
+                        thin = thin, 
+                        nchains = nchains, 
+                        samplesAsCodaMCMC = TRUE)
+}
+
+# Trace plots for key parameters
+if(modern){
+        top_lvl_param_names <- c("intercept", 
+                                "scaling", 
+                                "size")
+}else{
+        top_lvl_param_names <- c("intercept0", 
+                                "scaling0",
+                                "sd0",
+                                "sd1", 
+                                "b0", 
+                                "b1",
+                                "sigma_pop",
+                                "size")
+}
+
+tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
+
+ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
+        plot = tplot, 
+        device = "pdf")
+ggsave(filename = paste("Output/tplots_", modelname, ".png", sep = ""), 
+        plot = tplot, 
+        device = "png")
+
+if(!modern){
+        # and now to look at variability in scaling parameter among provinces
+        if(is.mcmc.list(mcmc_out)){
+                province_scaling_names <- colnames(mcmc_out[[1]])[grep("scaling\\[", colnames(mcmc_out[[1]]))]
+        }else{
+                province_scaling_names <- colnames(mcmc_out)[grep("scaling\\[", colnames(mcmc_out))]
+        }
+
+        tplot_provinces <- stacked_traceplot(mcmc_out, 
+                                        province_scaling_names, 
+                                        mode = "stacked", 
+                                        thin = 10)
+
+        ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = ""), 
+                plot = tplot_provinces, 
+                device = "pdf")
+        ggsave(filename = paste("Output/tplots_", modelname, "_provinces.png", sep = ""), 
+                plot = tplot_provinces, 
+                device = "png")
+}
+
+# convergence checking
+# ignore y_hat from the chain variables
+if(is.mcmc.list(mcmc_out)){
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out[[1]]))
+        mcmc_out_subset <- lapply(mcmc_out, function(x, pidx){x[, -c(pidx)]}, y_hat_idx)
+        mcmc_out_subset <- as.mcmc.list(mcmc_out_subset)
+}else{
+        y_hat_idx <- grep("y_hat",colnames(mcmc_out))
+        mcmc_out_subset <- mcmc_out[,-y_hat_idx]
+}
+
+# convergence
+g <- geweke.diag(mcmc_out_subset)
+
+output_geweke(g, modelname, "Output/")
+
+if(is.mcmc.list(mcmc_out_subset)){
+        output_gr_rhat(mcmc_out_subset, modelname)
+}
+
+# posterior summaries
+output_posterior_summary(mcmc_out_subset,
+                        modelname,
+                        outfolder = "Output/")
+
+# pseudo r-sqaured
+output_rsquared(y = y,
+                y_hat_idx = y_hat_idx,
+                mcmc_out = mcmc_out,
+                modelname = modelname,
+                thin = nchains)
+
+# exract scaling parameter chain and save to csv for plotting all
+# of them together at the end
+if(modern){
+        scaling_param = "scaling"
+}else{
+        scaling_param = "scaling0"
+}
+
+output_scaling(mcmc_out = mcmc_out,
+                modelname = modelname,
+                parameter = scaling_param,
+                outpath = "Output/scaling_samples.csv")
+
+if(fit_diagnostics){
+        # residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+        resid_plot <- plot_residual_intervals(mcmc_out, 
+                                                y, 
+                                                y_hat_param = "y_hat", 
+                                                cr_level = 0.95,
+                                                additional_thin = 5,
+                                                outlier_indices = as.vector(outliers_idx),
+                                                df = df,
+                                                id_col = 'City')
+
+        ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
+                plot = resid_plot, 
+                device = "pdf")
+        ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""), 
+                plot = resid_plot, 
+                device = "png")
+}
+
+}
+
 ### BASIC SCATTER PLOTS ########################################################
 
 # scatter plots with +1 offset to manage zeros
@@ -1051,7 +1334,8 @@ compiled_mcmc <- compileNimble(mcmc_object, project = compiled_model)
 mcmc_out <- runMCMC(compiled_mcmc, 
                 niter = niter, 
                 nburnin = nburnin, 
-                thin = thin, 
+                thin = thin,
+                thin2 = thin2, 
                 nchains = nchains, 
                 samplesAsCodaMCMC = TRUE,
                 WAIC = TRUE)
@@ -1094,19 +1378,18 @@ write.table(psis_loo$pointwise,
 
 write.table(psis_loo$estimates,
         file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
-        row.names = FALSE,
         sep = ",")
 
 # output the city identifiers that correspond with extreme Pareto k diagnostics
 outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
-append = file.exists("Output/city_outliers_roman.csv")
+
+outpath <- paste("Output/city_outliers_", modelname, ".csv", sep = "")
+
 write.table(df[outliers_idx, ], 
-                file = "Output/city_outliers_roman.csv",
+                file = outpath,
                 row.names = FALSE,
-                col.names = !append,
-                sep = ",",
-                append = append)
-rm(append)
+                sep = ",")
+rm(outpath)
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
@@ -1188,7 +1471,11 @@ output_scaling(mcmc_out = mcmc_out,
 resid_plot <- plot_residual_intervals(mcmc_out, 
                                         y, 
                                         y_hat_param = "y_hat", 
-                                        cr_level = 0.95)
+                                        cr_level = 0.95,
+                                        additional_thin = 5,
+                                        outlier_indices = as.vector(outliers_idx),
+                                        df = df,
+                                        id_col = 'City')
 
 ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
         plot = resid_plot, 
@@ -1416,6 +1703,7 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 niter = niter, 
                 nburnin = nburnin, 
                 thin = thin, 
+                thin2 = thin2,
                 nchains = nchains, 
                 samplesAsCodaMCMC = TRUE,
                 WAIC = TRUE)
@@ -1463,14 +1751,14 @@ write.table(psis_loo$estimates,
 
 # output the city identifiers that correspond with extreme Pareto k diagnostics
 outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
-append = file.exists("Outpath/roman_city_outliers.csv")
+
+outpath <- paste("Output/city_outliers_", modelname, ".csv", sep = "")
+
 write.table(df[outliers_idx, ], 
-                file = "Outpath/roman_city_outliers.csv",
-                row.names = F,
-                col.names = !append,
-                sep = ",",
-                append = append)
-rm(append)
+                file = outpath,
+                row.names = FALSE,
+                sep = ",")
+rm(outpath)
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
@@ -1486,6 +1774,9 @@ tplot <- stacked_traceplot(mcmc_out, top_lvl_param_names)
 ggsave(filename = paste("Output/tplots_", modelname, ".pdf", sep = ""), 
         plot = tplot, 
         device = "pdf")
+ggsave(filename = paste("Output/tplots_", modelname, ".png", sep = ""), 
+        plot = tplot, 
+        device = "png")
 
 # and now to look at variability among provinces
 if(is.mcmc.list(mcmc_out)){
@@ -1498,6 +1789,9 @@ tplot_provinces <- stacked_traceplot(mcmc_out, province_scaling_names, mode = "s
 ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = ""), 
         plot = tplot_provinces, 
         device = "pdf")
+ggsave(filename = paste("Output/tplots_", modelname, "_provinces.png", sep = ""), 
+        plot = tplot_provinces, 
+        device = "png")
 
 # ignore y_hat from the chain variables
 if(is.mcmc.list(mcmc_out)){
@@ -1540,7 +1834,11 @@ output_scaling(mcmc_out = mcmc_out,
 resid_plot <- plot_residual_intervals(mcmc_out, 
                                         y, 
                                         y_hat_param = "y_hat", 
-                                        cr_level = 0.95)
+                                        cr_level = 0.95,
+                                        additional_thin = 5,
+                                        outlier_indices = as.vector(outliers_idx),
+                                        df = df,
+                                        id_col = 'City')
                                         
 ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
         plot = resid_plot, 
@@ -1653,6 +1951,9 @@ tplot_provinces <- stacked_traceplot(mcmc_out, province_scaling_names, mode = "s
 ggsave(filename = paste("Output/tplots_", modelname, "_provinces.pdf", sep = ""), 
         plot = tplot_provinces, 
         device = "pdf")
+ggsave(filename = paste("Output/tplots_", modelname, "_provinces.png", sep = ""), 
+        plot = tplot_provinces, 
+        device = "png")
 
 # ignore y_hat from the chain variables
 if(is.mcmc.list(mcmc_out)){
@@ -1766,6 +2067,7 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 niter = niter, 
                 nburnin = nburnin, 
                 thin = thin, 
+                thin2 = thin2,
                 nchains = nchains, 
                 samplesAsCodaMCMC = TRUE,
                 WAIC = TRUE)
@@ -1808,8 +2110,18 @@ write.table(psis_loo$pointwise,
 
 write.table(psis_loo$estimates,
         file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
-        row.names = FALSE,
         sep = ",")
+
+# output the city identifiers that correspond with extreme Pareto k diagnostics
+outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
+
+outpath <- paste("Output/city_outliers_", modelname, ".csv", sep = "")
+
+write.table(df[outliers_idx, ], 
+                file = outpath,
+                row.names = FALSE,
+                sep = ",")
+rm(outpath)
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
@@ -1880,7 +2192,11 @@ output_scaling(mcmc_out = mcmc_out,
 resid_plot <- plot_residual_intervals(mcmc_out, 
                                         y, 
                                         y_hat_param = "y_hat", 
-                                        cr_level = 0.95)
+                                        cr_level = 0.95,
+                                        additional_thin = 5,
+                                        outlier_indices = as.vector(outliers_idx),
+                                        df = df,
+                                        id_col = 'City')
                                         
 ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
         plot = resid_plot, 
@@ -1892,6 +2208,9 @@ ggsave(filename = paste("Output/resid_", modelname, ".png", sep = ""),
 #### Excluding Zeros ###########################################################
 
 modelname = "filtmonuments_nozero"
+modeltype = "power_law"
+
+df <- RomanUrban
 
 nonzero_idx <- which(df$Monuments_filt > 0)
 df <- df[nonzero_idx,]
@@ -2104,6 +2423,7 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 niter = niter, 
                 nburnin = nburnin, 
                 thin = thin, 
+                thin2 = thin2,
                 nchains = nchains, 
                 samplesAsCodaMCMC = TRUE,
                 WAIC = TRUE)
@@ -2146,8 +2466,18 @@ write.table(psis_loo$pointwise,
 
 write.table(psis_loo$estimates,
         file = paste("Output/loo_est_", modelname, ".csv", sep = ""),
-        row.names = FALSE,
         sep = ",")
+
+# output the city identifiers that correspond with extreme Pareto k diagnostics
+outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
+
+outpath <- paste("Output/city_outliers_", modelname, ".csv", sep = "")
+
+write.table(df[outliers_idx, ], 
+                file = outpath,
+                row.names = FALSE,
+                sep = ",")
+rm(outpath)
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept0", 
@@ -2218,7 +2548,11 @@ output_scaling(mcmc_out = mcmc_out,
 resid_plot <- plot_residual_intervals(mcmc_out, 
                                         y, 
                                         y_hat_param = "y_hat", 
-                                        cr_level = 0.95)
+                                        cr_level = 0.95,
+                                        additional_thin = 5,
+                                        outlier_indices = as.vector(outliers_idx),
+                                        df = df,
+                                        id_col = 'City')
                                         
 ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
         plot = resid_plot, 
@@ -2426,6 +2760,7 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 niter = niter, 
                 nburnin = nburnin, 
                 thin = thin, 
+                thin2 = thin2,
                 nchains = nchains, 
                 samplesAsCodaMCMC = TRUE,
                 WAIC = TRUE)
@@ -2473,11 +2808,14 @@ write.table(psis_loo$estimates,
 
 # output the city identifiers that correspond with extreme Pareto k diagnostics
 outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
-write.table(global_hnwi[outliers_idx, ], 
-                file = "Output/city_outliers_hnwi.csv",
+
+outpath <- paste("Output/city_outliers_", modelname, ".csv", sep = "")
+
+write.table(df[outliers_idx, ], 
+                file = outpath,
                 row.names = FALSE,
-                col.names = FALSE,
                 sep = ",")
+rm(outpath)
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept", "scaling", "size")
@@ -2529,7 +2867,11 @@ output_scaling(mcmc_out = mcmc_out,
 resid_plot <- plot_residual_intervals(mcmc_out, 
                                         y, 
                                         y_hat_param = "y_hat", 
-                                        cr_level = 0.95)
+                                        cr_level = 0.95,
+                                        additional_thin = 5,
+                                        outlier_indices = as.vector(outliers_idx),
+                                        df = df,
+                                        id_col = 'City')
                                         
 ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
         plot = resid_plot, 
@@ -2597,7 +2939,7 @@ mcmc_out <- runMCMC(compiled_mcmc,
                 niter = niter, 
                 nburnin = nburnin, 
                 thin = thin,
-                thin2 = thin,
+                thin2 = thin2,
                 nchains = nchains, 
                 samplesAsCodaMCMC = TRUE,
                 WAIC = TRUE)
@@ -2645,11 +2987,14 @@ write.table(psis_loo$estimates,
 
 # output the city identifiers that correspond with extreme Pareto k diagnostics
 outliers_idx <- which(psis_loo$pointwise[,'influence_pareto_k'] > 0.7)
-write.table(tall_buildings[outliers_idx, ], 
-                file = "Output/city_outliers_tallbuildings.csv",
+
+outpath <- paste("Output/city_outliers_", modelname, ".csv", sep = "")
+
+write.table(df[outliers_idx, ], 
+                file = outpath,
                 row.names = FALSE,
-                col.names = FALSE,
                 sep = ",")
+rm(outpath)
 
 # Trace plots for key parameters
 top_lvl_param_names <- c("intercept", "scaling", "size")
@@ -2701,7 +3046,11 @@ output_scaling(mcmc_out = mcmc_out,
 resid_plot <- plot_residual_intervals(mcmc_out, 
                                         y, 
                                         y_hat_param = "y_hat", 
-                                        cr_level = 0.95)
+                                        cr_level = 0.95,
+                                        additional_thin = 5,
+                                        outlier_indices = as.vector(outliers_idx),
+                                        df = df,
+                                        id_col = 'City')
                                         
 ggsave(filename = paste("Output/resid_", modelname, ".pdf", sep = ""), 
         plot = resid_plot, 

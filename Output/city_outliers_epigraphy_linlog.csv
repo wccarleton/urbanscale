@@ -1,0 +1,8 @@
+"City","Province","Longitude (X)","Latitude (Y)","pop_est","Area","Basis","Monuments","Monuments_filt","Radius","InscriptionCount"
+"Hanson2016_26","Achaea",22.879795,37.906321,NA,241,"Urban grid",56,50,8.75857765680556,44
+"Hanson2016_180","Africa Proconsularis",14.29306,32.63833,NA,466,"Ramparts",46,41,12.1791792400657,83
+"Hanson2016_226","Alpes Graiae et Poeninae",7.073483,46.101706,NA,22,"Urban grid",12,10,2.64628371420061,7
+"Hanson2016_227","Alpes Maritimae",7.275398,43.720661,NA,18,"Inhabited area, 15 to 20 ha.",13,12,2.3936536824086,7
+"Hanson2016_312","Asia",28.040286,38.488315,NA,150,"Walls and topography",16,12,6.90988298942671,18
+"Hanson2016_587","Gallia Belgica",6.637075,49.752611,NA,131,"Urban grid and walls",17,13,6.45744493511765,8
+"Hanson2016_992","Italia (VII Etruria)",12.485098,41.892777,NA,1783,"Fourteen Augustan regions",236,221,23.8232350251954,146

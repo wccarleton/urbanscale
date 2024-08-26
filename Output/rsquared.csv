@@ -1,0 +1,17 @@
+"analysis","rsq"
+"allmonuments",0.45
+"allwalls_nozero",0.38
+"allwalls",0.38
+"allmonuments_nozero",0.5
+"epigraphy_nozero",0.57
+"filtmonuments_nozero",0.48
+"epigraphy",0.26
+"filtmonuments",0.43
+"hnwi",0.15
+"tallbuildings",0.22
+"allmonuments_linlog",0.18
+"allwalls_linlog",0.22
+"filtmonuments_loglin",0.16
+"epigraphy_linlog",0.07
+"hnwi_linlog",0.06
+"tallbuildings_linlog",0.04

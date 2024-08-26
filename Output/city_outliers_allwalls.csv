@@ -1,0 +1,15 @@
+"City","Province","Longitude (X)","Latitude (Y)","pop_est","Area","Basis","Monuments","Monuments_filt","Radius","InscriptionCount"
+"Hanson2016_14","Achaea",23.726559,37.971119,NA,225,"Walls of Themistocles and Valerian",107,97,8.46284375321634,1
+"Hanson2016_34","Achaea",23.542112,38.04325,NA,6,"Walls (Late 4th c B.C.)",18,14,1.38197659788534,1
+"Hanson2016_57","Achaea",23.344591,37.994845,NA,140,"Walls",32,30,6.67558117812455,0
+"Hanson2016_108","Achaea",23.362481,37.496574,NA,41,"Walls",22,20,3.61257599692178,0
+"Hanson2016_298","Asia",27.27621,37.531791,NA,97,"Urban grid and walls (Classical)",29,22,5.55662298161641,1
+"Hanson2016_329","Baetica",-5.774611,36.089886,NA,11,"Walls",17,14,1.87120515925478,1
+"Hanson2016_481","Creta et Cyrenaica",21.854404,32.820182,NA,107,"Walls and topography",38,34,5.83602243155949,3
+"Hanson2016_658","Gallia Narbonensis",4.878056,45.524167,NA,83,"Walls and topography (excluding Mont Salomon and Arnaud)",32,28,5.14001172695692,1
+"Hanson2016_714","Hispania Tarraconensis",-7.557873,43.011212,NA,41,"Walls",25,24,3.61257599692178,1
+"Hanson2016_731","Hispania Tarraconensis",1.25763,41.117936,NA,70,"Walls",22,17,4.72034871941315,1
+"Hanson2016_973","Italia (VII Etruria)",12.411516,42.28884,NA,31,"Urban grid and walls",21,18,3.14127465715711,0
+"Hanson2016_1077","Lusitania",-6.338496,38.915571,NA,81,"Walls",24,19,5.07770625192981,0
+"Hanson2016_1161","Macedonia",24.738633,40.747565,NA,30,"Walls and topography",21,16,3.09019361618552,0
+"Hanson2016_1375","Thracia",28.968935,41.010111,NA,155,"Walls (Severan)",36,26,7.02410366940064,4
