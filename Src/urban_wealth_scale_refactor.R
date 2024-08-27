@@ -281,10 +281,10 @@ tall_buildings <- tall_buildings[-remove_rows_idx,]
 # to censoring the zero-count data. Since the count data appear in each case below
 # to be overdispersed, we opted for the Negative-Binomial distribution.
 
-#### Common mcmc params
+#### Common mcmc params ########################################################
 niter <- 80000
 nburnin <- floor(niter * 0.25)
-thin <- 3       # given the above, this results in 20K samples per chain
+thin <- 3 # given niter = 80K, thin = 3 means 20K samples per chain
 thin2 <- 3
 nchains = 4
 
@@ -364,23 +364,6 @@ scalingCode_linlog <- nimbleCode({
         y_hat[n] <- (size * (1 - p[n])) / p[n]
     }
 })
-
-# these initial values will be used in the first 8 Nimble models, but
-# in each case the K variable can be different owing to different subsetting
-# between runs. In each script portion below where a Nimble model is going to be
-# run, the 'NA' elements of this list are replaced with the relevant value.
-Inits <- list(scaling = NA,
-            scaling_raw = NA,
-            intercept = NA,
-            intercept_raw = NA,
-            intercept0 = 0,
-            scaling0 = 0,
-            size = 0.5,
-            sd0 = 0.5,
-            sd1 = 0.5,
-            b0 = 4,
-            b1 = 0.8,
-            sigma_pop = 0.5)
 
 #### MODERN MODELS #############################################################
 # power-law
@@ -593,9 +576,6 @@ get_residual_summaries <- function(mcmc_obj, y, y_hat_param = "y_hat") {
   
   return(residuals_summary)
 }
-
-# Example usage
-# residual_summaries <- get_residual_summaries(mcmc_out$samples, y, y_hat_param = "y_hat")
 
 # convergence checking and diagnostics
 # Geweke
@@ -877,7 +857,11 @@ scalingModel <- nimbleModel(code = scalingCode,
 compiled_model <- compileNimble(scalingModel)
 
 # Configure the MCMC
-mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
+if(fit_diagnostics){
+        mcmc_config <- configureMCMC(scalingModel, enableWAIC = TRUE)
+}else{
+        mcmc_config <- configureMCMC(scalingModel)
+}
 
 if(modern){
         # Replace samplers for correlated parameters
@@ -918,7 +902,10 @@ if(modern){
 }
 
 mcmc_config$monitors <- params_to_track
-mcmc_config$addMonitors2("logProb_y")
+
+if(fit_diagnostics){
+        mcmc_config$addMonitors2("logProb_y")
+}
 
 # Build and compile the MCMC
 mcmc_object <- buildMCMC(mcmc_config)
@@ -1287,10 +1274,23 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+# Inits$scaling <- rep(0, K)
+# Inits$intercept <- rep(0, K)
+# Inits$scaling_raw <- rep(0.5, K)
+# Inits$intercept_raw <- rep(0.5, K)
+
+Inits <- list(scaling = rep(0, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(0, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 0,
+            scaling0 = 0,
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1310,6 +1310,7 @@ run_scaling_analysis(df = df,
 
 # model name for paths
 modelname <- "allmonuments_nozero"
+modeltype = "power_law"
 
 nonzero_idx <- which(RomanUrban$Monuments > 0)
 df <- RomanUrban[nonzero_idx,]
@@ -1330,10 +1331,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(0, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(0, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 0,
+            scaling0 = 0,
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1372,10 +1381,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(0, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(0, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 0,
+            scaling0 = 0,
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1394,6 +1411,7 @@ run_scaling_analysis(df = df,
 #### Excluding Zeros ###########################################################
 
 modelname = "allwalls_nozero"
+modeltype = "power_law"
 
 df <- RomanUrban[walls_idx,]
 
@@ -1416,10 +1434,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(0, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(0, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 0,
+            scaling0 = 0,
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1458,10 +1484,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(0, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(0, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 0,
+            scaling0 = 0,
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1503,10 +1537,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(0, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(0, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 0,
+            scaling0 = 0,
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1545,10 +1587,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(0, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(0, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 0,
+            scaling0 = 0,
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1567,6 +1617,7 @@ run_scaling_analysis(df = df,
 #### Excluding Zeros ###########################################################
 
 modelname = "epigraphy_nozero"
+modeltype = "power_law"
 
 df <- RomanUrban[which(RomanUrban$InscriptionCount > 0),]
 
@@ -1586,10 +1637,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(0, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(0, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 0,
+            scaling0 = 0,
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1762,11 +1821,11 @@ write.table(output_df,
 # a reasonable alternative, namely a linear-log model.
 
 #### global mcmc params ########################################################
-niter = 60000
+niter = 80000
 nburnin = floor(niter * 0.25)
-nchains = 1
-thin = 2
-thin2 = 2
+nchains = 4
+thin = 3
+thin2 = 3
 
 #### FIRST ANALYSIS, ALL MONUMENTS #############################################
 
@@ -1792,10 +1851,10 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits <- list(scaling = NA,
-            scaling_raw = NA,
-            intercept = NA,
-            intercept_raw = NA,
+Inits <- list(scaling = rep(1, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(1, K),
+            intercept_raw = rep(0.5, K),
             intercept0 = 1,
             scaling0 = 1,
             size = 1,
@@ -1804,11 +1863,6 @@ Inits <- list(scaling = NA,
             b0 = 4,
             b1 = 0.8,
             sigma_pop = 0.5)
-
-Inits$scaling <- rep(1, K)
-Inits$intercept <- rep(1, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1848,10 +1902,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(1, K)
-Inits$intercept <- rep(1, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(1, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(1, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 1,
+            scaling0 = 1,
+            size = 1,
+            sd0 = 1,
+            sd1 = 1,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1891,10 +1953,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(1, K)
-Inits$intercept <- rep(1, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(1, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(1, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 1,
+            scaling0 = 1,
+            size = 1,
+            sd0 = 1,
+            sd1 = 1,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -1934,10 +2004,18 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(1, K)
-Inits$intercept <- rep(1, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(1, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(1, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 1,
+            scaling0 = 1,
+            size = 1,
+            sd0 = 1,
+            sd1 = 1,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
 
 run_scaling_analysis(df = df,
                 modelname = modelname,
@@ -2020,10 +2098,231 @@ run_scaling_analysis(df = tall_buildings,
                 nchains = nchains,
                 lppd_diff = TRUE)
 
+#### COMPILE WAIC/LOOIC SUMMARY RESULTS ########################################
+
+# add a column to the waic.csv for looic values
+
+waic_path <- "Output/waic.csv"
+
+if(file.exists(waic_path)){
+        waic_df <- read.csv(waic_path, header = TRUE)
+
+        # Get the list of files containing looic values
+        file_list <- list.files(path = "Output/", 
+                                pattern = "^loo_est_", 
+                                full.names = TRUE)
+        
+          # Initialize an empty list to store the looic dataframes
+        looic_list <- list()
+
+        # Loop through each file in the list
+        for (file in file_list) {
+                # Extract the model name from the file name by removing 
+                # "loo_est_" and ".csv"
+                model_name <- gsub("^loo_est_|\\.csv$", "", basename(file))
+                
+                # Read the file while skipping the first line, and add the 
+                # 'model' column
+                looic_df <- read.csv(file, skip = 1, header = FALSE, 
+                                        col.names = c("parameter", 
+                                                        "estimate", 
+                                                        "se"))
+                looic_df$model <- model_name
+                
+                # Append to the looic_list
+                looic_list[[length(looic_list) + 1]] <- looic_df
+        }
+
+        # Combine all looic dataframes into one dataframe
+        looic_df <- do.call(rbind, looic_list)
+
+        # Select only the relevant rows (parameter == "looic")
+        looic_df <- looic_df[looic_df$parameter == "looic", 
+                                c("model", "estimate", "se")]
+        
+        # Rename columns for clarity before merging
+        names(looic_df) <- c("model", "looic_estimate", "looic_se")
+
+        # round looic values to significant values
+        looic_df$looic_estimate <- round(looic_df$looic_estimate)
+        looic_df$looic_se <- round(looic_df$looic_se)
+
+        # Merge waic_df and looic_df on the 'model' column
+        merged_df <- merge(waic_df, looic_df, by = "model", all.x = TRUE)
+
+        # new output path
+        outpath = "Output/waic_looic_csv"
+
+        # Save the updated dataframe back to waic.csv
+        write.csv(merged_df, outpath, row.names = FALSE)
+}else {
+        warning("No waic.csv file found.")
+}
+
 ### SUPPLEMENTAL: OUTLIER EFFECTS ##############################################
 # Here we have a look at the main models in terms of whether extreme outliers 
 # have significantly affected the primary scaling parameter estimates.
 
-# Rome and Athens are massive outliers
+#### FIRST ANALYSIS: ALL MOUNUMENTS ############################################
 
-# df <- RomanUrban[-c(612, 7),]
+# get the outlier cities identified earlier
+outlier_cities_df <- read.csv("Output/city_outliers_allmonuments.csv", 
+                        head = TRUE)
+
+# find the indeces again in the RomanUrban dataframe
+outliers_idx <- which(RomanUrban$City %in% outlier_cities_df$City)
+
+if(length(outliers_idx) != 0){
+        # double check
+        if(!all(outlier_cities_df[, 'City'] == RomanUrban[outliers_idx, 'City'])){
+                error("City names don't match.")
+        }
+
+        # run the analysis
+        modelname = "allmonuments_sup"
+        modeltype = "power_law"
+
+        # using full dataset
+        df <- RomanUrban[-outliers_idx,]
+
+        N <- dim(df)[1]
+        y <- df$Monuments
+        x <- log(df$Area)
+        pop <- log(df$pop_est)
+        # get provinces as integer indeces instead of character/factor levels
+        v <- as.numeric(as.factor(df$Province))
+        K <- length(unique(df$Province))
+
+        Consts <- list(N = N,
+                        v = v,
+                        K = K)
+
+        Data <- list(y = y,
+                x = x,
+                pop = pop)
+
+        Inits <- list(scaling = rep(0, K),
+                scaling_raw = rep(0.5, K),
+                intercept = rep(0, K),
+                intercept_raw = rep(0.5, K),
+                intercept0 = 0,
+                scaling0 = 0,
+                size = 0.5,
+                sd0 = 0.5,
+                sd1 = 0.5,
+                b0 = 4,
+                b1 = 0.8,
+                sigma_pop = 0.5)
+
+        run_scaling_analysis(df = df,
+                        modelname = modelname,
+                        modeltype = modeltype,
+                        modern = FALSE,
+                        fit_diagnostics = FALSE,
+                        scalingCode = scalingCode,
+                        Consts = Consts,
+                        Data = Data,
+                        inits = Inits,
+                        niter = niter,
+                        thin = thin,
+                        thin2 = thin2,
+                        nchains = nchains)
+}else{
+        warning("No outlier cities in list. Skipping this analysis.")
+}
+
+#### SECOND ANALYSIS: HNWI #####################################################
+
+# get the outlier cities identified earlier
+outlier_cities_df <- read.csv("Output/city_outliers_hnwi.csv", 
+                        head = TRUE)
+
+# find the indeces again in the RomanUrban dataframe
+outliers_idx <- which(global_hnwi$City %in% outlier_cities_df$City)
+if(length(outliers_idx) != 0){
+        # double check
+        if(!all(outlier_cities_df[, 'City'] == global_hnwi[outliers_idx, 'City'])){
+                error("City names don't match.")
+        }
+
+        # run the analysis
+        modelname = "hnwi_sup"
+        modeltype = "power_law"
+
+        N <- dim(global_hnwi)[1]
+        y <- global_hnwi$Billionaires
+        pop <- log(global_hnwi$population)
+
+        Consts <- list(N = N)
+
+        Data <- list(y = y,
+                pop = pop)
+
+        Inits <- list(scaling = 0,
+                intercept = 0,
+                size = 1)
+
+        run_scaling_analysis(df = global_hnwi,
+                        modelname = modelname,
+                        modeltype = modeltype,
+                        modern = TRUE,
+                        fit_diagnostics = FALSE,
+                        scalingCode = scalingCode2,
+                        Consts = Consts,
+                        Data = Data,
+                        inits = Inits,
+                        niter = niter,
+                        thin = thin,
+                        thin2 = thin2,
+                        nchains = nchains)
+}else{
+        warning("No outlier cities in list. Skipping this analysis.")
+}
+
+#### THIRD ANALYSIS: TALL BUILDINGS ############################################
+
+# get the outlier cities identified earlier
+outlier_cities_df <- read.csv("Output/city_outliers_tallbuildings.csv", 
+                        head = TRUE)
+
+# find the indeces again in the RomanUrban dataframe
+outliers_idx <- which(tall_buildings$City %in% outlier_cities_df$City)
+if(length(outliers_idx) != 0){
+        # double check
+        if(!all(outlier_cities_df[, 'City'] == tall_buildings[outliers_idx, 'City'])){
+                error("City names don't match.")
+        }
+
+        # run the analysis
+        modelname = "tallbuildings_sup"
+        modeltype = "power_law"
+
+        N <- dim(tall_buildings)[1]
+        y <- tall_buildings$`150 m+ Buildings`
+        pop <- log(tall_buildings$Population)
+
+        Consts <- list(N = N)
+
+        Data <- list(y = y,
+                pop = pop)
+
+        Inits <- list(scaling = 0,
+                intercept = 0,
+                size = 1)
+
+        run_scaling_analysis(df = tall_buildings,
+                        modelname = modelname,
+                        modeltype = modeltype,
+                        modern = TRUE,
+                        fit_diagnostics = FALSE,
+                        scalingCode = scalingCode2,
+                        Consts = Consts,
+                        Data = Data,
+                        inits = Inits,
+                        niter = niter,
+                        thin = thin,
+                        thin2 = thin2,
+                        nchains = nchains)
+}else{
+        warning("No outlier cities in list. Skipping this analysis.")
+}

@@ -1508,10 +1508,23 @@ Data <- list(y = y,
             x = x,
             pop = pop)
 
-Inits$scaling <- rep(0, K)
-Inits$intercept <- rep(0, K)
-Inits$scaling_raw <- rep(0.5, K)
-Inits$intercept_raw <- rep(0.5, K)
+Inits <- list(scaling = rep(1, K),
+            scaling_raw = rep(0.5, K),
+            intercept = rep(1, K),
+            intercept_raw = rep(0.5, K),
+            intercept0 = 1,
+            scaling0 = 1,
+            size = 0.5,
+            sd0 = 0.5,
+            sd1 = 0.5,
+            b0 = 4,
+            b1 = 0.8,
+            sigma_pop = 0.5)
+
+# Inits$scaling <- rep(1, K)
+# Inits$intercept <- rep(1, K)
+# Inits$scaling_raw <- rep(0.5, K)
+# Inits$intercept_raw <- rep(0.5, K)
 
 # Create the Nimble model
 scalingModel <- nimbleModel(code = scalingCode,
