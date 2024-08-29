@@ -1,0 +1,13 @@
+"model","waic","looic_estimate","looic_se"
+"allmonuments",5338,5251,58
+"allmonuments_linlog",5416,5328,84
+"allwalls",2708,2673,44
+"allwalls_linlog",2734,2695,51
+"epigraphy",2288,2217,94
+"epigraphy_linlog",2407,2318,102
+"filtmonuments",4958,4869,58
+"filtmonuments_loglin",5028,4940,78
+"hnwi",600,601,24
+"hnwi_linlog",604,604,23
+"tallbuildings",1472,1472,40
+"tallbuildings_linlog",1530,1530,43

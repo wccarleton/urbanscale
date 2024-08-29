@@ -1,0 +1,6 @@
+"City","Province","Longitude (X)","Latitude (Y)","pop_est","Area","Basis","Monuments","Monuments_filt","Radius","InscriptionCount"
+"Hanson2016_14","Achaea",23.726559,37.971119,NA,225,"Walls of Themistocles and Valerian",107,97,8.46284375321634,1
+"Hanson2016_584","Gallia Belgica",6.523514,49.974382,NA,2,"Walls",2,1,0.797884560802865,0
+"Hanson2016_713","Hispania Tarraconensis",-0.484794,38.346018,NA,2,"Walls",6,4,0.797884560802865,6
+"Hanson2016_1215","Moesia Inferior",28.193536,45.140203,NA,2,"Walls, 150 by 100 m",3,2,0.797884560802865,1
+"Hanson2016_1252","Numidia",9.143018,36.336294,NA,2,"Walls",13,11,0.797884560802865,1

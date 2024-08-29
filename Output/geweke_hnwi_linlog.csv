@@ -1,0 +1,13 @@
+"chain","model","parameter","z"
+1,"hnwi_linlog","intercept",1.05025222459848
+1,"hnwi_linlog","scaling",-1.04841216084752
+1,"hnwi_linlog","size",-0.70494748826721
+2,"hnwi_linlog","intercept",0.847129140992605
+2,"hnwi_linlog","scaling",-0.86890638317376
+2,"hnwi_linlog","size",-0.88948176699437
+3,"hnwi_linlog","intercept",0.345219464281263
+3,"hnwi_linlog","scaling",-0.207731867921394
+3,"hnwi_linlog","size",0.719442323701979
+4,"hnwi_linlog","intercept",-0.0684761413637826
+4,"hnwi_linlog","scaling",-0.320712811483545
+4,"hnwi_linlog","size",-1.14277453459828

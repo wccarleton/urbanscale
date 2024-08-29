@@ -1,0 +1,19 @@
+"City","Province","Longitude (X)","Latitude (Y)","pop_est","Area","Basis","Monuments","Monuments_filt","Radius","InscriptionCount"
+"Hanson2016_14","Achaea",23.726559,37.971119,NA,225,"Walls of Themistocles and Valerian",107,97,8.46284375321634,1
+"Hanson2016_227","Alpes Maritimae",7.275398,43.720661,NA,18,"Inhabited area, 15 to 20 ha.",13,12,2.3936536824086,7
+"Hanson2016_343","Baetica",-4.706673,36.822609,NA,8,"Urban grid",4,2,1.59576912160573,0
+"Hanson2016_352","Baetica",-5.740734,37.713343,NA,4,"Walls",7,5,1.12837916709551,0
+"Hanson2016_511","Dalmatia",15.680565,44.017634,NA,6,"Walls",6,4,1.38197659788534,6
+"Hanson2016_711","Hispania Tarraconensis",0.287408,42.14469,NA,10,"Inhabited area",4,3,1.78412411615277,0
+"Hanson2016_847","Italia (II Apulia et Calabria)",15.957096,41.706464,NA,10,"Walls",3,2,1.78412411615277,0
+"Hanson2016_887","Italia (IV Samnium)",12.63908,42.35459,NA,2,"Inhabited area",7,6,0.797884560802865,0
+"Hanson2016_937","Italia (VI Umbria and Ager Gallicus)",11.903398,43.983123,NA,2,"Unspecified",6,4,0.797884560802865,0
+"Hanson2016_977","Italia (VII Etruria)",12.077133,42.331568,NA,5,"Known area",3,2,1.26156626101008,0
+"Hanson2016_992","Italia (VII Etruria)",12.485098,41.892777,NA,1783,"Fourteen Augustan regions",236,221,23.8232350251954,146
+"Hanson2016_998","Italia (VII Etruria)",12.224259,42.241269,NA,7,"Walls",5,3,1.49270533036046,0
+"Hanson2016_1027","Italia (IX Liguria)",8.212805,44.048935,NA,8,"Walls",5,2,1.59576912160573,2
+"Hanson2016_1108","Lycia et Pamphylia",29.666491,36.308363,NA,2,"Acropolis",3,2,0.797884560802865,0
+"Hanson2016_1236","Noricum",13.443747,46.823308,NA,8,"Inhabited area",7,5,1.59576912160573,1
+"Hanson2016_1252","Numidia",9.143018,36.336294,NA,2,"Walls",13,11,0.797884560802865,1
+"Hanson2016_1271","Pannonia Inferior",18.419781,47.09017,NA,5,"Inhabited area",8,7,1.26156626101008,1
+"Hanson2016_1306","Silicia",13.290876,37.394824,NA,16,"Urban grid",7,4,2.25675833419103,0

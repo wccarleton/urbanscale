@@ -259,6 +259,13 @@ tall_buildings <- read_excel(data_path,
 remove_rows_idx <- which(is.na(tall_buildings$Population))
 tall_buildings <- tall_buildings[-remove_rows_idx,]
 
+# Cleanup
+# Define the vector or list of objects to keep
+keep_objects <- c("RomanUrban", "global_hnwi", "tall_buildings", "walls_idx")
+
+# Remove all objects except those in 'keep_objects'
+rm(list = setdiff(ls(), keep_objects))
+
 ### MAIN BAYESIAN/NIMBLE MODELS ################################################
 
 # Now use a Bayesian approach to simultaneously estimate missing
@@ -982,6 +989,9 @@ if(fit_diagnostics){
                         samplesAsCodaMCMC = TRUE)
 }
 
+# Cleanup nimble stuff after each analysis
+rm(compiled_mcmc, compiled_model)  # Remove objects
+
 # Trace plots for key parameters
 if(modern){
         top_lvl_param_names <- c("intercept", 
@@ -1098,6 +1108,14 @@ if(lppd_diff){
         # output the final point-wise lppd diff based model comparison
         output_lppd_diff(modelname)
 }
+
+# explicit cleanup of mcmc objects to reduce peak memory usage
+# Define the vector or list of objects to keep
+keep_objects <- c("RomanUrban", "global_hnwi", "tall_buildings", "walls_idx")
+
+# Remove all objects except those in 'keep_objects'
+rm(list = setdiff(ls(), keep_objects))
+gc() # force garbage collection just in case
 
 }
 
@@ -1273,11 +1291,6 @@ Consts <- list(N = N,
 Data <- list(y = y,
             x = x,
             pop = pop)
-
-# Inits$scaling <- rep(0, K)
-# Inits$intercept <- rep(0, K)
-# Inits$scaling_raw <- rep(0.5, K)
-# Inits$intercept_raw <- rep(0.5, K)
 
 Inits <- list(scaling = rep(0, K),
             scaling_raw = rep(0.5, K),

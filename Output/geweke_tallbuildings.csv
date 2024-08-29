@@ -1,0 +1,13 @@
+"chain","model","parameter","z"
+1,"tallbuildings","intercept",-0.797438958323744
+1,"tallbuildings","scaling",0.809492006596583
+1,"tallbuildings","size",0.750296826818382
+2,"tallbuildings","intercept",0.067625860342466
+2,"tallbuildings","scaling",-0.104752265694774
+2,"tallbuildings","size",0.670047362803498
+3,"tallbuildings","intercept",0.662176770917917
+3,"tallbuildings","scaling",-0.708069044266172
+3,"tallbuildings","size",-0.145123844346204
+4,"tallbuildings","intercept",-0.514731353531766
+4,"tallbuildings","scaling",0.518719817822234
+4,"tallbuildings","size",0.227156669394598

@@ -1,2 +1,13 @@
 "model","waic"
 "allmonuments",5338
+"allwalls",2708
+"filtmonuments",4958
+"epigraphy",2288
+"hnwi",600
+"tallbuildings",1472
+"allmonuments_linlog",5416
+"allwalls_linlog",2734
+"filtmonuments_loglin",5028
+"epigraphy_linlog",2407
+"hnwi_linlog",604
+"tallbuildings_linlog",1530

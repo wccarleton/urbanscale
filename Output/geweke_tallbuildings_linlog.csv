@@ -1,0 +1,13 @@
+"chain","model","parameter","z"
+1,"tallbuildings_linlog","intercept",0.770089330325364
+1,"tallbuildings_linlog","scaling",-0.0957969355402341
+1,"tallbuildings_linlog","size",-2.09667653251295
+2,"tallbuildings_linlog","intercept",-0.174389546443227
+2,"tallbuildings_linlog","scaling",0.395004212228651
+2,"tallbuildings_linlog","size",2.64595601371837
+3,"tallbuildings_linlog","intercept",-0.319671223864688
+3,"tallbuildings_linlog","scaling",0.358807130235134
+3,"tallbuildings_linlog","size",-0.115922625838931
+4,"tallbuildings_linlog","intercept",-1.20260897991931
+4,"tallbuildings_linlog","scaling",1.71741593100147
+4,"tallbuildings_linlog","size",-0.33717662838812
