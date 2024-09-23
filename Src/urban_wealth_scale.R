@@ -939,7 +939,10 @@ if(fit_diagnostics){
         # lppd
         waic_dets <- compiled_mcmc$getWAICdetails(returnElements = TRUE)
 
-        # only want values for data nodes, 'y', lppd
+        # only want values for data nodes, 'y', lppd, other data nodes are
+        # constant between the models and not relevant to the comparison---these
+        # relate to the population size esitmation sub-model and the 'data' nodes
+        # refer to the population size variable
         y_node_idx <- grep("y\\[", compiled_model$getNodeNames(dataOnly = TRUE))
 
         output_lppd(waic_dets,
