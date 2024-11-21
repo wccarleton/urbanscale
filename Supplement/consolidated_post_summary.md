@@ -1,0 +1,40 @@
+# Consolidated Parameter Summary
+
+| model                | param     |   lower |   upper |   mean |   stdd |
+|:---------------------|:----------|--------:|--------:|-------:|-------:|
+| allmonuments         | b0        |    2.88 |    5.19 |   4.12 |   0.45 |
+| allmonuments         | b1        |    0.91 |    1.48 |   1.17 |   0.11 |
+| allmonuments_linlog  | b0        |    2.81 |    5.09 |   4.06 |   0.44 |
+| allmonuments_linlog  | b1        |    0.97 |    1.54 |   1.23 |   0.11 |
+| allmonuments_nozero  | b0        |    3.06 |    5.33 |   4.27 |   0.44 |
+| allmonuments_nozero  | b1        |    0.84 |    1.4  |   1.1  |   0.11 |
+| allmonuments_sup     | b0        |    2.85 |    5.21 |   4.13 |   0.45 |
+| allmonuments_sup     | b1        |    0.9  |    1.49 |   1.18 |   0.11 |
+| allwalls             | b0        |    2.46 |    5.93 |   4.44 |   0.66 |
+| allwalls             | b1        |    0.69 |    1.55 |   1.06 |   0.16 |
+| allwalls_linlog      | b0        |    2.21 |    5.47 |   4.03 |   0.64 |
+| allwalls_linlog      | b1        |    0.81 |    1.65 |   1.19 |   0.16 |
+| allwalls_nozero      | b0        |    2.64 |    5.86 |   4.43 |   0.63 |
+| allwalls_nozero      | b1        |    0.69 |    1.5  |   1.06 |   0.16 |
+| epigraphy            | b0        |    3.26 |    5.85 |   4.64 |   0.5  |
+| epigraphy            | b1        |    0.79 |    1.44 |   1.09 |   0.13 |
+| epigraphy_linlog     | b0        |    2.76 |    5.78 |   4.36 |   0.57 |
+| epigraphy_linlog     | b1        |    0.85 |    1.6  |   1.2  |   0.14 |
+| epigraphy_nozero     | b0        |    2.13 |    6.1  |   4.19 |   0.78 |
+| epigraphy_nozero     | b1        |    0.68 |    1.69 |   1.18 |   0.2  |
+| filtmonuments        | b0        |    2.83 |    5.18 |   4.1  |   0.47 |
+| filtmonuments        | b1        |    0.92 |    1.49 |   1.18 |   0.11 |
+| filtmonuments_loglin | b0        |    2.9  |    5.19 |   4.16 |   0.44 |
+| filtmonuments_loglin | b1        |    0.94 |    1.52 |   1.21 |   0.11 |
+| filtmonuments_nozero | b0        |    3.18 |    5.53 |   4.45 |   0.46 |
+| filtmonuments_nozero | b1        |    0.79 |    1.38 |   1.06 |   0.11 |
+| hnwi                 | intercept |   -4.32 |    0.93 |  -1.73 |   1.01 |
+| hnwi                 | scaling   |    0.09 |    0.44 |   0.27 |   0.07 |
+| hnwi_linlog          | intercept |  -14.33 |    6.91 |  -4.19 |   4.16 |
+| hnwi_linlog          | scaling   |    0.22 |    1.7  |   0.95 |   0.29 |
+| hnwi_sup             | intercept |   -4.26 |    0.97 |  -1.73 |   1.01 |
+| hnwi_sup             | scaling   |    0.09 |    0.44 |   0.27 |   0.07 |
+| tallbuildings        | intercept |   -6.59 |   -2.53 |  -4.58 |   0.78 |
+| tallbuildings        | scaling   |    0.41 |    0.69 |   0.55 |   0.05 |
+| tallbuildings_linlog | intercept |  -18.51 |    7.59 |  -5.07 |   5.06 |
+| tallbuildings_linlog | scaling   |    1.7  |    3.72 |   2.71 |   0.39 |

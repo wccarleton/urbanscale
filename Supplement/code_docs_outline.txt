@@ -1,0 +1,265 @@
+# libraries
+### DATA WRANGLING #############################################################
+# pull in the data from Excel sheets and CSVs as needed
+#### Get Hanson Roman cities data
+# get sheet names
+# pull in raw Excel data
+# add in pop estimates
+# largest dataset, no filtering
+# now filtered, only cities with walls and non-wall above
+# ground monumental constructions (i.e., exluding the following)
+# isolate only relevant columns for further analyses
+# isolate only case where we have area estimates
+# set momument NAs to 0
+# identify cases where Area is determined by walls
+# get sample size
+# dealing with the population--area relationship linking function...
+# quick check with simple glm
+#### Get epigraphic data
+# checking for consistency when looking at an epigaphic record database and 
+# isolating the instances of epigraphic monument/building dedications 
+# Set the URL
+# Make the HTTP request and read the content
+# Parse the JSON content to a dataframe
+# extract relevant inscription types
+# View the dataframe
+# Convert 'coordinates' column from list of vectors to two separate columns
+# Initialize a column for inscription counts
+  # Calculate distances from city to each inscription
+  # Count how many inscriptions fall within the city's radius
+#### Get high net worth individuals data
+# pull in raw Excel data
+# remove duplicates in country names column
+# manually change country name entry "Hong Kong (SAR China)" to "Hong Kong" for 
+# consistency with other database similar revisions were made following manual 
+# checking for consistency between the two dataframe naming conventions (see below)
+# pull in population data from https://simplemaps.com/data/world-cities
+# slow, manual matching because merge wasn't working
+# make a new column for searching country names/iso variables all at once
+        # just take the top one but alert with a flag in a column
+# still several matches failed and population sizes remain NA
+# these need to be checked manually
+# The following lines were used to check the rows with NA population and then 
+# changes were made to city name spellings in the global_hnwi dataframe in order 
+# to make them consistent with the population dataframe spellings. This resolved 
+# a number of NA cases, but there were ultimately 5 that remained and were 
+# excluded for that reason.
+# remove rows from the HNWI dataframe with no pop values
+#### Get tall buildings data
+# get data
+# pull in raw Excel data
+# remove rows from the dataframe with no pop values
+# Cleanup
+# Define the vector or list of objects to keep
+# Remove all objects except those in 'keep_objects'
+### MAIN BAYESIAN/NIMBLE MODELS ################################################
+# Now use a Bayesian approach to simultaneously estimate missing
+# population sizes from the available data and then use the 
+# 'emprical' and estimated population sizes in a log-log model
+# to estimate the scaling parameters given different subsets
+# of the data.
+# We accounted for possible differences between/among the different Roman provinces
+# with an index variable that allows for the mean scaling coefficient to vary 
+# by province along with the intercept ('pre-factor'). Just for simplicity,
+# I've used a new variable 'v' to refer to a vector of Provinces (coded as integers)
+# that will be included in the Nimble model as 'data nodes'.
+# REVISED
+# In response to reviewer comments, we adapted the model to use a count/integer
+# distribution, which involves some tranformations between logged and non-logged
+# versions of certain parameters in order to arrive at a model equivalent to
+# the original log-log Gaussian model. This was done as an alternative
+# to censoring the zero-count data. Since the count data appear in each case below
+# to be overdispersed, we opted for the Negative-Binomial distribution.
+#### Common mcmc params ########################################################
+# note that for some of the processes below, additional thinning is performed
+# because of memory limitations, especially for plotting
+# set up a Nimble model
+#### ARCHAEOLOGICAL MODELS #####################################################
+# power law
+    # monument scaling params
+    # prior for negbinom size parameter (dispersion)
+    # population--area linking params
+    # main model
+                                                              # log scale
+                                                 # but power-law model for mean
+# linear-log
+    # monument scaling params
+    # prior for negbinom size parameter (dispersion)
+    # population--area linking params
+    # main model
+                                                # but linear-log model for mean 
+                                                # (mu is still on log-scale)
+#### MODERN MODELS #############################################################
+# power-law
+    # scaling params
+    # main model
+# linear-log
+    # scaling params
+    # main model
+### UTILITY FUNCTIONS ##########################################################
+# Function to create trace plots with mode switch for stacked or faceted 
+# visualization
+  # Check if the input is an mcmc.list or a single mcmc object
+        # Thinning the chains
+        # Add iteration numbers for each chain
+        # Add a Chain identifier
+        # Thinning the chain
+        # Add iteration numbers
+        # Single chain case, so add Chain identifier as 1
+  # Check if all specified parameters exist in the data
+  # Transform data to long format for specified parameters
+  # Plotting based on mode selection
+# plot model residuals
+  # if mcmc is a list, then there are multiple chains; combine them
+  # Calculate credible intervals for residuals
+  # Prepare data for the plot
+  # Assign outlier IDs based on the indices
+  # Plot the 95% CR for residuals with vertical line at zero
+  # Add labels for outliers
+# extract residual summaries
+  # Calculate residuals
+  # Calculate mean and median residuals for each data point
+  # Prepare the output
+# convergence checking and diagnostics
+# Geweke
+# Gelman-Rubin R_hat
+# Function to calculate and output Effective Sample Size (ESS)
+        # Construct the output file path
+        # Calculate ESS using the effectiveSize function from coda package
+        # Convert to a data frame for easy output
+        # Write the ESS values to a CSV file
+# output posterior summary
+# multiple chains are combined here assuming convergence
+        # summarize the results
+# estimate pseudo r-squared for compatibility with previous research
+# function for calculating it
+        # calculate r-squared
+        # summarize and save
+# output WAIC
+# output lppd
+# output the pointwise lppd-based model comparison scores
+# extract target scaling parameter mcmc samples and write to csv in long format
+# for plotting with the others later
+### CORE ANALYSIS WRAPPER ######################################################
+# Create the Nimble model
+# Compile the model
+# Configure the MCMC
+        # Replace samplers for correlated parameters
+        # Block sampling for intercept and scaling
+        # Parameters to track
+        # Replace samplers for correlated parameters
+        # Block sampling for intercept0 and scaling0
+        # Block sampling for b0 and b1
+        # Select parameters to track
+# Build and compile the MCMC
+        # Run the MCMC
+        # WAIC
+        # lppd
+        # only want values for data nodes, 'y', lppd, other data nodes are
+        # constant between the models and not relevant to the comparison---these
+        # relate to the population size esitmation sub-model and the 'data' nodes
+        # refer to the population size variable
+        # psis-loo, alternative to WAIC and pWAIC for assessing predictive utility
+        # output the city identifiers that correspond with extreme Pareto k diagnostics
+        # Run the MCMC
+# Cleanup nimble stuff after each analysis
+# Trace plots for key parameters
+        # and now to look at variability in scaling parameter among provinces
+# convergence checking
+# ignore y_hat from the chain variables
+# convergence
+# posterior summaries
+# pseudo r-sqaured
+# exract scaling parameter chain and save to csv for plotting all
+# of them together at the end
+        # residuals-v-predicted diagnostic plot, used in our later supplemental analysis
+        # output the final point-wise lppd diff based model comparison
+# explicit cleanup of mcmc objects to reduce peak memory usage
+# Define the vector or list of objects to keep
+# Remove all objects except those in 'keep_objects'
+### BASIC SCATTER PLOTS ########################################################
+# scatter plots with +1 offset to manage zeros
+# scatter plots, linear
+# scatter plots, linear-log, with +1 offset to manage zeros
+### FIRST ANALYSIS: ALL MONUMENTS ##############################################
+# using full dataset
+# get provinces as integer indeces instead of character/factor levels
+#### Exluding Zeros ############################################################
+# model name for paths
+# get provinces as integer indeces instead of character/factor levels
+### SECOND ANALYSIS: WALLED ONLY ###############################################
+# get provinces as integer indeces instead of character/factor levels
+#### Excluding Zeros ###########################################################
+# get provinces as integer indeces instead of character/factor levels
+### THIRD ANALYSIS: ABOVE GROUND ONLY ##########################################
+# get provinces as integer indeces instead of character/factor levels
+#### Excluding Zeros ###########################################################
+# get provinces as integer indeces instead of character/factor levels
+### FOURTH ANALYSIS: EPIGRAPHY #################################################
+# get provinces as integer indeces instead of character/factor levels
+#### Excluding Zeros ###########################################################
+# get provinces as integer indeces instead of character/factor levels
+### FIFTH ANALYSIS: HNWI #######################################################
+### SIXTH ANALYSIS: TALL BUILDINGS #############################################
+# Here we anlyze another, exclusive global dataset of tall buildings
+# These are usually indicative of wealth and and are frequently 
+# monumental in the sense that the sheer height/size of these
+# buildings has frequently been a display of an individual or
+# group's wealth and engineering prowess.
+### PLOT SCALING PARAM POSTERIOR DENSITIES #####################################
+# High-contrast color palette with 5 distinct colors
+# Define pattern types, repeating them for pairs
+# Create the plot with patterns and colors
+### COLLATE MAIN RESULTS TABLE #################################################
+### SUPPLEMENTAL: MODEL COMPARISON #############################################
+# Here we aim to check whether the power-law model is more appropriate than
+# a reasonable alternative, namely a linear-log model.
+#### global mcmc params ########################################################
+#### FIRST ANALYSIS, ALL MONUMENTS #############################################
+# using full dataset
+# get provinces as integer indeces instead of character/factor levels
+#### SECOND ANALYSIS, WALLS ONLY ###############################################
+# get provinces as integer indeces instead of character/factor levels
+#### THIRD ANALYSIS, ABOVE GROUND ONLY #########################################
+# get provinces as integer indeces instead of character/factor levels
+#### FOURTH ANALYSIS, EPIGRAPHIC ###############################################
+# get provinces as integer indeces instead of character/factor levels
+#### FIFTH ANALYSIS, HNWI ######################################################
+#### SIXTH ANALYSIS, TALL BUILDINGS ############################################
+#### COMPILE WAIC/LOOIC SUMMARY RESULTS ########################################
+# add a column to the waic.csv for looic values
+        # Get the list of files containing looic values
+          # Initialize an empty list to store the looic dataframes
+        # Loop through each file in the list
+                # Extract the model name from the file name by removing 
+                # "loo_est_" and ".csv"
+                # Read the file while skipping the first line, and add the 
+                # 'model' column
+                # Append to the looic_list
+        # Combine all looic dataframes into one dataframe
+        # Select only the relevant rows (parameter == "looic")
+        # Rename columns for clarity before merging
+        # round looic values to significant values
+        # Merge waic_df and looic_df on the 'model' column
+        # new output path
+        # Save the updated dataframe back to waic.csv
+### SUPPLEMENTAL: OUTLIER EFFECTS ##############################################
+# Here we have a look at the main models in terms of whether extreme outliers 
+# have significantly affected the primary scaling parameter estimates.
+#### FIRST ANALYSIS: ALL MOUNUMENTS ############################################
+# get the outlier cities identified earlier
+# find the indeces again in the RomanUrban dataframe
+        # double check
+        # run the analysis
+        # using full dataset
+        # get provinces as integer indeces instead of character/factor levels
+#### SECOND ANALYSIS: HNWI #####################################################
+# get the outlier cities identified earlier
+# find the indeces again in the RomanUrban dataframe
+        # double check
+        # run the analysis
+#### THIRD ANALYSIS: TALL BUILDINGS ############################################
+# get the outlier cities identified earlier
+# find the indeces again in the RomanUrban dataframe
+        # double check
+        # run the analysis

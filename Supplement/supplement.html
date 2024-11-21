@@ -1,0 +1,3778 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.542">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>supplement</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="supplement_files/libs/clipboard/clipboard.min.js"></script>
+<script src="supplement_files/libs/quarto-html/quarto.js"></script>
+<script src="supplement_files/libs/quarto-html/popper.min.js"></script>
+<script src="supplement_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="supplement_files/libs/quarto-html/anchor.min.js"></script>
+<link href="supplement_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="supplement_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="supplement_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="supplement_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="supplement_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="supplementary-information-for" class="level1">
+<h1>Supplementary Information for:</h1>
+<p><strong>Parallel Scaling of Elite Wealth in Ancient Roman and Modern Cities with Implications for Inequality and Sustainability</strong></p>
+<section id="authors" class="level2">
+<h2 class="anchored" data-anchor-id="authors">Authors</h2>
+<ul>
+<li><strong>W. Christopher Carleton</strong> (Max Planck Institute of Geoanthropology, Jena, Germany)</li>
+<li>Hugh Elton (Trent University, Peterborough, Canada)</li>
+<li>Will Miranda (Council of Tall Buildings and Urban Habitats, Chicago, USA)</li>
+<li>Isaac Work (Council of Tall Buildings and Urban Habitats, Chicago, USA)</li>
+<li>Daniel Safarik (Council of Tall Buildings and Urban Habitats, Chicago, USA)</li>
+<li>Ricarda Winkelmann (Max Planck Institute of Geoanthropology, Jena, Germany; Potsdam Institute for Climate Impact Research, Potsdam, Germany)</li>
+<li>Manfred Laubichler (Arizona State University; Santa Fe Institute, USA)</li>
+<li>Jürgen Renn (Max Planck Institute for the History of Science, Berlin, Germany)</li>
+<li>Patrick Roberts (Max Planck Institute of Geoanthropology, Jena, Germany; University of the Philippines, Quezon City)</li>
+</ul>
+<hr>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>This document serves as the supplementary material for the study <strong>“Parallel Scaling of Elite Wealth in Ancient Roman and Modern Cities with Implications for Inequality and Sustainability.”</strong> It provides detailed information about the data, methods, and analytical approaches employed in the study, along with additional results, figures, and tables to support the primary findings.</p>
+<p>The supplementary material complements the main text by documenting the technical aspects of the analysis, ensuring reproducibility and transparency. It includes scripts, data summaries, model diagnostics, and additional plots that underpin the conclusions drawn in the manuscript. For users interested in reanalyzing the data or adapting the methods, the required code is available in the project repository on GitHub, which has also been archived with Zenodo.</p>
+<section id="document-structure" class="level3">
+<h3 class="anchored" data-anchor-id="document-structure">Document Structure</h3>
+<ul>
+<li><strong><a href="#summary-tables-of-outputs">Summary Tables of Outputs</a></strong>: Consolidated tables listing all output files generated during the analysis.</li>
+<li><strong><a href="#trace-plots-for-all-analyses">Trace Plots for All Analyses</a></strong>: A list of all traceplots produced in the order they appear in the summary table of outputs.</li>
+<li><strong><a href="#posteriors-all-analyses">Posterior Summaries for Scaling Parameters from All Analyses</a></strong>: A table summarizing the posterior densities for the key scaling parameters from each analysis.</li>
+<li><strong><a href="#analysis-workflow">Analysis Workflow</a></strong>: Detailed descriptions of data wrangling, modeling, and results validation.
+<ul>
+<li><strong><a href="#1-data-wrangling">1. Data Wrangling</a></strong>: Preparation of datasets used in the analyses.</li>
+<li><strong><a href="#2-model-fitting">2. Model Fitting</a></strong>: Bayesian modeling approaches and diagnostics.</li>
+<li><strong><a href="#3-results">3. Results</a></strong>: Extended tables and plots supporting the main manuscript.</li>
+<li><strong><a href="#4-supplemental-analyses">4. Supplemental Analyses</a></strong>: Alternative model testing and additional robustness checks.</li>
+</ul></li>
+<li><strong><a href="#reproducibility">Reproducibility</a></strong>: Instructions on reproducing the analyses using the provided code.</li>
+</ul>
+<p>For any questions or additional support, please contact the corresponding authors: - <strong>W. Christopher Carleton</strong> at <a href="mailto:carleton@gea.mpg.de">carleton@gea.mpg.de</a> - <strong>Patrick Roberts</strong> at <a href="mailto:roberts@gea.mpg.de">roberts@gea.mpg.de</a></p>
+<hr>
+</section>
+</section>
+<section id="summary-table-of-outputs" class="level2">
+<h2 class="anchored" data-anchor-id="summary-table-of-outputs">Summary Table of Outputs</h2>
+<section id="file-naming-conventions" class="level3">
+<h3 class="anchored" data-anchor-id="file-naming-conventions">File Naming Conventions</h3>
+<p>Please refer to this table to understand the file naming conventions used in the R script and the subsequent tables containing the output file names.</p>
+<table class="table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>File Name Convention</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>post_summary_&lt;model&gt;.csv</code></td>
+<td>Contains parameter summaries (e.g., mean, confidence intervals) for a model.</td>
+</tr>
+<tr class="even">
+<td><code>tplots_&lt;model&gt;.png</code></td>
+<td>Trace plots of MCMC chains for the specified model.</td>
+</tr>
+<tr class="odd">
+<td><code>geweke_&lt;model&gt;.csv</code></td>
+<td>Geweke diagnostic results for the specified model.</td>
+</tr>
+<tr class="even">
+<td><code>grrhat_&lt;model&gt;.csv</code></td>
+<td>R-hat convergence diagnostic for the specified model.</td>
+</tr>
+<tr class="odd">
+<td><code>resid_&lt;model&gt;.png</code></td>
+<td>Residual diagnostic plots for the specified model.</td>
+</tr>
+<tr class="even">
+<td><code>waic_&lt;model&gt;.csv</code></td>
+<td>WAIC model comparison metrics for the specified model.</td>
+</tr>
+<tr class="odd">
+<td><code>loo_&lt;model&gt;.csv</code></td>
+<td>Leave-One-Out cross-validation results for the specified model.</td>
+</tr>
+<tr class="even">
+<td><code>city_outliers_&lt;model&gt;.csv</code></td>
+<td>Identifies cities considered outliers for the specified model.</td>
+</tr>
+<tr class="odd">
+<td><code>scaling_posteriors.png</code></td>
+<td>Posterior density plots for scaling parameters.</td>
+</tr>
+<tr class="even">
+<td><code>analysis_results_summary.csv</code></td>
+<td>Summary of main results across all models.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="main-analyses-plot-files" class="level3">
+<h3 class="anchored" data-anchor-id="main-analyses-plot-files">Main Analyses, Plot Files</h3>
+<table class="table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 45%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Context</th>
+<th>Script Section</th>
+<th>Filename</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Summary</td>
+<td>Plot Scaling Param Posterior Densities</td>
+<td>scaling_posteriors.pdf</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Plot Scaling Param Posterior Densities</td>
+<td>scaling_posteriors.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>First Analysis</td>
+<td>resid_allmonuments.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>First Analysis</td>
+<td>resid_allmonuments.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Second Analysis</td>
+<td>resid_allwalls.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Second Analysis</td>
+<td>resid_allwalls.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>resid_epigraphy.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>resid_epigraphy.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Third Analysis</td>
+<td>resid_filtmonuments.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Third Analysis</td>
+<td>resid_filtmonuments.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Fifth Analysis</td>
+<td>resid_hnwi.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Fifth Analysis</td>
+<td>resid_hnwi.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Sixth Analysis</td>
+<td>resid_tallbuildings.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Sixth Analysis</td>
+<td>resid_tallbuildings.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>tplots_allmonuments.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>tplots_allmonuments.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>tplots_allmonuments_nozero.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>tplots_allmonuments_nozero.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>tplots_allmonuments_nozero_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>tplots_allmonuments_nozero_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>tplots_allmonuments_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>tplots_allmonuments_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>tplots_allwalls.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>tplots_allwalls.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>tplots_allwalls_nozero.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>tplots_allwalls_nozero.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>tplots_allwalls_nozero_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>tplots_allwalls_nozero_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>tplots_allwalls_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>tplots_allwalls_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>tplots_epigraphy.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>tplots_epigraphy.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>tplots_epigraphy_nozero.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>tplots_epigraphy_nozero.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>tplots_epigraphy_nozero_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>tplots_epigraphy_nozero_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>tplots_epigraphy_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>tplots_epigraphy_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>tplots_filtmonuments.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>tplots_filtmonuments.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>tplots_filtmonuments_nozero.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>tplots_filtmonuments_nozero.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>tplots_filtmonuments_nozero_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>tplots_filtmonuments_nozero_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>tplots_filtmonuments_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>tplots_filtmonuments_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Fifth Analysis</td>
+<td>tplots_hnwi.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Fifth Analysis</td>
+<td>tplots_hnwi.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Sixth Analysis</td>
+<td>tplots_tallbuildings.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Sixth Analysis</td>
+<td>tplots_tallbuildings.png</td>
+</tr>
+<tr class="odd">
+<td>nan</td>
+<td>Visualization</td>
+<td>pa_gini_results.png</td>
+</tr>
+<tr class="even">
+<td>nan</td>
+<td>Visualization</td>
+<td>point_scatters.pdf</td>
+</tr>
+<tr class="odd">
+<td>nan</td>
+<td>Visualization</td>
+<td>point_scatters.png</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="main-analyses-numeric-files-csv" class="level3">
+<h3 class="anchored" data-anchor-id="main-analyses-numeric-files-csv">Main Analyses, Numeric Files (csv)</h3>
+<table class="table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 45%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Context</th>
+<th>Script Section</th>
+<th>Filename</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Summary</td>
+<td>Results Summary</td>
+<td>analysis_results_summary.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>First Analysis</td>
+<td>post_summary_allmonuments.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>First Analysis</td>
+<td>post_summary_allmonuments_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Second Analysis</td>
+<td>post_summary_allwalls.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>Second Analysis</td>
+<td>post_summary_allwalls_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Fourth Analysis</td>
+<td>post_summary_epigraphy.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>Fourth Analysis</td>
+<td>post_summary_epigraphy_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Third Analysis</td>
+<td>post_summary_filtmonuments.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>Third Analysis</td>
+<td>post_summary_filtmonuments_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Fifth Analysis</td>
+<td>post_summary_hnwi.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>Sixth Analysis</td>
+<td>post_summary_tallbuildings.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Collate Main Results Table</td>
+<td>rsquared.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>Plot Scaling Param Posterior Densities</td>
+<td>scaling_samples.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>First Analysis</td>
+<td>city_outliers_allmonuments.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Second Analysis</td>
+<td>city_outliers_allwalls.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>city_outliers_epigraphy.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Third Analysis</td>
+<td>city_outliers_filtmonuments.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Fifth Analysis</td>
+<td>city_outliers_hnwi.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Sixth Analysis</td>
+<td>city_outliers_tallbuildings.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>geweke_allmonuments.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>geweke_allmonuments_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>geweke_allwalls.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>geweke_allwalls_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>geweke_epigraphy.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>geweke_epigraphy_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>geweke_filtmonuments.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>geweke_filtmonuments_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Fifth Analysis</td>
+<td>geweke_hnwi.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Sixth Analysis</td>
+<td>geweke_tallbuildings.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>grrhat_allmonuments.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>First Analysis</td>
+<td>grrhat_allmonuments_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>grrhat_allwalls.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Second Analysis</td>
+<td>grrhat_allwalls_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>grrhat_epigraphy.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Fourth Analysis</td>
+<td>grrhat_epigraphy_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>grrhat_filtmonuments.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Third Analysis</td>
+<td>grrhat_filtmonuments_nozero.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Fifth Analysis</td>
+<td>grrhat_hnwi.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Sixth Analysis</td>
+<td>grrhat_tallbuildings.csv</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="supplementary-analyses-plot-files" class="level3">
+<h3 class="anchored" data-anchor-id="supplementary-analyses-plot-files">Supplementary Analyses, Plot Files</h3>
+<table class="table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 45%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Context</th>
+<th>Script Section</th>
+<th>Filename</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_allmonuments_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_allmonuments_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_allwalls_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_allwalls_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_epigraphy_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_epigraphy_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_filtmonuments_loglin.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_filtmonuments_loglin.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_hnwi_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_hnwi_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_tallbuildings_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>resid_tallbuildings_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_allmonuments_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_allmonuments_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_allmonuments_linlog_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_allmonuments_linlog_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>tplots_allmonuments_sup.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>tplots_allmonuments_sup.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>tplots_allmonuments_sup_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>tplots_allmonuments_sup_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_allwalls_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_allwalls_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_allwalls_linlog_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_allwalls_linlog_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_epigraphy_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_epigraphy_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_epigraphy_linlog_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_epigraphy_linlog_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_filtmonuments_loglin.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_filtmonuments_loglin.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_filtmonuments_loglin_provinces.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_filtmonuments_loglin_provinces.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_hnwi_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_hnwi_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>tplots_hnwi_sup.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>tplots_hnwi_sup.png</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_tallbuildings_linlog.pdf</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>tplots_tallbuildings_linlog.png</td>
+</tr>
+<tr class="odd">
+<td>nan</td>
+<td>Visualization</td>
+<td>point_scatters_linear.pdf</td>
+</tr>
+<tr class="even">
+<td>nan</td>
+<td>Visualization</td>
+<td>point_scatters_linear.png</td>
+</tr>
+<tr class="odd">
+<td>nan</td>
+<td>Visualization</td>
+<td>point_scatters_linear_log.pdf</td>
+</tr>
+<tr class="even">
+<td>nan</td>
+<td>Visualization</td>
+<td>point_scatters_linear_log.png</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="supplementary-analyses-numeric-files-csv" class="level3">
+<h3 class="anchored" data-anchor-id="supplementary-analyses-numeric-files-csv">Supplementary Analyses, Numeric Files (csv)</h3>
+<table class="table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 45%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Context</th>
+<th>Script Section</th>
+<th>Filename</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Summary</td>
+<td>Supplemental: Model Comparison</td>
+<td>model_comparison.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Supplemental: Model Comparison</td>
+<td>post_summary_allmonuments_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>Supplemental: Outlier Effects</td>
+<td>post_summary_allmonuments_sup.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Supplemental: Model Comparison</td>
+<td>post_summary_allwalls_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>Supplemental: Model Comparison</td>
+<td>post_summary_epigraphy_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Supplemental: Model Comparison</td>
+<td>post_summary_filtmonuments_loglin.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>Supplemental: Model Comparison</td>
+<td>post_summary_hnwi_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Supplemental: Outlier Effects</td>
+<td>post_summary_hnwi_sup.csv</td>
+</tr>
+<tr class="odd">
+<td>Summary</td>
+<td>Supplemental: Model Comparison</td>
+<td>post_summary_tallbuildings_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>Summary</td>
+<td>Supplemental: Model Comparison</td>
+<td>waic.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>city_outliers_allmonuments_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>city_outliers_allwalls_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>city_outliers_epigraphy_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>city_outliers_filtmonuments_loglin.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>city_outliers_hnwi_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>city_outliers_tallbuildings_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_allmonuments.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_allmonuments_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_allwalls.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_allwalls_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_epigraphy.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_epigraphy_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_filtmonuments.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_filtmonuments_loglin.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_hnwi.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_hnwi_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_tallbuildings.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_est_tallbuildings_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_allmonuments.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_allmonuments_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_allwalls.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_allwalls_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_epigraphy.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_epigraphy_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_filtmonuments.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_filtmonuments_loglin.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_hnwi.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_hnwi_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_tallbuildings.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>loo_pw_tallbuildings_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>lppd.csv</td>
+</tr>
+<tr class="even">
+<td>Model Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>waic_looic.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>geweke_allmonuments_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>geweke_allmonuments_sup.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>geweke_allwalls_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>geweke_epigraphy_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>geweke_filtmonuments_loglin.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>geweke_hnwi_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>geweke_hnwi_sup.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>geweke_tallbuildings_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>grrhat_allmonuments_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>grrhat_allmonuments_sup.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>grrhat_allwalls_linlog.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>grrhat_epigraphy_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>grrhat_filtmonuments_loglin.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>grrhat_hnwi_linlog.csv</td>
+</tr>
+<tr class="odd">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Outlier Effects</td>
+<td>grrhat_hnwi_sup.csv</td>
+</tr>
+<tr class="even">
+<td>MCMC Diagnostic</td>
+<td>Supplemental: Model Comparison</td>
+<td>grrhat_tallbuildings_linlog.csv</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="summary-table-of-key-model-posteriors" class="level2">
+<h2 class="anchored" data-anchor-id="summary-table-of-key-model-posteriors">Summary Table of Key Model Posteriors</h2>
+<p><strong>Note</strong></p>
+<p>In the table below, the focal posterior summaries (lower and upper 95% CI, mean, and standard error) of parameters from the models are presented. For the archaeologcial data anlayses, only the top-level scaling parameters in the model hierarchies are presented. This was intentional because the lower-level (group-level) parameters correpsond to Roman provinces and there are 50+ for each model, making their presentation in a table unwieldy. Please see the csv files in the Output folder of the project repository (and the Summary Table of Outputs above) for the statistical summaries of the relevant group-level parameters. In line with the Methods section of the paper (and the R code) the parameters <code>b0</code> and <code>b1</code> refer to the intercept and focal scaling coefficients for the archaeological analyses.</p>
+</section>
+</section>
+<section id="consolidated-parameter-summary" class="level1">
+<h1>Consolidated Parameter Summary</h1>
+<table class="table">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 16%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">model</th>
+<th style="text-align: left;">param</th>
+<th style="text-align: right;">lower</th>
+<th style="text-align: right;">upper</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">stdd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">allmonuments</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.88</td>
+<td style="text-align: right;">5.19</td>
+<td style="text-align: right;">4.12</td>
+<td style="text-align: right;">0.45</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">allmonuments</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.91</td>
+<td style="text-align: right;">1.48</td>
+<td style="text-align: right;">1.17</td>
+<td style="text-align: right;">0.11</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">allmonuments_linlog</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.81</td>
+<td style="text-align: right;">5.09</td>
+<td style="text-align: right;">4.06</td>
+<td style="text-align: right;">0.44</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">allmonuments_linlog</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">1.54</td>
+<td style="text-align: right;">1.23</td>
+<td style="text-align: right;">0.11</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">allmonuments_nozero</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">3.06</td>
+<td style="text-align: right;">5.33</td>
+<td style="text-align: right;">4.27</td>
+<td style="text-align: right;">0.44</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">allmonuments_nozero</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.84</td>
+<td style="text-align: right;">1.4</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">0.11</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">allmonuments_sup</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.85</td>
+<td style="text-align: right;">5.21</td>
+<td style="text-align: right;">4.13</td>
+<td style="text-align: right;">0.45</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">allmonuments_sup</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">1.49</td>
+<td style="text-align: right;">1.18</td>
+<td style="text-align: right;">0.11</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">allwalls</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.46</td>
+<td style="text-align: right;">5.93</td>
+<td style="text-align: right;">4.44</td>
+<td style="text-align: right;">0.66</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">allwalls</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.69</td>
+<td style="text-align: right;">1.55</td>
+<td style="text-align: right;">1.06</td>
+<td style="text-align: right;">0.16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">allwalls_linlog</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.21</td>
+<td style="text-align: right;">5.47</td>
+<td style="text-align: right;">4.03</td>
+<td style="text-align: right;">0.64</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">allwalls_linlog</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.81</td>
+<td style="text-align: right;">1.65</td>
+<td style="text-align: right;">1.19</td>
+<td style="text-align: right;">0.16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">allwalls_nozero</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.64</td>
+<td style="text-align: right;">5.86</td>
+<td style="text-align: right;">4.43</td>
+<td style="text-align: right;">0.63</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">allwalls_nozero</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.69</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">1.06</td>
+<td style="text-align: right;">0.16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">epigraphy</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">3.26</td>
+<td style="text-align: right;">5.85</td>
+<td style="text-align: right;">4.64</td>
+<td style="text-align: right;">0.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">epigraphy</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.79</td>
+<td style="text-align: right;">1.44</td>
+<td style="text-align: right;">1.09</td>
+<td style="text-align: right;">0.13</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">epigraphy_linlog</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.76</td>
+<td style="text-align: right;">5.78</td>
+<td style="text-align: right;">4.36</td>
+<td style="text-align: right;">0.57</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">epigraphy_linlog</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">1.2</td>
+<td style="text-align: right;">0.14</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">epigraphy_nozero</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.13</td>
+<td style="text-align: right;">6.1</td>
+<td style="text-align: right;">4.19</td>
+<td style="text-align: right;">0.78</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">epigraphy_nozero</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.68</td>
+<td style="text-align: right;">1.69</td>
+<td style="text-align: right;">1.18</td>
+<td style="text-align: right;">0.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">filtmonuments</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.83</td>
+<td style="text-align: right;">5.18</td>
+<td style="text-align: right;">4.1</td>
+<td style="text-align: right;">0.47</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">filtmonuments</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.92</td>
+<td style="text-align: right;">1.49</td>
+<td style="text-align: right;">1.18</td>
+<td style="text-align: right;">0.11</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">filtmonuments_loglin</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">2.9</td>
+<td style="text-align: right;">5.19</td>
+<td style="text-align: right;">4.16</td>
+<td style="text-align: right;">0.44</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">filtmonuments_loglin</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.94</td>
+<td style="text-align: right;">1.52</td>
+<td style="text-align: right;">1.21</td>
+<td style="text-align: right;">0.11</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">filtmonuments_nozero</td>
+<td style="text-align: left;">b0</td>
+<td style="text-align: right;">3.18</td>
+<td style="text-align: right;">5.53</td>
+<td style="text-align: right;">4.45</td>
+<td style="text-align: right;">0.46</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">filtmonuments_nozero</td>
+<td style="text-align: left;">b1</td>
+<td style="text-align: right;">0.79</td>
+<td style="text-align: right;">1.38</td>
+<td style="text-align: right;">1.06</td>
+<td style="text-align: right;">0.11</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">hnwi</td>
+<td style="text-align: left;">intercept</td>
+<td style="text-align: right;">-4.32</td>
+<td style="text-align: right;">0.93</td>
+<td style="text-align: right;">-1.73</td>
+<td style="text-align: right;">1.01</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">hnwi</td>
+<td style="text-align: left;">scaling</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">hnwi_linlog</td>
+<td style="text-align: left;">intercept</td>
+<td style="text-align: right;">-14.33</td>
+<td style="text-align: right;">6.91</td>
+<td style="text-align: right;">-4.19</td>
+<td style="text-align: right;">4.16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">hnwi_linlog</td>
+<td style="text-align: left;">scaling</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">1.7</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">0.29</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">hnwi_sup</td>
+<td style="text-align: left;">intercept</td>
+<td style="text-align: right;">-4.26</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">-1.73</td>
+<td style="text-align: right;">1.01</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">hnwi_sup</td>
+<td style="text-align: left;">scaling</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tallbuildings</td>
+<td style="text-align: left;">intercept</td>
+<td style="text-align: right;">-6.59</td>
+<td style="text-align: right;">-2.53</td>
+<td style="text-align: right;">-4.58</td>
+<td style="text-align: right;">0.78</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tallbuildings</td>
+<td style="text-align: left;">scaling</td>
+<td style="text-align: right;">0.41</td>
+<td style="text-align: right;">0.69</td>
+<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">0.05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tallbuildings_linlog</td>
+<td style="text-align: left;">intercept</td>
+<td style="text-align: right;">-18.51</td>
+<td style="text-align: right;">7.59</td>
+<td style="text-align: right;">-5.07</td>
+<td style="text-align: right;">5.06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tallbuildings_linlog</td>
+<td style="text-align: left;">scaling</td>
+<td style="text-align: right;">1.7</td>
+<td style="text-align: right;">3.72</td>
+<td style="text-align: right;">2.71</td>
+<td style="text-align: right;">0.39</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<section id="trace-plots-for-all-analyses" class="level2">
+<h2 class="anchored" data-anchor-id="trace-plots-for-all-analyses">Trace Plots for All Analyses</h2>
+</section>
+</section>
+<section id="trace-plots" class="level1">
+<h1>Trace Plots</h1>
+<p>This section contains the trace plots (<code>tplots_...png</code>) for the MCMC diagnostics.</p>
+<section id="tplots_allmonuments.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allmonuments.png">tplots_allmonuments.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allmonuments.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allmonuments.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allmonuments_nozero.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allmonuments_nozero.png">tplots_allmonuments_nozero.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allmonuments_nozero.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allmonuments_nozero.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allmonuments_nozero_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allmonuments_nozero_provinces.png">tplots_allmonuments_nozero_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allmonuments_nozero_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allmonuments_nozero_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allmonuments_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allmonuments_provinces.png">tplots_allmonuments_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allmonuments_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allmonuments_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allwalls.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allwalls.png">tplots_allwalls.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allwalls.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allwalls.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allwalls_nozero.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allwalls_nozero.png">tplots_allwalls_nozero.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allwalls_nozero.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allwalls_nozero.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allwalls_nozero_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allwalls_nozero_provinces.png">tplots_allwalls_nozero_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allwalls_nozero_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allwalls_nozero_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allwalls_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allwalls_provinces.png">tplots_allwalls_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allwalls_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allwalls_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_epigraphy.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_epigraphy.png">tplots_epigraphy.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_epigraphy.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_epigraphy.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_epigraphy_nozero.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_epigraphy_nozero.png">tplots_epigraphy_nozero.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_epigraphy_nozero.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_epigraphy_nozero.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_epigraphy_nozero_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_epigraphy_nozero_provinces.png">tplots_epigraphy_nozero_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_epigraphy_nozero_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_epigraphy_nozero_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_epigraphy_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_epigraphy_provinces.png">tplots_epigraphy_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_epigraphy_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_epigraphy_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_filtmonuments.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_filtmonuments.png">tplots_filtmonuments.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_filtmonuments.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_filtmonuments.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_filtmonuments_nozero.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_filtmonuments_nozero.png">tplots_filtmonuments_nozero.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_filtmonuments_nozero.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_filtmonuments_nozero.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_filtmonuments_nozero_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_filtmonuments_nozero_provinces.png">tplots_filtmonuments_nozero_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_filtmonuments_nozero_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_filtmonuments_nozero_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_filtmonuments_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_filtmonuments_provinces.png">tplots_filtmonuments_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_filtmonuments_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_filtmonuments_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_hnwi.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_hnwi.png">tplots_hnwi.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_hnwi.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_hnwi.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_tallbuildings.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_tallbuildings.png">tplots_tallbuildings.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_tallbuildings.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_tallbuildings.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allmonuments_linlog.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allmonuments_linlog.png">tplots_allmonuments_linlog.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allmonuments_linlog.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allmonuments_linlog.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allmonuments_linlog_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allmonuments_linlog_provinces.png">tplots_allmonuments_linlog_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allmonuments_linlog_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allmonuments_linlog_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allmonuments_sup.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allmonuments_sup.png">tplots_allmonuments_sup.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allmonuments_sup.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allmonuments_sup.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allmonuments_sup_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allmonuments_sup_provinces.png">tplots_allmonuments_sup_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allmonuments_sup_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allmonuments_sup_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allwalls_linlog.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allwalls_linlog.png">tplots_allwalls_linlog.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allwalls_linlog.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allwalls_linlog.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_allwalls_linlog_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_allwalls_linlog_provinces.png">tplots_allwalls_linlog_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_allwalls_linlog_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_allwalls_linlog_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_epigraphy_linlog.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_epigraphy_linlog.png">tplots_epigraphy_linlog.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_epigraphy_linlog.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_epigraphy_linlog.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_epigraphy_linlog_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_epigraphy_linlog_provinces.png">tplots_epigraphy_linlog_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_epigraphy_linlog_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_epigraphy_linlog_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_filtmonuments_loglin.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_filtmonuments_loglin.png">tplots_filtmonuments_loglin.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_filtmonuments_loglin.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_filtmonuments_loglin.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_filtmonuments_loglin_provinces.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_filtmonuments_loglin_provinces.png">tplots_filtmonuments_loglin_provinces.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_filtmonuments_loglin_provinces.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_filtmonuments_loglin_provinces.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_hnwi_linlog.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_hnwi_linlog.png">tplots_hnwi_linlog.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_hnwi_linlog.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_hnwi_linlog.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_hnwi_sup.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_hnwi_sup.png">tplots_hnwi_sup.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_hnwi_sup.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_hnwi_sup.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="tplots_tallbuildings_linlog.png" class="level3">
+<h3 class="anchored" data-anchor-id="tplots_tallbuildings_linlog.png">tplots_tallbuildings_linlog.png</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../Output/tplots_tallbuildings_linlog.png" class="img-fluid figure-img"></p>
+<figcaption>tplots_tallbuildings_linlog.png</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="analysis-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="analysis-workflow">Analysis Workflow</h2>
+<section id="data-wrangling" class="level3">
+<h3 class="anchored" data-anchor-id="data-wrangling">1. Data Wrangling</h3>
+<p>This section processes data from various sources to prepare it for analysis, including Roman cities, epigraphic records, high-net-worth individuals (HNWI), and tall buildings.</p>
+<section id="roman-cities-data" class="level4">
+<h4 class="anchored" data-anchor-id="roman-cities-data">1.1 Roman Cities Data</h4>
+<ul>
+<li><strong>Sources</strong>:
+<ul>
+<li>Population and area data: <code>Data/Hanson2016_CitiesDatabase_OxREP.xlsx</code></li>
+<li>Population estimates: <code>Data/population_size.csv</code></li>
+</ul></li>
+<li><strong>Key Operations</strong>:
+<ul>
+<li>Merge population estimates with area data.</li>
+<li>Filter monumental constructions (excluding walls and non-monumental structures).</li>
+<li>Extract relevant columns: Area, monuments, province, coordinates.</li>
+<li>Identify wall-determined areas and compute sample size (<code>n_roman</code>).</li>
+</ul></li>
+</ul>
+</section>
+<section id="outputs" class="level4">
+<h4 class="anchored" data-anchor-id="outputs">Outputs:</h4>
+<ul>
+<li>Cleaned dataset: <code>RomanUrban</code></li>
+<li>Columns:
+<ul>
+<li><code>Area</code>, <code>Province</code>, <code>Longitude</code>, <code>Latitude</code>, <code>Monuments</code>, <code>Monuments_filt</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="epigraphic-data" class="level4">
+<h4 class="anchored" data-anchor-id="epigraphic-data">1.2 Epigraphic Data</h4>
+<ul>
+<li><strong>Source</strong>:
+<ul>
+<li>Epigraphic inscriptions database: <code>https://zenodo.org/record/4888168/files/EDH_text_cleaned_2021-01-21.json</code></li>
+</ul></li>
+<li><strong>Key Operations</strong>:
+<ul>
+<li>Extract building/dedicatory inscriptions.</li>
+<li>Validate and extract geographic coordinates.</li>
+<li>Calculate distances from cities to inscriptions.</li>
+<li>Count inscriptions within each city’s radius.</li>
+</ul></li>
+</ul>
+</section>
+<section id="outputs-1" class="level4">
+<h4 class="anchored" data-anchor-id="outputs-1">Outputs:</h4>
+<ul>
+<li>Updated dataset: <code>RomanUrban</code>
+<ul>
+<li>New column: <code>InscriptionCount</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="hnwi-data" class="level4">
+<h4 class="anchored" data-anchor-id="hnwi-data">1.3 HNWI Data</h4>
+<ul>
+<li><strong>Source</strong>:
+<ul>
+<li>High-net-worth individuals: <code>Data/hnwi_by_city.xlsx</code></li>
+<li>Population data: <code>Data/worldcities.csv</code></li>
+</ul></li>
+<li><strong>Key Operations</strong>:
+<ul>
+<li>Match population data with HNWI cities.</li>
+<li>Manually resolve inconsistencies (e.g., “Hong Kong (SAR China)” -&gt; “Hong Kong”).</li>
+<li>Remove rows with missing population values.</li>
+<li>Assign zero values to missing billionaire counts.</li>
+</ul></li>
+</ul>
+</section>
+<section id="outputs-2" class="level4">
+<h4 class="anchored" data-anchor-id="outputs-2">Outputs:</h4>
+<ul>
+<li>Cleaned dataset: <code>global_hnwi</code>
+<ul>
+<li>Key columns: <code>City</code>, <code>Country_cleaned</code>, <code>population</code>, <code>Billionaires</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="tall-buildings-data" class="level4">
+<h4 class="anchored" data-anchor-id="tall-buildings-data">1.4 Tall Buildings Data</h4>
+<ul>
+<li><strong>Source</strong>:
+<ul>
+<li>Dataset of tall buildings: <code>Data/MPI_150m_Dataset.xlsx</code></li>
+</ul></li>
+<li><strong>Key Operations</strong>:
+<ul>
+<li>Filter rows with missing population data.</li>
+</ul></li>
+</ul>
+</section>
+<section id="outputs-3" class="level4">
+<h4 class="anchored" data-anchor-id="outputs-3">Outputs:</h4>
+<ul>
+<li>Cleaned dataset: <code>tall_buildings</code></li>
+</ul>
+<hr>
+</section>
+<section id="cleanup" class="level4">
+<h4 class="anchored" data-anchor-id="cleanup">Cleanup</h4>
+<p>Unnecessary objects are removed to optimize the workspace: - Retained objects: <code>RomanUrban</code>, <code>global_hnwi</code>, <code>tall_buildings</code>, <code>walls_idx</code>.</p>
+</section>
+</section>
+<section id="defining-the-core-bayesian-nimble-models" class="level3">
+<h3 class="anchored" data-anchor-id="defining-the-core-bayesian-nimble-models">2. Defining the Core Bayesian (Nimble) Models</h3>
+<p>This section implements Bayesian models using the Nimble framework to estimate scaling parameters while accounting for uncertainty in population sizes and count data. The models are defined for both archaeological (Roman) and modern datasets and involve comparisons between power-law and linear-log scaling relationships.</p>
+<section id="general-approach" class="level4">
+<h4 class="anchored" data-anchor-id="general-approach">2.1 General Approach</h4>
+<ul>
+<li><strong>Objective</strong>: Simultaneously estimate missing population sizes and scaling parameters.</li>
+<li><strong>Innovations</strong>:
+<ul>
+<li>Use of a negative binomial distribution to model count data, addressing overdispersion.</li>
+<li>Flexible parameters to account for differences across Roman provinces.</li>
+</ul></li>
+<li><strong>MCMC Parameters</strong>:
+<ul>
+<li>Iterations: <code>niter = 80000</code></li>
+<li>Burn-in: <code>nburnin = 20000</code> (25%)</li>
+<li>Thinning: <code>thin = 3</code>, resulting in <code>20000</code> samples per chain.</li>
+<li>Chains: <code>nchains = 4</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="archaeological-models" class="level4">
+<h4 class="anchored" data-anchor-id="archaeological-models">2.2 Archaeological Models</h4>
+<section id="power-law-model" class="level5">
+<h5 class="anchored" data-anchor-id="power-law-model">2.2.1 Power-Law Model</h5>
+<ul>
+<li><strong>Purpose</strong>: Estimate monument scaling parameters based on Roman cities data.</li>
+<li><strong>Key Features</strong>:
+<ul>
+<li>Province-level variations in intercept and scaling parameters (<code>v</code> as province index).</li>
+<li>Negative binomial distribution to handle count data.</li>
+<li>Log-log population-area linking.</li>
+</ul></li>
+</ul>
+</section>
+<section id="outputs-4" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-4">Outputs:</h5>
+<ul>
+<li>Posterior distributions for parameters:
+<ul>
+<li>Intercepts: <code>intercept0</code>, <code>intercept_raw[k]</code></li>
+<li>Scaling coefficients: <code>scaling0</code>, <code>scaling_raw[k]</code></li>
+<li>Dispersion parameter: <code>size</code></li>
+<li>Population linking coefficients: <code>b0</code>, <code>b1</code>, <code>sigma_pop</code></li>
+</ul></li>
+<li>Predictions and fitted values: <code>y_hat[n]</code></li>
+</ul>
+</section>
+<section id="linear-log-model" class="level5">
+<h5 class="anchored" data-anchor-id="linear-log-model">2.2.2 Linear-Log Model</h5>
+<ul>
+<li><strong>Purpose</strong>: Provide an alternative to the power-law model.</li>
+<li><strong>Key Features</strong>:
+<ul>
+<li>Similar to the power-law model but with linear-log population scaling.</li>
+</ul></li>
+</ul>
+</section>
+<section id="outputs-5" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-5">Outputs:</h5>
+<ul>
+<li>Posterior distributions analogous to the power-law model.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="modern-models" class="level4">
+<h4 class="anchored" data-anchor-id="modern-models">2.3 Modern Models</h4>
+<section id="power-law-model-1" class="level5">
+<h5 class="anchored" data-anchor-id="power-law-model-1">2.3.1 Power-Law Model</h5>
+<ul>
+<li><strong>Purpose</strong>: Estimate scaling relationships in modern datasets (HNWI, tall buildings).</li>
+<li><strong>Key Features</strong>:
+<ul>
+<li>Intercept and scaling parameters on a log-log scale.</li>
+<li>Negative binomial distribution for count data.</li>
+</ul></li>
+</ul>
+</section>
+<section id="outputs-6" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-6">Outputs:</h5>
+<ul>
+<li>Posterior distributions for parameters:
+<ul>
+<li><code>intercept</code></li>
+<li><code>scaling</code></li>
+<li>Dispersion parameter: <code>size</code></li>
+</ul></li>
+<li>Predictions and fitted values: <code>y_hat[n]</code></li>
+</ul>
+</section>
+<section id="linear-log-model-1" class="level5">
+<h5 class="anchored" data-anchor-id="linear-log-model-1">2.3.2 Linear-Log Model</h5>
+<ul>
+<li><strong>Purpose</strong>: Provide a linear-log alternative for modern datasets.</li>
+</ul>
+</section>
+<section id="outputs-7" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-7">Outputs:</h5>
+<ul>
+<li>Posterior distributions analogous to the power-law model.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="model-outputs" class="level4">
+<h4 class="anchored" data-anchor-id="model-outputs">2.4 Model Outputs</h4>
+<p>All models produce: - <strong>Posterior distributions</strong> for scaling parameters (<code>Output/posterior_*</code>). - <strong>MCMC Diagnostics</strong>: - Trace plots: <code>Output/mcmc_trace_*</code> - Effective sample size: <code>Output/effective_sample_size_*</code> - <strong>Model Fit Metrics</strong>: - WAIC and LOOIC values for comparisons (<code>Output/waic.csv</code>, <code>Output/looic.csv</code>).</p>
+<hr>
+</section>
+<section id="notes" class="level4">
+<h4 class="anchored" data-anchor-id="notes">Notes</h4>
+<ul>
+<li>The models are structured to allow future extensions or modifications (e.g., adding hierarchical effects).</li>
+<li>Additional thinning is applied during plotting to accommodate memory constraints.</li>
+</ul>
+</section>
+</section>
+<section id="utility-functions" class="level3">
+<h3 class="anchored" data-anchor-id="utility-functions">3. Utility Functions</h3>
+<p>This section outlines the custom utility functions developed to assist with the analysis, including visualization, diagnostics, and output generation.</p>
+<section id="visualization-functions" class="level4">
+<h4 class="anchored" data-anchor-id="visualization-functions">3.1 Visualization Functions</h4>
+<section id="stacked_traceplot" class="level5">
+<h5 class="anchored" data-anchor-id="stacked_traceplot"><code>stacked_traceplot</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Creates trace plots of MCMC chains with options for faceted or stacked visualizations.</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>mcmc_obj</code>: MCMC output object.</li>
+<li><code>params</code>: Parameters to plot.</li>
+<li><code>mode</code>: Visualization mode (<code>facet</code> or <code>stacked</code>).</li>
+<li><code>thin</code>: Thinning interval for MCMC samples.</li>
+</ul></li>
+<li><strong>Output</strong>: A <code>ggplot2</code> object displaying MCMC trace plots.</li>
+</ul>
+</section>
+<section id="plot_residual_intervals" class="level5">
+<h5 class="anchored" data-anchor-id="plot_residual_intervals"><code>plot_residual_intervals</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Visualizes credible intervals for model residuals.</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>mcmc_obj</code>: MCMC output object.</li>
+<li><code>y</code>: Observed data.</li>
+<li><code>y_hat_param</code>: Predicted values from the model.</li>
+<li><code>cr_level</code>: Credible interval level (default 0.95).</li>
+<li><code>outlier_indices</code>: Highlight outliers (optional).</li>
+</ul></li>
+<li><strong>Output</strong>: A plot with residual intervals and optional outlier annotations.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="diagnostics-functions" class="level4">
+<h4 class="anchored" data-anchor-id="diagnostics-functions">3.2 Diagnostics Functions</h4>
+<section id="output_geweke" class="level5">
+<h5 class="anchored" data-anchor-id="output_geweke"><code>output_geweke</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Outputs Geweke diagnostic scores for convergence.</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>g</code>: Geweke diagnostic object.</li>
+<li><code>modelname</code>: Name of the model.</li>
+<li><code>outfolder</code>: Path to save the output file.</li>
+</ul></li>
+<li><strong>Output</strong>: A CSV file with Geweke statistics for model parameters.</li>
+</ul>
+</section>
+<section id="output_gr_rhat" class="level5">
+<h5 class="anchored" data-anchor-id="output_gr_rhat"><code>output_gr_rhat</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Outputs Gelman-Rubin <code>R_hat</code> diagnostics.</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>mcmc_out</code>: MCMC output object.</li>
+<li><code>modelname</code>: Name of the model.</li>
+<li><code>outfolder</code>: Path to save the output file.</li>
+</ul></li>
+<li><strong>Output</strong>: A CSV file summarizing <code>R_hat</code> diagnostics.</li>
+</ul>
+</section>
+<section id="output_ess" class="level5">
+<h5 class="anchored" data-anchor-id="output_ess"><code>output_ess</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Calculates and outputs Effective Sample Size (ESS).</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>mcmc_out</code>: MCMC output object.</li>
+<li><code>modelname</code>: Name of the model.</li>
+<li><code>outfolder</code>: Path to save the output file.</li>
+</ul></li>
+<li><strong>Output</strong>: A CSV file with ESS values for each parameter.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="summary-and-model-evaluation-functions" class="level4">
+<h4 class="anchored" data-anchor-id="summary-and-model-evaluation-functions">3.3 Summary and Model Evaluation Functions</h4>
+<section id="output_posterior_summary" class="level5">
+<h5 class="anchored" data-anchor-id="output_posterior_summary"><code>output_posterior_summary</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Outputs posterior summaries (mean, standard deviation, and credible intervals).</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>mcmc_out</code>: MCMC output object.</li>
+<li><code>modelname</code>: Name of the model.</li>
+<li><code>outfolder</code>: Path to save the output file.</li>
+</ul></li>
+<li><strong>Output</strong>: A CSV file summarizing posterior distributions.</li>
+</ul>
+</section>
+<section id="rsquared" class="level5">
+<h5 class="anchored" data-anchor-id="rsquared"><code>rsquared</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Calculates pseudo R-squared values for model fit.</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>y</code>: Observed values.</li>
+<li><code>y_hat</code>: Predicted values.</li>
+</ul></li>
+<li><strong>Output</strong>: R-squared values.</li>
+</ul>
+</section>
+<section id="output_rsquared" class="level5">
+<h5 class="anchored" data-anchor-id="output_rsquared"><code>output_rsquared</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Outputs pseudo R-squared values.</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>y</code>: Observed values.</li>
+<li><code>mcmc_out</code>: MCMC output object.</li>
+<li><code>y_hat_param</code>: Predicted parameter.</li>
+</ul></li>
+<li><strong>Output</strong>: A CSV file summarizing R-squared values for models.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="model-comparison-functions" class="level4">
+<h4 class="anchored" data-anchor-id="model-comparison-functions">3.4 Model Comparison Functions</h4>
+<section id="output_waic" class="level5">
+<h5 class="anchored" data-anchor-id="output_waic"><code>output_waic</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Outputs WAIC scores for model comparison.</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>waic</code>: WAIC object from model fit.</li>
+<li><code>modelname</code>: Name of the model.</li>
+</ul></li>
+<li><strong>Output</strong>: A CSV file with WAIC scores.</li>
+</ul>
+</section>
+<section id="output_lppd" class="level5">
+<h5 class="anchored" data-anchor-id="output_lppd"><code>output_lppd</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Outputs log-posterior predictive density (LPPD) values.</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>waic_dets</code>: Detailed WAIC results.</li>
+<li><code>modelname</code>: Name of the model.</li>
+</ul></li>
+<li><strong>Output</strong>: A CSV file summarizing LPPD values.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="scaling-parameter-functions" class="level4">
+<h4 class="anchored" data-anchor-id="scaling-parameter-functions">3.5 Scaling Parameter Functions</h4>
+<section id="output_scaling" class="level5">
+<h5 class="anchored" data-anchor-id="output_scaling"><code>output_scaling</code></h5>
+<ul>
+<li><strong>Purpose</strong>: Extracts scaling parameter samples and saves them in a long format for plotting.</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><code>mcmc_out</code>: MCMC output object.</li>
+<li><code>modelname</code>: Name of the model.</li>
+<li><code>parameter</code>: Target scaling parameter.</li>
+</ul></li>
+<li><strong>Output</strong>: A CSV file with scaling parameter samples.</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="core-analysis-wrapper" class="level3">
+<h3 class="anchored" data-anchor-id="core-analysis-wrapper">4. Core Analysis Wrapper</h3>
+<p>The <code>run_scaling_analysis</code> function orchestrates the analysis, from model building to output generation. This section outlines the steps involved, along with the file-naming conventions for each output type, to guide users in locating relevant results within the repository.</p>
+<hr>
+<section id="overview" class="level4">
+<h4 class="anchored" data-anchor-id="overview">4.1 Overview</h4>
+<p>The wrapper function performs the following tasks: 1. Constructs and compiles the Bayesian model. 2. Configures and runs the MCMC process. 3. Generates diagnostics and summaries. 4. Saves results and visualizations to the <code>Output</code> directory.</p>
+<hr>
+</section>
+<section id="key-analytical-steps-and-output-patterns" class="level4">
+<h4 class="anchored" data-anchor-id="key-analytical-steps-and-output-patterns">4.2 Key Analytical Steps and Output Patterns</h4>
+<section id="model-construction-and-compilation" class="level5">
+<h5 class="anchored" data-anchor-id="model-construction-and-compilation">4.2.1 Model Construction and Compilation</h5>
+<ul>
+<li><strong>Steps</strong>:
+<ul>
+<li>Defines the Nimble model using <code>scalingCode</code>.</li>
+<li>Configures MCMC sampling, including special samplers for correlated parameters.</li>
+</ul></li>
+<li><strong>Outputs</strong>:
+<ul>
+<li>Intermediate model objects (<code>compiled_model</code>, <code>compiled_mcmc</code>), not saved to files.</li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="running-mcmc" class="level5">
+<h5 class="anchored" data-anchor-id="running-mcmc">4.2.2 Running MCMC</h5>
+<ul>
+<li><strong>Steps</strong>:
+<ul>
+<li>Runs the MCMC chains with specified iterations, burn-in, and thinning.</li>
+<li>Monitors parameters of interest and computes WAIC.</li>
+</ul></li>
+<li><strong>Output Patterns</strong>:
+<ul>
+<li><strong>WAIC Scores</strong>: <code>Output/waic_&lt;modelname&gt;.csv</code></li>
+<li><strong>Pointwise LPPD (Log Posterior Predictive Density)</strong>:
+<ul>
+<li>Details: <code>Output/loo_pw_&lt;modelname&gt;.csv</code></li>
+<li>Estimates: <code>Output/loo_est_&lt;modelname&gt;.csv</code></li>
+</ul></li>
+<li><strong>Outliers with Pareto k Diagnostics</strong>: <code>Output/city_outliers_&lt;modelname&gt;.csv</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="visual-diagnostics" class="level5">
+<h5 class="anchored" data-anchor-id="visual-diagnostics">4.2.3 Visual Diagnostics</h5>
+<ul>
+<li><strong>Steps</strong>:
+<ul>
+<li>Generates trace plots for monitored parameters.</li>
+<li>Optionally, produces province-specific trace plots for archaeological models.</li>
+</ul></li>
+<li><strong>Output Patterns</strong>:
+<ul>
+<li><strong>Trace Plots</strong>:
+<ul>
+<li>General: <code>Output/tplots_&lt;modelname&gt;.pdf</code> and <code>Output/tplots_&lt;modelname&gt;.png</code></li>
+<li>Province-Specific: <code>Output/tplots_&lt;modelname&gt;_provinces.pdf</code> and <code>Output/tplots_&lt;modelname&gt;_provinces.png</code></li>
+</ul></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="convergence-and-posterior-summaries" class="level5">
+<h5 class="anchored" data-anchor-id="convergence-and-posterior-summaries">4.2.4 Convergence and Posterior Summaries</h5>
+<ul>
+<li><strong>Steps</strong>:
+<ul>
+<li>Computes convergence diagnostics (<code>Geweke</code>, <code>Gelman-Rubin R_hat</code>).</li>
+<li>Extracts posterior summaries, including credible intervals and means.</li>
+</ul></li>
+<li><strong>Output Patterns</strong>:
+<ul>
+<li><strong>Geweke Diagnostic</strong>: <code>Output/geweke_&lt;modelname&gt;.csv</code></li>
+<li><strong>Gelman-Rubin R_hat</strong>: <code>Output/grrhat_&lt;modelname&gt;.csv</code></li>
+<li><strong>Posterior Summaries</strong>: <code>Output/post_summary_&lt;modelname&gt;.csv</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="model-fit-and-residual-diagnostics" class="level5">
+<h5 class="anchored" data-anchor-id="model-fit-and-residual-diagnostics">4.2.5 Model Fit and Residual Diagnostics</h5>
+<ul>
+<li><strong>Steps</strong>:
+<ul>
+<li>Calculates pseudo R-squared for model fit.</li>
+<li>Generates residuals vs.&nbsp;predicted plots with credible intervals.</li>
+</ul></li>
+<li><strong>Output Patterns</strong>:
+<ul>
+<li><strong>Pseudo R-Squared</strong>: <code>Output/rsquared_&lt;modelname&gt;.csv</code></li>
+<li><strong>Residual Diagnostics</strong>:
+<ul>
+<li>Plot: <code>Output/resid_&lt;modelname&gt;.pdf</code> and <code>Output/resid_&lt;modelname&gt;.png</code></li>
+</ul></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="scaling-parameter-samples" class="level5">
+<h5 class="anchored" data-anchor-id="scaling-parameter-samples">4.2.6 Scaling Parameter Samples</h5>
+<ul>
+<li><strong>Steps</strong>:
+<ul>
+<li>Extracts MCMC samples for scaling parameters for later cross-model comparisons.</li>
+</ul></li>
+<li><strong>Output Pattern</strong>:
+<ul>
+<li><code>Output/scaling_samples.csv</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="additional-notes" class="level4">
+<h4 class="anchored" data-anchor-id="additional-notes">4.3 Additional Notes</h4>
+<ul>
+<li><strong>Custom Cleanup</strong>:
+<ul>
+<li>Objects not required for subsequent analyses are removed to optimize memory usage.</li>
+</ul></li>
+<li><strong>Parallel Execution</strong>:
+<ul>
+<li>The function supports running multiple chains in parallel for computational efficiency.</li>
+</ul></li>
+</ul>
+<p>This function ensures all relevant outputs are systematically saved, enabling reproducibility and detailed exploration of results.</p>
+</section>
+</section>
+<section id="scatter-plots-of-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="scatter-plots-of-the-data">5. Scatter Plots of the Data</h3>
+<p>This section visualizes the data analyzed in the study through a series of scatter plots. Three types of plots are produced: log-log, linear, and linear-log, with offsets applied where necessary to handle zero values.</p>
+<hr>
+<section id="log-log-scatter-plots" class="level4">
+<h4 class="anchored" data-anchor-id="log-log-scatter-plots">5.1 Log-Log Scatter Plots</h4>
+<section id="description" class="level5">
+<h5 class="anchored" data-anchor-id="description"><strong>Description</strong>:</h5>
+<ul>
+<li>Plots log-transformed values of key variables to explore scaling relationships.</li>
+<li>Offset of <code>+1</code> applied to avoid issues with zero values in logarithmic transformations.</li>
+</ul>
+</section>
+<section id="included-variables" class="level5">
+<h5 class="anchored" data-anchor-id="included-variables"><strong>Included Variables</strong>:</h5>
+<ul>
+<li><strong>RomanUrban</strong>:
+<ul>
+<li><code>Area</code> vs.&nbsp;<code>Monuments</code></li>
+<li><code>Area</code> vs.&nbsp;<code>Monuments (filtered)</code></li>
+<li><code>Area</code> vs.&nbsp;<code>InscriptionCount</code></li>
+</ul></li>
+<li><strong>global_hnwi</strong>:
+<ul>
+<li><code>Population</code> vs.&nbsp;<code>Billionaires</code></li>
+</ul></li>
+<li><strong>tall_buildings</strong>:
+<ul>
+<li><code>Population</code> vs.&nbsp;<code>150 m+ Buildings</code></li>
+</ul></li>
+</ul>
+</section>
+<section id="output-file-naming-pattern" class="level5">
+<h5 class="anchored" data-anchor-id="output-file-naming-pattern"><strong>Output File Naming Pattern</strong>:</h5>
+<ul>
+<li>Combined plots saved as:
+<ul>
+<li>PDF: <code>Output/point_scatters.pdf</code></li>
+<li>PNG: <code>Output/point_scatters.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="linear-scatter-plots" class="level4">
+<h4 class="anchored" data-anchor-id="linear-scatter-plots">5.2 Linear Scatter Plots</h4>
+<section id="description-1" class="level5">
+<h5 class="anchored" data-anchor-id="description-1"><strong>Description</strong>:</h5>
+<ul>
+<li>Plots raw (untransformed) values of the same variables.</li>
+<li>Useful for identifying linear trends or deviations.</li>
+</ul>
+</section>
+<section id="included-variables-1" class="level5">
+<h5 class="anchored" data-anchor-id="included-variables-1"><strong>Included Variables</strong>:</h5>
+<ul>
+<li><strong>RomanUrban</strong>:
+<ul>
+<li><code>Area</code> vs.&nbsp;<code>Monuments</code></li>
+<li><code>Area</code> vs.&nbsp;<code>Monuments (filtered)</code></li>
+<li><code>Area</code> vs.&nbsp;<code>InscriptionCount</code></li>
+</ul></li>
+<li><strong>global_hnwi</strong>:
+<ul>
+<li><code>Population</code> vs.&nbsp;<code>Billionaires</code></li>
+</ul></li>
+<li><strong>tall_buildings</strong>:
+<ul>
+<li><code>Population</code> vs.&nbsp;<code>150 m+ Buildings</code></li>
+</ul></li>
+</ul>
+</section>
+<section id="output-file-naming-pattern-1" class="level5">
+<h5 class="anchored" data-anchor-id="output-file-naming-pattern-1"><strong>Output File Naming Pattern</strong>:</h5>
+<ul>
+<li>Combined plots saved as:
+<ul>
+<li>PDF: <code>Output/point_scatters_linear.pdf</code></li>
+<li>PNG: <code>Output/point_scatters_linear.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="linear-log-scatter-plots" class="level4">
+<h4 class="anchored" data-anchor-id="linear-log-scatter-plots">5.3 Linear-Log Scatter Plots</h4>
+<section id="description-2" class="level5">
+<h5 class="anchored" data-anchor-id="description-2"><strong>Description</strong>:</h5>
+<ul>
+<li>Plots raw values for the x-axis and log-transformed values for the y-axis.</li>
+<li>Offset of <code>+1</code> applied to y-axis values to handle zeros.</li>
+</ul>
+</section>
+<section id="included-variables-2" class="level5">
+<h5 class="anchored" data-anchor-id="included-variables-2"><strong>Included Variables</strong>:</h5>
+<ul>
+<li><strong>RomanUrban</strong>:
+<ul>
+<li><code>Area</code> vs.&nbsp;<code>log(Monuments + 1)</code></li>
+<li><code>Area</code> vs.&nbsp;<code>log(Monuments (filtered) + 1)</code></li>
+<li><code>Area</code> vs.&nbsp;<code>log(InscriptionCount + 1)</code></li>
+</ul></li>
+<li><strong>global_hnwi</strong>:
+<ul>
+<li><code>Population</code> vs.&nbsp;<code>log(Billionaires + 1)</code></li>
+</ul></li>
+<li><strong>tall_buildings</strong>:
+<ul>
+<li><code>Population</code> vs.&nbsp;<code>log(150 m+ Buildings + 1)</code></li>
+</ul></li>
+</ul>
+</section>
+<section id="output-file-naming-pattern-2" class="level5">
+<h5 class="anchored" data-anchor-id="output-file-naming-pattern-2"><strong>Output File Naming Pattern</strong>:</h5>
+<ul>
+<li>Combined plots saved as:
+<ul>
+<li>PDF: <code>Output/point_scatters_linear_log.pdf</code></li>
+<li>PNG: <code>Output/point_scatters_linear_log.png</code></li>
+</ul></li>
+</ul>
+<hr>
+<p>These scatter plots provide a comprehensive visual overview of the data relationships and scaling patterns explored in the study.</p>
+</section>
+</section>
+</section>
+<section id="first-analysis-all-monuments" class="level3">
+<h3 class="anchored" data-anchor-id="first-analysis-all-monuments">6. First Analysis: All Monuments</h3>
+<p>This section presents the analysis of the relationship between urban area and the number of monuments across all Roman cities. The analysis is conducted twice: 1. Using the full dataset. 2. Excluding cities with zero monuments.</p>
+<hr>
+<section id="analysis-with-full-dataset" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-with-full-dataset">6.1 Analysis with Full Dataset</h4>
+<section id="description-3" class="level5">
+<h5 class="anchored" data-anchor-id="description-3"><strong>Description</strong>:</h5>
+<ul>
+<li>Examines the scaling relationship between urban area and monument count using all available data.</li>
+</ul>
+</section>
+<section id="model-parameters" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>allmonuments</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Number of monuments (<code>Monuments</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed area (<code>log(Area)</code>).</li>
+<li><strong>Population Proxy</strong>: Log-transformed population estimates (<code>log(pop_est)</code>).</li>
+<li><strong>Province Index</strong>: Integer-encoded province identifiers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li><code>N</code>: Number of cities in the dataset.</li>
+<li><code>K</code>: Number of unique provinces.</li>
+<li><code>v</code>: Province indices.</li>
+<li><code>y</code>: Monument counts.</li>
+<li><code>x</code>: Log-transformed area.</li>
+<li><code>pop</code>: Log-transformed population estimates.</li>
+</ul>
+</section>
+<section id="initialization" class="level5">
+<h5 class="anchored" data-anchor-id="initialization"><strong>Initialization</strong>:</h5>
+<ul>
+<li>Parameters initialized to plausible starting values (e.g., scaling coefficients, intercepts).</li>
+</ul>
+</section>
+<section id="outputs-8" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-8"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC, LPPD, posterior summaries, and diagnostics for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_allmonuments.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_allmonuments.csv</code></li>
+<li>Residuals: <code>Output/resid_allmonuments.pdf</code> and <code>Output/resid_allmonuments.png</code></li>
+<li>Trace Plots: <code>Output/tplots_allmonuments.pdf</code> and <code>Output/tplots_allmonuments.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="analysis-excluding-cities-with-zero-monuments" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-excluding-cities-with-zero-monuments">6.2 Analysis Excluding Cities with Zero Monuments</h4>
+<section id="description-4" class="level5">
+<h5 class="anchored" data-anchor-id="description-4"><strong>Description</strong>:</h5>
+<ul>
+<li>Repeats the analysis excluding cities with zero reported monuments to check the robustness of the scaling relationship.</li>
+</ul>
+</section>
+<section id="model-parameters-1" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters-1"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>allmonuments_nozero</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Number of monuments (<code>Monuments &gt; 0</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed area (<code>log(Area)</code>).</li>
+<li><strong>Population Proxy</strong>: Log-transformed population estimates (<code>log(pop_est)</code>).</li>
+<li><strong>Province Index</strong>: Integer-encoded province identifiers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data-1" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data-1"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li>Similar to the full dataset analysis but using only cities where <code>Monuments &gt; 0</code>.</li>
+</ul>
+</section>
+<section id="initialization-1" class="level5">
+<h5 class="anchored" data-anchor-id="initialization-1"><strong>Initialization</strong>:</h5>
+<ul>
+<li>Same initialization values as the full dataset analysis.</li>
+</ul>
+</section>
+<section id="outputs-9" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-9"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC and posterior summaries for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_allmonuments_nozero.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_allmonuments_nozero.csv</code></li>
+<li>Trace Plots: <code>Output/tplots_allmonuments_nozero.pdf</code> and <code>Output/tplots_allmonuments_nozero.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="notes-1" class="level4">
+<h4 class="anchored" data-anchor-id="notes-1">6.3 Notes</h4>
+<ul>
+<li>The inclusion of zero values in the dataset can influence the scaling results. By excluding zeros, the second analysis provides a robustness check for the observed patterns.</li>
+<li>All outputs are saved in the <code>Output</code> directory, with consistent naming patterns for ease of reference.</li>
+</ul>
+<p>This analysis establishes a foundation for exploring scaling relationships in subsequent sections.</p>
+</section>
+</section>
+<section id="second-analysis-walled-cities-only" class="level3">
+<h3 class="anchored" data-anchor-id="second-analysis-walled-cities-only">7. Second Analysis: Walled Cities Only</h3>
+<p>This section analyzes the relationship between urban area and the number of monuments, focusing exclusively on cities where urban areas are defined by walls. As with the first analysis, this is conducted twice: 1. Using all walled cities. 2. Excluding cities with zero monuments.</p>
+<hr>
+<section id="analysis-with-all-walled-cities" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-with-all-walled-cities">7.1 Analysis with All Walled Cities</h4>
+<section id="description-5" class="level5">
+<h5 class="anchored" data-anchor-id="description-5"><strong>Description</strong>:</h5>
+<ul>
+<li>Examines scaling relationships for cities where walls were used to define urban areas.</li>
+<li>Helps to explore whether walled cities exhibit different scaling dynamics compared to the full dataset.</li>
+</ul>
+</section>
+<section id="model-parameters-2" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters-2"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>allwalls</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Number of monuments (<code>Monuments</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed area (<code>log(Area)</code>).</li>
+<li><strong>Population Proxy</strong>: Log-transformed population estimates (<code>log(pop_est)</code>).</li>
+<li><strong>Province Index</strong>: Integer-encoded province identifiers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data-2" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data-2"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li><code>N</code>: Number of walled cities in the dataset.</li>
+<li><code>K</code>: Number of unique provinces.</li>
+<li><code>v</code>: Province indices.</li>
+<li><code>y</code>: Monument counts.</li>
+<li><code>x</code>: Log-transformed area.</li>
+<li><code>pop</code>: Log-transformed population estimates.</li>
+</ul>
+</section>
+<section id="initialization-2" class="level5">
+<h5 class="anchored" data-anchor-id="initialization-2"><strong>Initialization</strong>:</h5>
+<ul>
+<li>Parameters initialized with values identical to the first analysis.</li>
+</ul>
+</section>
+<section id="outputs-10" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-10"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC, LPPD, posterior summaries, and diagnostics for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_allwalls.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_allwalls.csv</code></li>
+<li>Residuals: <code>Output/resid_allwalls.pdf</code> and <code>Output/resid_allwalls.png</code></li>
+<li>Trace Plots: <code>Output/tplots_allwalls.pdf</code> and <code>Output/tplots_allwalls.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="analysis-excluding-cities-with-zero-monuments-1" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-excluding-cities-with-zero-monuments-1">7.2 Analysis Excluding Cities with Zero Monuments</h4>
+<section id="description-6" class="level5">
+<h5 class="anchored" data-anchor-id="description-6"><strong>Description</strong>:</h5>
+<ul>
+<li>Focuses on walled cities with at least one monument, removing cities with zero reported monuments.</li>
+</ul>
+</section>
+<section id="model-parameters-3" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters-3"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>allwalls_nozero</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Number of monuments (<code>Monuments &gt; 0</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed area (<code>log(Area)</code>).</li>
+<li><strong>Population Proxy</strong>: Log-transformed population estimates (<code>log(pop_est)</code>).</li>
+<li><strong>Province Index</strong>: Integer-encoded province identifiers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data-3" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data-3"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li>Similar to the first analysis but filtered to include only cities where <code>Monuments &gt; 0</code>.</li>
+</ul>
+</section>
+<section id="initialization-3" class="level5">
+<h5 class="anchored" data-anchor-id="initialization-3"><strong>Initialization</strong>:</h5>
+<ul>
+<li>Parameters initialized with the same values as the full walled city analysis.</li>
+</ul>
+</section>
+<section id="outputs-11" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-11"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC and posterior summaries for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_allwalls_nozero.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_allwalls_nozero.csv</code></li>
+<li>Trace Plots: <code>Output/tplots_allwalls_nozero.pdf</code> and <code>Output/tplots_allwalls_nozero.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="notes-2" class="level4">
+<h4 class="anchored" data-anchor-id="notes-2">7.3 Notes</h4>
+<ul>
+<li>Walled cities provide a subset of the data that may exhibit distinct scaling properties due to their architectural and social significance.</li>
+<li>By excluding zeros, the robustness of scaling patterns is further examined within this subset.</li>
+<li>As before, all outputs are saved in the <code>Output</code> directory, with consistent naming conventions.</li>
+</ul>
+<p>This analysis delves deeper into the dynamics of monument scaling, focusing on a distinctive subset of urban settlements.</p>
+</section>
+</section>
+<section id="third-analysis-above-ground-monuments-only" class="level3">
+<h3 class="anchored" data-anchor-id="third-analysis-above-ground-monuments-only">8. Third Analysis: Above Ground Monuments Only</h3>
+<p>This section focuses on monuments explicitly identified as “above ground” in the dataset, excluding features like walls, forums, and other non-symbolic constructions. The analysis is conducted twice: 1. Using all cities. 2. Excluding cities with zero filtered monuments.</p>
+<hr>
+<section id="analysis-with-all-cities" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-with-all-cities">8.1 Analysis with All Cities</h4>
+<section id="description-7" class="level5">
+<h5 class="anchored" data-anchor-id="description-7"><strong>Description</strong>:</h5>
+<ul>
+<li>Explores scaling relationships using a filtered count of symbolic monuments (<code>Monuments_filt</code>), focusing solely on above-ground, non-defensive structures.</li>
+</ul>
+</section>
+<section id="model-parameters-4" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters-4"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>filtmonuments</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Number of symbolic monuments (<code>Monuments_filt</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed area (<code>log(Area)</code>).</li>
+<li><strong>Population Proxy</strong>: Log-transformed population estimates (<code>log(pop_est)</code>).</li>
+<li><strong>Province Index</strong>: Integer-encoded province identifiers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data-4" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data-4"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li><code>N</code>: Number of cities in the dataset.</li>
+<li><code>K</code>: Number of unique provinces.</li>
+<li><code>v</code>: Province indices.</li>
+<li><code>y</code>: Filtered monument counts.</li>
+<li><code>x</code>: Log-transformed area.</li>
+<li><code>pop</code>: Log-transformed population estimates.</li>
+</ul>
+</section>
+<section id="initialization-4" class="level5">
+<h5 class="anchored" data-anchor-id="initialization-4"><strong>Initialization</strong>:</h5>
+<ul>
+<li>Identical to the first two analyses.</li>
+</ul>
+</section>
+<section id="outputs-12" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-12"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC, LPPD, posterior summaries, and diagnostics for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_filtmonuments.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_filtmonuments.csv</code></li>
+<li>Residuals: <code>Output/resid_filtmonuments.pdf</code> and <code>Output/resid_filtmonuments.png</code></li>
+<li>Trace Plots: <code>Output/tplots_filtmonuments.pdf</code> and <code>Output/tplots_filtmonuments.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="analysis-excluding-cities-with-zero-symbolic-monuments" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-excluding-cities-with-zero-symbolic-monuments">8.2 Analysis Excluding Cities with Zero Symbolic Monuments</h4>
+<section id="description-8" class="level5">
+<h5 class="anchored" data-anchor-id="description-8"><strong>Description</strong>:</h5>
+<ul>
+<li>Re-examines the scaling relationship after excluding cities with zero symbolic monuments to test the robustness of the observed patterns.</li>
+</ul>
+</section>
+<section id="model-parameters-5" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters-5"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>filtmonuments_nozero</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Number of symbolic monuments (<code>Monuments_filt &gt; 0</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed area (<code>log(Area)</code>).</li>
+<li><strong>Population Proxy</strong>: Log-transformed population estimates (<code>log(pop_est)</code>).</li>
+<li><strong>Province Index</strong>: Integer-encoded province identifiers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data-5" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data-5"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li>Similar to the full dataset analysis but filtered to exclude zeros.</li>
+</ul>
+</section>
+<section id="initialization-5" class="level5">
+<h5 class="anchored" data-anchor-id="initialization-5"><strong>Initialization</strong>:</h5>
+<ul>
+<li>Same as the previous analyses.</li>
+</ul>
+</section>
+<section id="outputs-13" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-13"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC and posterior summaries for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_filtmonuments_nozero.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_filtmonuments_nozero.csv</code></li>
+<li>Trace Plots: <code>Output/tplots_filtmonuments_nozero.pdf</code> and <code>Output/tplots_filtmonuments_nozero.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="notes-3" class="level4">
+<h4 class="anchored" data-anchor-id="notes-3">8.3 Notes</h4>
+<ul>
+<li>This analysis narrows the focus to symbolic monuments, which may reflect different scaling dynamics compared to the broader datasets.</li>
+<li>Excluding zeros ensures robustness by removing cases without symbolic structures, which could bias scaling estimates.</li>
+<li>All outputs follow consistent naming conventions for ease of access and reproducibility.</li>
+</ul>
+<p>This analysis provides additional insights into scaling relationships specific to symbolic, above-ground monuments.</p>
+</section>
+</section>
+<section id="fourth-analysis-epigraphy" class="level3">
+<h3 class="anchored" data-anchor-id="fourth-analysis-epigraphy">9. Fourth Analysis: Epigraphy</h3>
+<p>This section investigates the scaling relationships for inscriptions (epigraphy) found in or near cities. The analysis is conducted twice: 1. Using all cities with epigraphic data. 2. Excluding cities with zero recorded inscriptions.</p>
+<hr>
+<section id="analysis-with-all-cities-1" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-with-all-cities-1">9.1 Analysis with All Cities</h4>
+<section id="description-9" class="level5">
+<h5 class="anchored" data-anchor-id="description-9"><strong>Description</strong>:</h5>
+<ul>
+<li>Examines scaling relationships using the count of inscriptions (<code>InscriptionCount</code>).</li>
+<li>Inscriptions are treated as a proxy for cultural or symbolic activity within cities.</li>
+</ul>
+</section>
+<section id="model-parameters-6" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters-6"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>epigraphy</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Number of inscriptions (<code>InscriptionCount</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed area (<code>log(Area)</code>).</li>
+<li><strong>Population Proxy</strong>: Log-transformed population estimates (<code>log(pop_est)</code>).</li>
+<li><strong>Province Index</strong>: Integer-encoded province identifiers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data-6" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data-6"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li><code>N</code>: Number of cities in the dataset.</li>
+<li><code>K</code>: Number of unique provinces.</li>
+<li><code>v</code>: Province indices.</li>
+<li><code>y</code>: Inscription counts.</li>
+<li><code>x</code>: Log-transformed area.</li>
+<li><code>pop</code>: Log-transformed population estimates.</li>
+</ul>
+</section>
+<section id="initialization-6" class="level5">
+<h5 class="anchored" data-anchor-id="initialization-6"><strong>Initialization</strong>:</h5>
+<ul>
+<li>Identical to the earlier analyses.</li>
+</ul>
+</section>
+<section id="outputs-14" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-14"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC, LPPD, posterior summaries, and diagnostics for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_epigraphy.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_epigraphy.csv</code></li>
+<li>Residuals: <code>Output/resid_epigraphy.pdf</code> and <code>Output/resid_epigraphy.png</code></li>
+<li>Trace Plots: <code>Output/tplots_epigraphy.pdf</code> and <code>Output/tplots_epigraphy.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="analysis-excluding-cities-with-zero-inscriptions" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-excluding-cities-with-zero-inscriptions">9.2 Analysis Excluding Cities with Zero Inscriptions</h4>
+<section id="description-10" class="level5">
+<h5 class="anchored" data-anchor-id="description-10"><strong>Description</strong>:</h5>
+<ul>
+<li>Re-analyzes scaling relationships for cities with at least one recorded inscription.</li>
+</ul>
+</section>
+<section id="model-parameters-7" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters-7"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>epigraphy_nozero</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Number of inscriptions (<code>InscriptionCount &gt; 0</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed area (<code>log(Area)</code>).</li>
+<li><strong>Population Proxy</strong>: Log-transformed population estimates (<code>log(pop_est)</code>).</li>
+<li><strong>Province Index</strong>: Integer-encoded province identifiers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data-7" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data-7"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li>Similar to the full dataset analysis but filtered to exclude cities with zero inscriptions.</li>
+</ul>
+</section>
+<section id="initialization-7" class="level5">
+<h5 class="anchored" data-anchor-id="initialization-7"><strong>Initialization</strong>:</h5>
+<ul>
+<li>Same as the previous analyses.</li>
+</ul>
+</section>
+<section id="outputs-15" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-15"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC and posterior summaries for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_epigraphy_nozero.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_epigraphy_nozero.csv</code></li>
+<li>Trace Plots: <code>Output/tplots_epigraphy_nozero.pdf</code> and <code>Output/tplots_epigraphy_nozero.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="notes-4" class="level4">
+<h4 class="anchored" data-anchor-id="notes-4">9.3 Notes</h4>
+<ul>
+<li>This analysis provides insights into the relationship between city size and epigraphic activity, highlighting potential cultural or administrative significance tied to inscriptions.</li>
+<li>Excluding zeros ensures that scaling relationships are robust and not influenced by cities lacking any recorded inscriptions.</li>
+<li>Consistent naming conventions for outputs make it easier to locate and review results.</li>
+</ul>
+<p>This analysis adds a cultural dimension to the scaling relationships explored in the dataset.</p>
+</section>
+</section>
+<section id="fifth-analysis-high-net-worth-individuals-hnwi" class="level3">
+<h3 class="anchored" data-anchor-id="fifth-analysis-high-net-worth-individuals-hnwi">10. Fifth Analysis: High Net Worth Individuals (HNWI)</h3>
+<p>This section examines the scaling relationship between city population and the count of billionaires residing in cities. The analysis uses data for modern cities with available high net worth individual (HNWI) information.</p>
+<hr>
+<section id="analysis-description" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-description">10.1 Analysis Description</h4>
+<section id="description-11" class="level5">
+<h5 class="anchored" data-anchor-id="description-11"><strong>Description</strong>:</h5>
+<ul>
+<li>Explores the scaling of billionaires (<code>HNWI</code>) with city population size.</li>
+<li>This analysis focuses exclusively on modern cities with population and billionaire count data.</li>
+</ul>
+</section>
+<section id="model-parameters-8" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters-8"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>hnwi</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Count of billionaires in each city (<code>Billionaires</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed population size (<code>log(population)</code>).</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data-8" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data-8"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li><code>N</code>: Number of cities in the dataset.</li>
+<li><code>y</code>: Count of billionaires.</li>
+<li><code>pop</code>: Log-transformed population size.</li>
+</ul>
+</section>
+<section id="initialization-8" class="level5">
+<h5 class="anchored" data-anchor-id="initialization-8"><strong>Initialization</strong>:</h5>
+<ul>
+<li><strong>Scaling Parameter (<code>scaling</code>)</strong>: Initialized to <code>0</code>.</li>
+<li><strong>Intercept Parameter (<code>intercept</code>)</strong>: Initialized to <code>0</code>.</li>
+<li><strong>Dispersion Parameter (<code>size</code>)</strong>: Initialized to <code>1</code>.</li>
+</ul>
+</section>
+<section id="outputs-16" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-16"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC, LPPD, posterior summaries, and diagnostics for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_hnwi.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_hnwi.csv</code></li>
+<li>Residuals: <code>Output/resid_hnwi.pdf</code> and <code>Output/resid_hnwi.png</code></li>
+<li>Trace Plots: <code>Output/tplots_hnwi.pdf</code> and <code>Output/tplots_hnwi.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="notes-5" class="level4">
+<h4 class="anchored" data-anchor-id="notes-5">10.2 Notes</h4>
+<ul>
+<li>This analysis provides insights into the distribution of extreme wealth relative to urban population size.</li>
+<li>Unlike previous analyses involving ancient datasets, this analysis focuses entirely on modern data for billionaires.</li>
+<li>The results are critical for understanding wealth concentration patterns in contemporary urban systems.</li>
+<li>The consistent naming conventions for output files ensure accessibility and reproducibility.</li>
+</ul>
+<p>This analysis builds on the broader theme of wealth scaling while transitioning the focus to modern urban data.</p>
+</section>
+</section>
+<section id="sixth-analysis-tall-buildings" class="level3">
+<h3 class="anchored" data-anchor-id="sixth-analysis-tall-buildings">11. Sixth Analysis: Tall Buildings</h3>
+<p>This section investigates the scaling relationship between city population and the number of skyscrapers (buildings taller than 150 meters). Skyscrapers are often proxies for urban wealth and engineering capacity, symbolizing status and economic power.</p>
+<hr>
+<section id="analysis-description-1" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-description-1">11.1 Analysis Description</h4>
+<section id="description-12" class="level5">
+<h5 class="anchored" data-anchor-id="description-12"><strong>Description</strong>:</h5>
+<ul>
+<li>Explores the scaling of tall buildings (<code>150 m+ Buildings</code>) with city population size.</li>
+<li>This analysis uses a modern dataset exclusively focused on cities with recorded skyscrapers.</li>
+</ul>
+</section>
+<section id="model-parameters-9" class="level5">
+<h5 class="anchored" data-anchor-id="model-parameters-9"><strong>Model Parameters</strong>:</h5>
+<ul>
+<li><strong>Name</strong>: <code>tallbuildings</code></li>
+<li><strong>Type</strong>: Power-law model</li>
+<li><strong>Inputs</strong>:
+<ul>
+<li><strong>Dependent Variable</strong>: Count of skyscrapers taller than 150 meters (<code>150 m+ Buildings</code>).</li>
+<li><strong>Predictor</strong>: Log-transformed population size (<code>log(Population)</code>).</li>
+</ul></li>
+</ul>
+</section>
+<section id="constants-and-data-9" class="level5">
+<h5 class="anchored" data-anchor-id="constants-and-data-9"><strong>Constants and Data</strong>:</h5>
+<ul>
+<li><code>N</code>: Number of cities in the dataset.</li>
+<li><code>y</code>: Count of skyscrapers.</li>
+<li><code>pop</code>: Log-transformed population size.</li>
+</ul>
+</section>
+<section id="initialization-9" class="level5">
+<h5 class="anchored" data-anchor-id="initialization-9"><strong>Initialization</strong>:</h5>
+<ul>
+<li><strong>Scaling Parameter (<code>scaling</code>)</strong>: Initialized to <code>0</code>.</li>
+<li><strong>Intercept Parameter (<code>intercept</code>)</strong>: Initialized to <code>0</code>.</li>
+<li><strong>Dispersion Parameter (<code>size</code>)</strong>: Initialized to <code>1</code>.</li>
+</ul>
+</section>
+<section id="outputs-17" class="level5">
+<h5 class="anchored" data-anchor-id="outputs-17"><strong>Outputs</strong>:</h5>
+<ul>
+<li>WAIC, LPPD, posterior summaries, and diagnostics for the scaling model.</li>
+<li>Output file naming pattern:
+<ul>
+<li>WAIC: <code>Output/waic_tallbuildings.csv</code></li>
+<li>Posterior Summaries: <code>Output/post_summary_tallbuildings.csv</code></li>
+<li>Residuals: <code>Output/resid_tallbuildings.pdf</code> and <code>Output/resid_tallbuildings.png</code></li>
+<li>Trace Plots: <code>Output/tplots_tallbuildings.pdf</code> and <code>Output/tplots_tallbuildings.png</code></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="notes-6" class="level4">
+<h4 class="anchored" data-anchor-id="notes-6">11.2 Notes</h4>
+<ul>
+<li>This analysis connects the physical manifestation of wealth (skyscrapers) with urban population scaling.</li>
+<li>Tall buildings often signify not just economic resources but also cultural ambition, making this analysis particularly relevant to modern urban systems.</li>
+<li>The results contribute to the broader discussion of how wealth scales in contemporary urban settings.</li>
+<li>Consistent output naming conventions facilitate reproducibility and accessibility.</li>
+</ul>
+<p>This analysis complements the broader project by addressing a modern architectural dimension of wealth scaling.</p>
+</section>
+</section>
+<section id="plot-scaling-parameter-posterior-densities" class="level3">
+<h3 class="anchored" data-anchor-id="plot-scaling-parameter-posterior-densities">12. Plot Scaling Parameter Posterior Densities</h3>
+<p>This section visualizes the posterior densities of the scaling parameter (<code>scaling</code>) across all analyses. The plot aggregates results from the different subsets of data analyzed earlier, providing a comparative overview of scaling behavior across diverse urban proxies and contexts.</p>
+<hr>
+<section id="analysis-description-2" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-description-2">12.1 Analysis Description</h4>
+<section id="purpose" class="level5">
+<h5 class="anchored" data-anchor-id="purpose"><strong>Purpose</strong>:</h5>
+<ul>
+<li>To compare the posterior distributions of the scaling parameter for all the analyses, highlighting differences or consistencies across datasets and models.</li>
+</ul>
+</section>
+<section id="visualization" class="level5">
+<h5 class="anchored" data-anchor-id="visualization"><strong>Visualization</strong>:</h5>
+<ul>
+<li><strong>Density Plot</strong>: Displays posterior densities for the scaling parameter across analyses.</li>
+<li><strong>Vertical Reference Lines</strong>:
+<ul>
+<li>Red dashed lines at <code>x = 0.15</code> and <code>x = 0.85</code>, indicating expected bounds or thresholds.</li>
+</ul></li>
+</ul>
+</section>
+<section id="aesthetic-features" class="level5">
+<h5 class="anchored" data-anchor-id="aesthetic-features"><strong>Aesthetic Features</strong>:</h5>
+<ul>
+<li><strong>Color Palette</strong>: A high-contrast palette to distinguish between analyses.</li>
+<li><strong>Patterns</strong>: Alternating patterns (e.g., solid, striped) to enhance readability in both color and grayscale formats.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="output-description" class="level4">
+<h4 class="anchored" data-anchor-id="output-description">12.2 Output Description</h4>
+<section id="plot" class="level5">
+<h5 class="anchored" data-anchor-id="plot"><strong>Plot</strong>:</h5>
+<ul>
+<li>File Names:
+<ul>
+<li>PDF: <code>Output/scaling_posteriors.pdf</code></li>
+<li>PNG: <code>Output/scaling_posteriors.png</code></li>
+</ul></li>
+<li>Dimensions: 15 cm x 10 cm, scaled by a factor of 2.5.</li>
+</ul>
+</section>
+<section id="inputs" class="level5">
+<h5 class="anchored" data-anchor-id="inputs"><strong>Inputs</strong>:</h5>
+<ul>
+<li>Aggregated scaling parameter samples stored in <code>Output/scaling_samples.csv</code>.</li>
+<li>The <code>analysis</code> column distinguishes the dataset/model associated with each sample.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="notes-7" class="level4">
+<h4 class="anchored" data-anchor-id="notes-7">12.3 Notes</h4>
+<ul>
+<li>This visualization is a key figure for the main paper, emphasizing the comparative nature of the analyses.</li>
+<li>Clear labeling and visual separation (color and pattern) ensure accessibility and interpretability.</li>
+<li>The reference lines provide a conceptual anchor for interpreting the scaling parameter’s range and significance.</li>
+<li>The plot synthesizes the entire analytical workflow, summarizing scaling trends from Roman cities to modern urban datasets.</li>
+</ul>
+<p>By juxtaposing all analyses, this plot provides a holistic view of the scaling parameter across diverse urban contexts.</p>
+</section>
+</section>
+<section id="collate-main-results-table" class="level3">
+<h3 class="anchored" data-anchor-id="collate-main-results-table">13. Collate Main Results Table</h3>
+<p>This section aggregates the top-level results from the various analyses into a single summary table for easy reference. The table includes the posterior summaries for the scaling parameter and other relevant metrics like the R-squared value for each analysis.</p>
+<hr>
+<section id="analysis-description-3" class="level4">
+<h4 class="anchored" data-anchor-id="analysis-description-3">13.1 Analysis Description</h4>
+<section id="purpose-1" class="level5">
+<h5 class="anchored" data-anchor-id="purpose-1"><strong>Purpose</strong>:</h5>
+<ul>
+<li>To create a concise summary table (<code>analysis_results_summary.csv</code>) that allows readers to quickly understand and compare the key outputs of each analysis.</li>
+</ul>
+</section>
+<section id="contents" class="level5">
+<h5 class="anchored" data-anchor-id="contents"><strong>Contents</strong>:</h5>
+<ul>
+<li><strong>Columns</strong>:
+<ul>
+<li><code>analysis</code>: The name of the analysis (e.g., “allmonuments”, “hnwi”).</li>
+<li><code>mean</code>: The posterior mean of the scaling parameter.</li>
+<li><code>lower</code>: The lower bound of the 99% highest posterior density (HPD) interval.</li>
+<li><code>upper</code>: The upper bound of the 99% HPD interval.</li>
+<li><code>stdd</code>: The posterior standard deviation.</li>
+<li><code>r_squared</code>: The pseudo R-squared value for the analysis.</li>
+</ul></li>
+<li><strong>Rows</strong>:
+<ul>
+<li>Each row corresponds to one analysis.</li>
+</ul></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="example-table-structure" class="level4">
+<h4 class="anchored" data-anchor-id="example-table-structure">13.2 Example Table Structure</h4>
+<p>Below is an example of the table structure with a few blank rows as placeholders:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>analysis</th>
+<th>mean</th>
+<th>lower</th>
+<th>upper</th>
+<th>stdd</th>
+<th>r_squared</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>allmonuments</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>hnwi</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>tallbuildings</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="output-description-1" class="level4">
+<h4 class="anchored" data-anchor-id="output-description-1">13.3 Output Description</h4>
+<section id="file-name" class="level5">
+<h5 class="anchored" data-anchor-id="file-name"><strong>File Name</strong>:</h5>
+<ul>
+<li><code>Output/analysis_results_summary.csv</code></li>
+</ul>
+</section>
+<section id="purpose-2" class="level5">
+<h5 class="anchored" data-anchor-id="purpose-2"><strong>Purpose</strong>:</h5>
+<ul>
+<li>This CSV file is a master summary of the key results across all analyses.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="notes-8" class="level4">
+<h4 class="anchored" data-anchor-id="notes-8">13.4 Notes</h4>
+<ul>
+<li>The <code>analysis</code> column provides a direct link to the corresponding subset of data and analysis.</li>
+<li>Readers can use this table to identify high-level patterns or investigate specific analyses in greater detail by referring to the outputs from earlier steps.</li>
+<li>This summary table is a crucial component for interpreting the results presented in the main text and supplementary materials.</li>
+</ul>
+</section>
+</section>
+<section id="supplemental-analyses-workflow" class="level3">
+<h3 class="anchored" data-anchor-id="supplemental-analyses-workflow">Supplemental Analyses Workflow</h3>
+<p>This section describes the supplemental analyses conducted to compare model fits and examine outlier effects. It includes both linear-log model comparison and outlier robustness checks.</p>
+<hr>
+<section id="model-comparison" class="level4">
+<h4 class="anchored" data-anchor-id="model-comparison">1. Model Comparison</h4>
+<section id="purpose-3" class="level5">
+<h5 class="anchored" data-anchor-id="purpose-3"><strong>Purpose</strong>:</h5>
+<ul>
+<li>Compare the fit of the power-law model against a linear-log alternative for various datasets.</li>
+</ul>
+</section>
+<section id="steps" class="level5">
+<h5 class="anchored" data-anchor-id="steps"><strong>Steps</strong>:</h5>
+<ol type="1">
+<li><strong>Prepare Data</strong>:
+<ul>
+<li>For each dataset (<code>allmonuments</code>, <code>allwalls</code>, <code>filtmonuments</code>, <code>epigraphy</code>, <code>hnwi</code>, and <code>tallbuildings</code>), prepare the inputs: response variable (<code>y</code>), predictor (<code>x</code> or <code>pop</code>), and constants (<code>Consts</code>).</li>
+</ul></li>
+<li><strong>Run Linear-Log Models</strong>:
+<ul>
+<li>Use <code>scalingCode_linlog</code> and <code>run_scaling_analysis()</code> to analyze each dataset.</li>
+</ul></li>
+</ol>
+</section>
+<section id="output-file-patterns" class="level5">
+<h5 class="anchored" data-anchor-id="output-file-patterns"><strong>Output File Patterns</strong>:</h5>
+<ul>
+<li><strong>Posterior summaries</strong>: <code>Output/post_summary_&lt;modelname&gt;_linlog.csv</code></li>
+<li><strong>WAIC and LOOIC values</strong>: <code>Output/waic.csv</code> (merged with <code>Output/loo_est_&lt;modelname&gt;.csv</code>)</li>
+<li><strong>Scaling parameter samples</strong>: <code>Output/scaling_samples.csv</code></li>
+</ul>
+</section>
+<section id="analysis-mapping" class="level5">
+<h5 class="anchored" data-anchor-id="analysis-mapping"><strong>Analysis Mapping</strong>:</h5>
+<table class="table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 27%">
+<col style="width: 53%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Analysis</th>
+<th>Model Name</th>
+<th>Key Output Files</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>All Monuments</td>
+<td><code>allmonuments_linlog</code></td>
+<td><code>post_summary_allmonuments_linlog.csv</code></td>
+</tr>
+<tr class="even">
+<td>Walled Only</td>
+<td><code>allwalls_linlog</code></td>
+<td><code>post_summary_allwalls_linlog.csv</code></td>
+</tr>
+<tr class="odd">
+<td>Above Ground</td>
+<td><code>filtmonuments_loglin</code></td>
+<td><code>post_summary_filtmonuments_loglin.csv</code></td>
+</tr>
+<tr class="even">
+<td>Epigraphy</td>
+<td><code>epigraphy_linlog</code></td>
+<td><code>post_summary_epigraphy_linlog.csv</code></td>
+</tr>
+<tr class="odd">
+<td>HNWI</td>
+<td><code>hnwi_linlog</code></td>
+<td><code>post_summary_hnwi_linlog.csv</code></td>
+</tr>
+<tr class="even">
+<td>Tall Buildings</td>
+<td><code>tallbuildings_linlog</code></td>
+<td><code>post_summary_tallbuildings_linlog.csv</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="waiclooic-summary" class="level4">
+<h4 class="anchored" data-anchor-id="waiclooic-summary">2. WAIC/LOOIC Summary</h4>
+<section id="purpose-4" class="level5">
+<h5 class="anchored" data-anchor-id="purpose-4"><strong>Purpose</strong>:</h5>
+<ul>
+<li>Aggregate and compare WAIC and LOOIC values for model evaluation.</li>
+</ul>
+</section>
+<section id="output-file" class="level5">
+<h5 class="anchored" data-anchor-id="output-file"><strong>Output File</strong>:</h5>
+<ul>
+<li><code>Output/waic_looic_csv</code>: Combines WAIC and LOOIC values into a single summary table.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="outlier-effects" class="level4">
+<h4 class="anchored" data-anchor-id="outlier-effects">3. Outlier Effects</h4>
+<section id="purpose-5" class="level5">
+<h5 class="anchored" data-anchor-id="purpose-5"><strong>Purpose</strong>:</h5>
+<ul>
+<li>Assess the impact of extreme outliers on scaling parameter estimates for the primary datasets.</li>
+</ul>
+</section>
+<section id="steps-1" class="level5">
+<h5 class="anchored" data-anchor-id="steps-1"><strong>Steps</strong>:</h5>
+<ol type="1">
+<li>Identify outlier cities using <code>Output/city_outliers_&lt;modelname&gt;.csv</code>.</li>
+<li>Exclude outliers from the datasets and rerun the analyses with the power-law model.</li>
+</ol>
+</section>
+<section id="output-file-patterns-1" class="level5">
+<h5 class="anchored" data-anchor-id="output-file-patterns-1"><strong>Output File Patterns</strong>:</h5>
+<ul>
+<li><strong>Posterior summaries</strong>: <code>Output/post_summary_&lt;modelname&gt;_sup.csv</code></li>
+</ul>
+</section>
+<section id="analysis-mapping-1" class="level5">
+<h5 class="anchored" data-anchor-id="analysis-mapping-1"><strong>Analysis Mapping</strong>:</h5>
+<table class="table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 23%">
+<col style="width: 54%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Analysis</th>
+<th>Model Name</th>
+<th>Key Output Files</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>All Monuments</td>
+<td><code>allmonuments_sup</code></td>
+<td><code>post_summary_allmonuments_sup.csv</code></td>
+</tr>
+<tr class="even">
+<td>HNWI</td>
+<td><code>hnwi_sup</code></td>
+<td><code>post_summary_hnwi_sup.csv</code></td>
+</tr>
+<tr class="odd">
+<td>Tall Buildings</td>
+<td><code>tallbuildings_sup</code></td>
+<td><code>post_summary_tallbuildings_sup.csv</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="supplemental-notes" class="level4">
+<h4 class="anchored" data-anchor-id="supplemental-notes">Supplemental Notes</h4>
+<ul>
+<li><strong>File Organization</strong>: All outputs are stored in the <code>Output/</code> subdirectory.</li>
+<li><strong>Scaling Parameter Summary</strong>: The file <code>Output/scaling_samples.csv</code> aggregates scaling parameter samples across analyses for posterior density plots.</li>
+<li><strong>Model Comparison Summary</strong>: The file <code>Output/waic_looic_csv</code> includes WAIC and LOOIC values for both power-law and linear-log models.</li>
+</ul>
+<p>This structure ensures transparency and traceability for all supplemental analyses.</p>
+</section>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      return note.innerHTML;
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

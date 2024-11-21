@@ -2167,7 +2167,7 @@ if(file.exists(waic_path)){
         merged_df <- merge(waic_df, looic_df, by = "model", all.x = TRUE)
 
         # new output path
-        outpath = "Output/waic_looic_csv"
+        outpath = "Output/waic_looic.csv"
 
         # Save the updated dataframe back to waic.csv
         write.csv(merged_df, outpath, row.names = FALSE)

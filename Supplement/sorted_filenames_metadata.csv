@@ -1,0 +1,193 @@
+Filename,Analysis,Script Section,Type,Model,Context
+scaling_posteriors.pdf,Main,Plot Scaling Param Posterior Densities,Plot,all,Summary
+scaling_posteriors.png,Main,Plot Scaling Param Posterior Densities,Plot,all,Summary
+resid_allmonuments.pdf,Main,First Analysis,Plot,allmonuments,Model Diagnostic
+resid_allmonuments.png,Main,First Analysis,Plot,allmonuments,Model Diagnostic
+resid_allwalls.pdf,Main,Second Analysis,Plot,allwalls,Model Diagnostic
+resid_allwalls.png,Main,Second Analysis,Plot,allwalls,Model Diagnostic
+resid_epigraphy.pdf,Main,Fourth Analysis,Plot,epigraphy,Model Diagnostic
+resid_epigraphy.png,Main,Fourth Analysis,Plot,epigraphy,Model Diagnostic
+resid_filtmonuments.pdf,Main,Third Analysis,Plot,filtmonuments,Model Diagnostic
+resid_filtmonuments.png,Main,Third Analysis,Plot,filtmonuments,Model Diagnostic
+resid_hnwi.pdf,Main,Fifth Analysis,Plot,hnwi,Model Diagnostic
+resid_hnwi.png,Main,Fifth Analysis,Plot,hnwi,Model Diagnostic
+resid_tallbuildings.pdf,Main,Sixth Analysis,Plot,tallbuildings,Model Diagnostic
+resid_tallbuildings.png,Main,Sixth Analysis,Plot,tallbuildings,Model Diagnostic
+tplots_allmonuments.pdf,Main,First Analysis,Plot,allmonuments,MCMC Diagnostic
+tplots_allmonuments.png,Main,First Analysis,Plot,allmonuments,MCMC Diagnostic
+tplots_allmonuments_nozero.pdf,Main,First Analysis,Plot,allmonuments_nozero,MCMC Diagnostic
+tplots_allmonuments_nozero.png,Main,First Analysis,Plot,allmonuments_nozero,MCMC Diagnostic
+tplots_allmonuments_nozero_provinces.pdf,Main,First Analysis,Plot,allmonuments_nozero,MCMC Diagnostic
+tplots_allmonuments_nozero_provinces.png,Main,First Analysis,Plot,allmonuments_nozero,MCMC Diagnostic
+tplots_allmonuments_provinces.pdf,Main,First Analysis,Plot,allmonuments,MCMC Diagnostic
+tplots_allmonuments_provinces.png,Main,First Analysis,Plot,allmonuments,MCMC Diagnostic
+tplots_allwalls.pdf,Main,Second Analysis,Plot,allwalls,MCMC Diagnostic
+tplots_allwalls.png,Main,Second Analysis,Plot,allwalls,MCMC Diagnostic
+tplots_allwalls_nozero.pdf,Main,Second Analysis,Plot,allwalls_nozero,MCMC Diagnostic
+tplots_allwalls_nozero.png,Main,Second Analysis,Plot,allwalls_nozero,MCMC Diagnostic
+tplots_allwalls_nozero_provinces.pdf,Main,Second Analysis,Plot,allwalls_nozero,MCMC Diagnostic
+tplots_allwalls_nozero_provinces.png,Main,Second Analysis,Plot,allwalls_nozero,MCMC Diagnostic
+tplots_allwalls_provinces.pdf,Main,Second Analysis,Plot,allwalls,MCMC Diagnostic
+tplots_allwalls_provinces.png,Main,Second Analysis,Plot,allwalls,MCMC Diagnostic
+tplots_epigraphy.pdf,Main,Fourth Analysis,Plot,epigraphy,MCMC Diagnostic
+tplots_epigraphy.png,Main,Fourth Analysis,Plot,epigraphy,MCMC Diagnostic
+tplots_epigraphy_nozero.pdf,Main,Fourth Analysis,Plot,epigraphy_nozero,MCMC Diagnostic
+tplots_epigraphy_nozero.png,Main,Fourth Analysis,Plot,epigraphy_nozero,MCMC Diagnostic
+tplots_epigraphy_nozero_provinces.pdf,Main,Fourth Analysis,Plot,epigraphy_nozero,MCMC Diagnostic
+tplots_epigraphy_nozero_provinces.png,Main,Fourth Analysis,Plot,epigraphy_nozero,MCMC Diagnostic
+tplots_epigraphy_provinces.pdf,Main,Fourth Analysis,Plot,epigraphy,MCMC Diagnostic
+tplots_epigraphy_provinces.png,Main,Fourth Analysis,Plot,epigraphy,MCMC Diagnostic
+tplots_filtmonuments.pdf,Main,Third Analysis,Plot,filtmonuments,MCMC Diagnostic
+tplots_filtmonuments.png,Main,Third Analysis,Plot,filtmonuments,MCMC Diagnostic
+tplots_filtmonuments_nozero.pdf,Main,Third Analysis,Plot,filtmonuments_nozero,MCMC Diagnostic
+tplots_filtmonuments_nozero.png,Main,Third Analysis,Plot,filtmonuments_nozero,MCMC Diagnostic
+tplots_filtmonuments_nozero_provinces.pdf,Main,Third Analysis,Plot,filtmonuments_nozero,MCMC Diagnostic
+tplots_filtmonuments_nozero_provinces.png,Main,Third Analysis,Plot,filtmonuments_nozero,MCMC Diagnostic
+tplots_filtmonuments_provinces.pdf,Main,Third Analysis,Plot,filtmonuments,MCMC Diagnostic
+tplots_filtmonuments_provinces.png,Main,Third Analysis,Plot,filtmonuments,MCMC Diagnostic
+tplots_hnwi.pdf,Main,Fifth Analysis,Plot,hnwi,MCMC Diagnostic
+tplots_hnwi.png,Main,Fifth Analysis,Plot,hnwi,MCMC Diagnostic
+tplots_tallbuildings.pdf,Main,Sixth Analysis,Plot,tallbuildings,MCMC Diagnostic
+tplots_tallbuildings.png,Main,Sixth Analysis,Plot,tallbuildings,MCMC Diagnostic
+pa_gini_results.png,Main,Visualization,Plot,ABM,
+point_scatters.pdf,Main,Visualization,Plot,,
+point_scatters.png,Main,Visualization,Plot,,
+analysis_results_summary.csv,Main,Results Summary,Numeric,all,Summary
+post_summary_allmonuments.csv,Main,First Analysis,Numeric,allmonuments,Summary
+post_summary_allmonuments_nozero.csv,Main,First Analysis,Numeric,allmonuments_nozero,Summary
+post_summary_allwalls.csv,Main,Second Analysis,Numeric,allwalls,Summary
+post_summary_allwalls_nozero.csv,Main,Second Analysis,Numeric,allwalls_nozero,Summary
+post_summary_epigraphy.csv,Main,Fourth Analysis,Numeric,epigraphy,Summary
+post_summary_epigraphy_nozero.csv,Main,Fourth Analysis,Numeric,epigraphy_nozero,Summary
+post_summary_filtmonuments.csv,Main,Third Analysis,Numeric,filtmonuments,Summary
+post_summary_filtmonuments_nozero.csv,Main,Third Analysis,Numeric,filtmonuments_nozero,Summary
+post_summary_hnwi.csv,Main,Fifth Analysis,Numeric,hnwi,Summary
+post_summary_tallbuildings.csv,Main,Sixth Analysis,Numeric,tallbuildings,Summary
+rsquared.csv,Main,Collate Main Results Table,Numeric,all,Summary
+scaling_samples.csv,Main,Plot Scaling Param Posterior Densities,Numeric,all,Summary
+city_outliers_allmonuments.csv,Main,First Analysis,Numeric,allmonuments,Model Diagnostic
+city_outliers_allwalls.csv,Main,Second Analysis,Numeric,allwalls,Model Diagnostic
+city_outliers_epigraphy.csv,Main,Fourth Analysis,Numeric,epigraphy,Model Diagnostic
+city_outliers_filtmonuments.csv,Main,Third Analysis,Numeric,filtmonuments,Model Diagnostic
+city_outliers_hnwi.csv,Main,Fifth Analysis,Numeric,hnwi,Model Diagnostic
+city_outliers_tallbuildings.csv,Main,Sixth Analysis,Numeric,tallbuildings,Model Diagnostic
+geweke_allmonuments.csv,Main,First Analysis,Numeric,allmonuments,MCMC Diagnostic
+geweke_allmonuments_nozero.csv,Main,First Analysis,Numeric,allmonuments_nozero,MCMC Diagnostic
+geweke_allwalls.csv,Main,Second Analysis,Numeric,allwalls,MCMC Diagnostic
+geweke_allwalls_nozero.csv,Main,Second Analysis,Numeric,allwalls_nozero,MCMC Diagnostic
+geweke_epigraphy.csv,Main,Fourth Analysis,Numeric,epigraphy,MCMC Diagnostic
+geweke_epigraphy_nozero.csv,Main,Fourth Analysis,Numeric,epigraphy_nozero,MCMC Diagnostic
+geweke_filtmonuments.csv,Main,Third Analysis,Numeric,filtmonuments,MCMC Diagnostic
+geweke_filtmonuments_nozero.csv,Main,Third Analysis,Numeric,filtmonuments_nozero,MCMC Diagnostic
+geweke_hnwi.csv,Main,Fifth Analysis,Numeric,hnwi,MCMC Diagnostic
+geweke_tallbuildings.csv,Main,Sixth Analysis,Numeric,tallbuildings,MCMC Diagnostic
+grrhat_allmonuments.csv,Main,First Analysis,Numeric,allmonuments,MCMC Diagnostic
+grrhat_allmonuments_nozero.csv,Main,First Analysis,Numeric,allmonuments_nozero,MCMC Diagnostic
+grrhat_allwalls.csv,Main,Second Analysis,Numeric,allwalls,MCMC Diagnostic
+grrhat_allwalls_nozero.csv,Main,Second Analysis,Numeric,allwalls_nozero,MCMC Diagnostic
+grrhat_epigraphy.csv,Main,Fourth Analysis,Numeric,epigraphy,MCMC Diagnostic
+grrhat_epigraphy_nozero.csv,Main,Fourth Analysis,Numeric,epigraphy_nozero,MCMC Diagnostic
+grrhat_filtmonuments.csv,Main,Third Analysis,Numeric,filtmonuments,MCMC Diagnostic
+grrhat_filtmonuments_nozero.csv,Main,Third Analysis,Numeric,filtmonuments_nozero,MCMC Diagnostic
+grrhat_hnwi.csv,Main,Fifth Analysis,Numeric,hnwi,MCMC Diagnostic
+grrhat_tallbuildings.csv,Main,Sixth Analysis,Numeric,tallbuildings,MCMC Diagnostic
+resid_allmonuments_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog,Model Diagnostic
+resid_allmonuments_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog,Model Diagnostic
+resid_allwalls_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog,Model Diagnostic
+resid_allwalls_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog,Model Diagnostic
+resid_epigraphy_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog,Model Diagnostic
+resid_epigraphy_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog,Model Diagnostic
+resid_filtmonuments_loglin.pdf,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin,Model Diagnostic
+resid_filtmonuments_loglin.png,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin,Model Diagnostic
+resid_hnwi_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,hnwi_linlog,Model Diagnostic
+resid_hnwi_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,hnwi_linlog,Model Diagnostic
+resid_tallbuildings_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,tallbuildings_linlog,Model Diagnostic
+resid_tallbuildings_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,tallbuildings_linlog,Model Diagnostic
+tplots_allmonuments_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog,MCMC Diagnostic
+tplots_allmonuments_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog,MCMC Diagnostic
+tplots_allmonuments_linlog_provinces.pdf,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog,MCMC Diagnostic
+tplots_allmonuments_linlog_provinces.png,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog,MCMC Diagnostic
+tplots_allmonuments_sup.pdf,Supplemental,Supplemental: Outlier Effects,Plot,allmonuments_sup,MCMC Diagnostic
+tplots_allmonuments_sup.png,Supplemental,Supplemental: Outlier Effects,Plot,allmonuments_sup,MCMC Diagnostic
+tplots_allmonuments_sup_provinces.pdf,Supplemental,Supplemental: Outlier Effects,Plot,allmonuments_sup,MCMC Diagnostic
+tplots_allmonuments_sup_provinces.png,Supplemental,Supplemental: Outlier Effects,Plot,allmonuments_sup,MCMC Diagnostic
+tplots_allwalls_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog,MCMC Diagnostic
+tplots_allwalls_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog,MCMC Diagnostic
+tplots_allwalls_linlog_provinces.pdf,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog,MCMC Diagnostic
+tplots_allwalls_linlog_provinces.png,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog,MCMC Diagnostic
+tplots_epigraphy_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog,MCMC Diagnostic
+tplots_epigraphy_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog,MCMC Diagnostic
+tplots_epigraphy_linlog_provinces.pdf,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog,MCMC Diagnostic
+tplots_epigraphy_linlog_provinces.png,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog,MCMC Diagnostic
+tplots_filtmonuments_loglin.pdf,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin,MCMC Diagnostic
+tplots_filtmonuments_loglin.png,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin,MCMC Diagnostic
+tplots_filtmonuments_loglin_provinces.pdf,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin,MCMC Diagnostic
+tplots_filtmonuments_loglin_provinces.png,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin,MCMC Diagnostic
+tplots_hnwi_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,hnwi_linlog,MCMC Diagnostic
+tplots_hnwi_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,hnwi_linlog,MCMC Diagnostic
+tplots_hnwi_sup.pdf,Supplemental,Supplemental: Outlier Effects,Plot,hnwi_sup,MCMC Diagnostic
+tplots_hnwi_sup.png,Supplemental,Supplemental: Outlier Effects,Plot,hnwi_sup,MCMC Diagnostic
+tplots_tallbuildings_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,tallbuildings_linlog,MCMC Diagnostic
+tplots_tallbuildings_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,tallbuildings_linlog,MCMC Diagnostic
+point_scatters_linear.pdf,Supplemental,Visualization,Plot,,
+point_scatters_linear.png,Supplemental,Visualization,Plot,,
+point_scatters_linear_log.pdf,Supplemental,Visualization,Plot,,
+point_scatters_linear_log.png,Supplemental,Visualization,Plot,,
+model_comparison.csv,Supplemental,Supplemental: Model Comparison,Numeric,All,Summary
+post_summary_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments_linlog,Summary
+post_summary_allmonuments_sup.csv,Supplemental,Supplemental: Outlier Effects,Numeric,allmonuments_sup,Summary
+post_summary_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls_linlog,Summary
+post_summary_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy_linlog,Summary
+post_summary_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments_loglin,Summary
+post_summary_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi_linlog,Summary
+post_summary_hnwi_sup.csv,Supplemental,Supplemental: Outlier Effects,Numeric,hnwi_sup,Summary
+post_summary_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings_linlog,Summary
+waic.csv,Supplemental,Supplemental: Model Comparison,Numeric,all,Summary
+city_outliers_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments_linlog,Model Diagnostic
+city_outliers_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls_linlog,Model Diagnostic
+city_outliers_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy_linlog,Model Diagnostic
+city_outliers_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments_loglin,Model Diagnostic
+city_outliers_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi_linlog,Model Diagnostic
+city_outliers_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings_linlog,Model Diagnostic
+loo_est_allmonuments.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments,Model Diagnostic
+loo_est_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments_linlog,Model Diagnostic
+loo_est_allwalls.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls,Model Diagnostic
+loo_est_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls_linlog,Model Diagnostic
+loo_est_epigraphy.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy,Model Diagnostic
+loo_est_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy_linlog,Model Diagnostic
+loo_est_filtmonuments.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments,Model Diagnostic
+loo_est_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments_loglin,Model Diagnostic
+loo_est_hnwi.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi,Model Diagnostic
+loo_est_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi_linlog,Model Diagnostic
+loo_est_tallbuildings.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings,Model Diagnostic
+loo_est_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings_linlog,Model Diagnostic
+loo_pw_allmonuments.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments,Model Diagnostic
+loo_pw_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments_linlog,Model Diagnostic
+loo_pw_allwalls.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls,Model Diagnostic
+loo_pw_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls_linlog,Model Diagnostic
+loo_pw_epigraphy.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy,Model Diagnostic
+loo_pw_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy_linlog,Model Diagnostic
+loo_pw_filtmonuments.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments,Model Diagnostic
+loo_pw_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments_loglin,Model Diagnostic
+loo_pw_hnwi.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi,Model Diagnostic
+loo_pw_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi_linlog,Model Diagnostic
+loo_pw_tallbuildings.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings,Model Diagnostic
+loo_pw_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings_linlog,Model Diagnostic
+lppd.csv,Supplemental,Supplemental: Model Comparison,Numeric,All,Model Diagnostic
+waic_looic.csv,Supplemental,Supplemental: Model Comparison,Numeric,all,Model Diagnostic
+geweke_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments_linlog,MCMC Diagnostic
+geweke_allmonuments_sup.csv,Supplemental,Supplemental: Outlier Effects,Numeric,allmonuments_sup,MCMC Diagnostic
+geweke_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls_linlog,MCMC Diagnostic
+geweke_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy_linlog,MCMC Diagnostic
+geweke_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments_loglin,MCMC Diagnostic
+geweke_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi_linlog,MCMC Diagnostic
+geweke_hnwi_sup.csv,Supplemental,Supplemental: Outlier Effects,Numeric,hnwi_sup,MCMC Diagnostic
+geweke_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings_linlog,MCMC Diagnostic
+grrhat_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments_linlog,MCMC Diagnostic
+grrhat_allmonuments_sup.csv,Supplemental,Supplemental: Outlier Effects,Numeric,allmonuments_sup,MCMC Diagnostic
+grrhat_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls_linlog,MCMC Diagnostic
+grrhat_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy_linlog,MCMC Diagnostic
+grrhat_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments_loglin,MCMC Diagnostic
+grrhat_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi_linlog,MCMC Diagnostic
+grrhat_hnwi_sup.csv,Supplemental,Supplemental: Outlier Effects,Numeric,hnwi_sup,MCMC Diagnostic
+grrhat_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings_linlog,MCMC Diagnostic

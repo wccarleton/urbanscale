@@ -1,0 +1,193 @@
+﻿Filename,Analysis,Script Section,Type,Model
+analysis_results_summary.csv,Main,Results Summary,Summary,all
+city_outliers_allmonuments.csv,Main,First Analysis,Numeric,allmonuments
+city_outliers_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments_linlog
+city_outliers_allwalls.csv,Main,Second Analysis,Numeric,allwalls
+city_outliers_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls_linlog
+city_outliers_epigraphy.csv,Main,Fourth Analysis,Numeric,epigraphy
+city_outliers_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy_linlog
+city_outliers_filtmonuments.csv,Main,Third Analysis,Numeric,filtmonuments
+city_outliers_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments_loglin
+city_outliers_hnwi.csv,Main,Fifth Analysis,Numeric,hnwi
+city_outliers_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi_linlog
+city_outliers_tallbuildings.csv,Main,Sixth Analysis,Numeric,tallbuildings
+city_outliers_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings_linlog
+geweke_allmonuments.csv,Main,First Analysis,Diagnostics,allmonuments
+geweke_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,allmonuments_linlog
+geweke_allmonuments_nozero.csv,Main,First Analysis,Diagnostics,allmonuments_nozero
+geweke_allmonuments_sup.csv,Supplemental,Supplemental: Outlier Effects,Diagnostics,allmonuments_sup
+geweke_allwalls.csv,Main,Second Analysis,Diagnostics,allwalls
+geweke_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,allwalls_linlog
+geweke_allwalls_nozero.csv,Main,Second Analysis,Diagnostics,allwalls_nozero
+geweke_epigraphy.csv,Main,Fourth Analysis,Diagnostics,epigraphy
+geweke_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,epigraphy_linlog
+geweke_epigraphy_nozero.csv,Main,Fourth Analysis,Diagnostics,epigraphy_nozero
+geweke_filtmonuments.csv,Main,Third Analysis,Diagnostics,filtmonuments
+geweke_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,filtmonuments_loglin
+geweke_filtmonuments_nozero.csv,Main,Third Analysis,Diagnostics,filtmonuments_nozero
+geweke_hnwi.csv,Main,Fifth Analysis,Diagnostics,hnwi
+geweke_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,hnwi_linlog
+geweke_hnwi_sup.csv,Supplemental,Supplemental: Outlier Effects,Diagnostics,hnwi_sup
+geweke_tallbuildings.csv,Main,Sixth Analysis,Diagnostics,tallbuildings
+geweke_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,tallbuildings_linlog
+grrhat_allmonuments.csv,Main,First Analysis,Diagnostics,allmonuments
+grrhat_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,allmonuments_linlog
+grrhat_allmonuments_nozero.csv,Main,First Analysis,Diagnostics,allmonuments_nozero
+grrhat_allmonuments_sup.csv,Supplemental,Supplemental: Outlier Effects,Diagnostics,allmonuments_sup
+grrhat_allwalls.csv,Main,Second Analysis,Diagnostics,allwalls
+grrhat_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,allwalls_linlog
+grrhat_allwalls_nozero.csv,Main,Second Analysis,Diagnostics,allwalls_nozero
+grrhat_epigraphy.csv,Main,Fourth Analysis,Diagnostics,epigraphy
+grrhat_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,epigraphy_linlog
+grrhat_epigraphy_nozero.csv,Main,Fourth Analysis,Diagnostics,epigraphy_nozero
+grrhat_filtmonuments.csv,Main,Third Analysis,Diagnostics,filtmonuments
+grrhat_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,filtmonuments_loglin
+grrhat_filtmonuments_nozero.csv,Main,Third Analysis,Diagnostics,filtmonuments_nozero
+grrhat_hnwi.csv,Main,Fifth Analysis,Diagnostics,hnwi
+grrhat_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,hnwi_linlog
+grrhat_hnwi_sup.csv,Supplemental,Supplemental: Outlier Effects,Diagnostics,hnwi_sup
+grrhat_tallbuildings.csv,Main,Sixth Analysis,Diagnostics,tallbuildings
+grrhat_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Diagnostics,tallbuildings_linlog
+loo_est_allmonuments.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments
+loo_est_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments_linlog
+loo_est_allwalls.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls
+loo_est_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls_linlog
+loo_est_epigraphy.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy
+loo_est_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy_linlog
+loo_est_filtmonuments.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments
+loo_est_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments_loglin
+loo_est_hnwi.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi
+loo_est_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi_linlog
+loo_est_tallbuildings.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings
+loo_est_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings_linlog
+loo_pw_allmonuments.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments
+loo_pw_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allmonuments_linlog
+loo_pw_allwalls.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls
+loo_pw_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,allwalls_linlog
+loo_pw_epigraphy.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy
+loo_pw_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,epigraphy_linlog
+loo_pw_filtmonuments.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments
+loo_pw_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Numeric,filtmonuments_loglin
+loo_pw_hnwi.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi
+loo_pw_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,hnwi_linlog
+loo_pw_tallbuildings.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings
+loo_pw_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Numeric,tallbuildings_linlog
+lppd.csv,Supplemental,Supplemental: Model Comparison,Numeric,All
+model_comparison.csv,Supplemental,Supplemental: Model Comparison,Summary Table,All
+pa_gini_results.png,Main,Visualization,Plot,ABM
+point_scatters.pdf,Main,Visualization,Plot,N/A
+point_scatters.png,Main,Visualization,Plot,N/A
+point_scatters_linear.pdf,Supplemental,Visualization,Plot,N/A
+point_scatters_linear.png,Supplemental,Visualization,Plot,N/A
+point_scatters_linear_log.pdf,Supplemental,Visualization,Plot,N/A
+point_scatters_linear_log.png,Supplemental,Visualization,Plot,N/A
+post_summary_allmonuments.csv,Main,First Analysis,Summary Table,allmonuments
+post_summary_allmonuments_linlog.csv,Supplemental,Supplemental: Model Comparison,Summary Table,allmonuments_linlog
+post_summary_allmonuments_nozero.csv,Main,First Analysis,Summary Table,allmonuments_nozero
+post_summary_allmonuments_sup.csv,Supplemental,Supplemental: Outlier Effects,Summary Table,allmonuments_sup
+post_summary_allwalls.csv,Main,Second Analysis,Summary Table,allwalls
+post_summary_allwalls_linlog.csv,Supplemental,Supplemental: Model Comparison,Summary Table,allwalls_linlog
+post_summary_allwalls_nozero.csv,Main,Second Analysis,Summary Table,allwalls_nozero
+post_summary_epigraphy.csv,Main,Fourth Analysis,Summary Table,epigraphy
+post_summary_epigraphy_linlog.csv,Supplemental,Supplemental: Model Comparison,Summary Table,epigraphy_linlog
+post_summary_epigraphy_nozero.csv,Main,Fourth Analysis,Summary Table,epigraphy_nozero
+post_summary_filtmonuments.csv,Main,Third Analysis,Summary Table,filtmonuments
+post_summary_filtmonuments_loglin.csv,Supplemental,Supplemental: Model Comparison,Summary Table,filtmonuments_loglin
+post_summary_filtmonuments_nozero.csv,Main,Third Analysis,Summary Table,filtmonuments_nozero
+post_summary_hnwi.csv,Main,Fifth Analysis,Summary Table,hnwi
+post_summary_hnwi_linlog.csv,Supplemental,Supplemental: Model Comparison,Summary Table,hnwi_linlog
+post_summary_hnwi_sup.csv,Supplemental,Supplemental: Outlier Effects,Summary Table,hnwi_sup
+post_summary_tallbuildings.csv,Main,Sixth Analysis,Summary Table,tallbuildings
+post_summary_tallbuildings_linlog.csv,Supplemental,Supplemental: Model Comparison,Summary Table,tallbuildings_linlog
+resid_allmonuments.pdf,Main,First Analysis,Plot,allmonuments
+resid_allmonuments.png,Main,First Analysis,Plot,allmonuments
+resid_allmonuments_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog
+resid_allmonuments_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog
+resid_allwalls.pdf,Main,Second Analysis,Plot,allwalls
+resid_allwalls.png,Main,Second Analysis,Plot,allwalls
+resid_allwalls_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog
+resid_allwalls_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog
+resid_epigraphy.pdf,Main,Fourth Analysis,Plot,epigraphy
+resid_epigraphy.png,Main,Fourth Analysis,Plot,epigraphy
+resid_epigraphy_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog
+resid_epigraphy_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog
+resid_filtmonuments.pdf,Main,Third Analysis,Plot,filtmonuments
+resid_filtmonuments.png,Main,Third Analysis,Plot,filtmonuments
+resid_filtmonuments_loglin.pdf,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin
+resid_filtmonuments_loglin.png,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin
+resid_hnwi.pdf,Main,Fifth Analysis,Plot,hnwi
+resid_hnwi.png,Main,Fifth Analysis,Plot,hnwi
+resid_hnwi_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,hnwi_linlog
+resid_hnwi_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,hnwi_linlog
+resid_tallbuildings.pdf,Main,Sixth Analysis,Plot,tallbuildings
+resid_tallbuildings.png,Main,Sixth Analysis,Plot,tallbuildings
+resid_tallbuildings_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,tallbuildings_linlog
+resid_tallbuildings_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,tallbuildings_linlog
+rsquared.csv,Main,Collate Main Results Table,Summary Table,all
+scaling_posteriors.pdf,Main,Plot Scaling Param Posterior Densities,Plot,all
+scaling_posteriors.png,Main,Plot Scaling Param Posterior Densities,Plot,all
+scaling_samples.csv,Main,Plot Scaling Param Posterior Densities,Numeric,all
+tplots_allmonuments.pdf,Main,First Analysis,Plot,allmonuments
+tplots_allmonuments.png,Main,First Analysis,Plot,allmonuments
+tplots_allmonuments_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog
+tplots_allmonuments_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog
+tplots_allmonuments_linlog_provinces.pdf,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog
+tplots_allmonuments_linlog_provinces.png,Supplemental,Supplemental: Model Comparison,Plot,allmonuments_linlog
+tplots_allmonuments_nozero.pdf,Main,First Analysis,Plot,allmonuments_nozero
+tplots_allmonuments_nozero.png,Main,First Analysis,Plot,allmonuments_nozero
+tplots_allmonuments_nozero_provinces.pdf,Main,First Analysis,Plot,allmonuments_nozero
+tplots_allmonuments_nozero_provinces.png,Main,First Analysis,Plot,allmonuments_nozero
+tplots_allmonuments_provinces.pdf,Main,First Analysis,Plot,allmonuments
+tplots_allmonuments_provinces.png,Main,First Analysis,Plot,allmonuments
+tplots_allmonuments_sup.pdf,Supplemental,Supplemental: Outlier Effects,Plot,allmonuments_sup
+tplots_allmonuments_sup.png,Supplemental,Supplemental: Outlier Effects,Plot,allmonuments_sup
+tplots_allmonuments_sup_provinces.pdf,Supplemental,Supplemental: Outlier Effects,Plot,allmonuments_sup
+tplots_allmonuments_sup_provinces.png,Supplemental,Supplemental: Outlier Effects,Plot,allmonuments_sup
+tplots_allwalls.pdf,Main,Second Analysis,Plot,allwalls
+tplots_allwalls.png,Main,Second Analysis,Plot,allwalls
+tplots_allwalls_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog
+tplots_allwalls_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog
+tplots_allwalls_linlog_provinces.pdf,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog
+tplots_allwalls_linlog_provinces.png,Supplemental,Supplemental: Model Comparison,Plot,allwalls_linlog
+tplots_allwalls_nozero.pdf,Main,Second Analysis,Plot,allwalls_nozero
+tplots_allwalls_nozero.png,Main,Second Analysis,Plot,allwalls_nozero
+tplots_allwalls_nozero_provinces.pdf,Main,Second Analysis,Plot,allwalls_nozero
+tplots_allwalls_nozero_provinces.png,Main,Second Analysis,Plot,allwalls_nozero
+tplots_allwalls_provinces.pdf,Main,Second Analysis,Plot,allwalls
+tplots_allwalls_provinces.png,Main,Second Analysis,Plot,allwalls
+tplots_epigraphy.pdf,Main,Fourth Analysis,Plot,epigraphy
+tplots_epigraphy.png,Main,Fourth Analysis,Plot,epigraphy
+tplots_epigraphy_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog
+tplots_epigraphy_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog
+tplots_epigraphy_linlog_provinces.pdf,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog
+tplots_epigraphy_linlog_provinces.png,Supplemental,Supplemental: Model Comparison,Plot,epigraphy_linlog
+tplots_epigraphy_nozero.pdf,Main,Fourth Analysis,Plot,epigraphy_nozero
+tplots_epigraphy_nozero.png,Main,Fourth Analysis,Plot,epigraphy_nozero
+tplots_epigraphy_nozero_provinces.pdf,Main,Fourth Analysis,Plot,epigraphy_nozero
+tplots_epigraphy_nozero_provinces.png,Main,Fourth Analysis,Plot,epigraphy_nozero
+tplots_epigraphy_provinces.pdf,Main,Fourth Analysis,Plot,epigraphy
+tplots_epigraphy_provinces.png,Main,Fourth Analysis,Plot,epigraphy
+tplots_filtmonuments.pdf,Main,Third Analysis,Plot,filtmonuments
+tplots_filtmonuments.png,Main,Third Analysis,Plot,filtmonuments
+tplots_filtmonuments_loglin.pdf,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin
+tplots_filtmonuments_loglin.png,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin
+tplots_filtmonuments_loglin_provinces.pdf,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin
+tplots_filtmonuments_loglin_provinces.png,Supplemental,Supplemental: Model Comparison,Plot,filtmonuments_loglin
+tplots_filtmonuments_nozero.pdf,Main,Third Analysis,Plot,filtmonuments_nozero
+tplots_filtmonuments_nozero.png,Main,Third Analysis,Plot,filtmonuments_nozero
+tplots_filtmonuments_nozero_provinces.pdf,Main,Third Analysis,Plot,filtmonuments_nozero
+tplots_filtmonuments_nozero_provinces.png,Main,Third Analysis,Plot,filtmonuments_nozero
+tplots_filtmonuments_provinces.pdf,Main,Third Analysis,Plot,filtmonuments
+tplots_filtmonuments_provinces.png,Main,Third Analysis,Plot,filtmonuments
+tplots_hnwi.pdf,Main,Fifth Analysis,Plot,hnwi
+tplots_hnwi.png,Main,Fifth Analysis,Plot,hnwi
+tplots_hnwi_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,hnwi_linlog
+tplots_hnwi_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,hnwi_linlog
+tplots_hnwi_sup.pdf,Supplemental,Supplemental: Outlier Effects,Plot,hnwi_sup
+tplots_hnwi_sup.png,Supplemental,Supplemental: Outlier Effects,Plot,hnwi_sup
+tplots_tallbuildings.pdf,Main,Sixth Analysis,Plot,tallbuildings
+tplots_tallbuildings.png,Main,Sixth Analysis,Plot,tallbuildings
+tplots_tallbuildings_linlog.pdf,Supplemental,Supplemental: Model Comparison,Plot,tallbuildings_linlog
+tplots_tallbuildings_linlog.png,Supplemental,Supplemental: Model Comparison,Plot,tallbuildings_linlog
+waic.csv,Supplemental,Supplemental: Model Comparison,Summary Table,all
+waic_looic.csv,Supplemental,Supplemental: Model Comparison,Summary Table,all
