@@ -835,6 +835,77 @@ output_scaling <- function(mcmc_out,
                 append = append)
 }
 
+# collate and output convergence stats as plots
+# Function to process Geweke statistics and create a histogram
+plot_geweke_stats <- function(geweke_files, output_path) {
+  geweke_values <- c()
+  
+  # Read all Geweke files
+  for (file in geweke_files) {
+    df <- read.csv(file, header = TRUE)
+    geweke_values <- c(geweke_values, df[, 4])
+  }
+
+  # Calculate proportions for 95% and 99% thresholds
+  total_values <- length(geweke_values)
+  proportion_exceeding_95 <- sum(abs(geweke_values) > 2.58) / total_values * 100
+  proportion_exceeding_99 <- sum(abs(geweke_values) > 2.9) / total_values * 100
+  
+  # Create the histogram
+  geweke_df <- data.frame(Geweke = geweke_values)
+  plot <- ggplot(geweke_df, aes(x = Geweke)) +
+    geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+    geom_vline(xintercept = c(-2.58, 2.58), color = "red", linetype = "dashed", size = 1) +
+    geom_vline(xintercept = c(-2.9, 2.9), color = "orange", linetype = "dashed", size = 1) +
+    annotate("text", x = -4, y = max(table(cut(geweke_values, 30))) * 0.9,
+             label = sprintf("Proportion > |2.58|: %.2f%%", proportion_exceeding_95),
+             color = "red", hjust = 0, size = 5) +
+    annotate("text", x = -4, y = max(table(cut(geweke_values, 30))) * 0.8,
+             label = sprintf("Proportion > |2.9|: %.2f%%", proportion_exceeding_99),
+             color = "orange", hjust = 0, size = 5) +
+    labs(title = "Histogram of Geweke Statistics", x = "Geweke Statistic", y = "Frequency") +
+    theme_minimal()
+  
+  # Save the plot
+  ggsave(filename = file.path(output_path, "geweke_histogram.png"), 
+        plot = plot, 
+        width = 10, 
+        height = 6)
+  ggsave(filename = file.path(output_path, "geweke_histogram.pdf"), 
+        plot = plot, 
+        width = 10, 
+        height = 6)
+}
+
+# Function to process R-hat statistics and create a histogram
+plot_rhat_stats <- function(rhat_files, output_path) {
+  rhat_values <- c()
+  
+  # Read all R-hat files and extract the second column (index 2)
+  for (file in rhat_files) {
+    df <- read.csv(file, header = TRUE)
+    rhat_values <- c(rhat_values, df[, 2]) # Assuming column 2 contains R-hat stats
+  }
+  
+  # Create the histogram
+  rhat_df <- data.frame(Rhat = rhat_values)
+  plot <- ggplot(rhat_df, aes(x = Rhat)) +
+    geom_histogram(bins = 30, fill = "lightgreen", color = "black", alpha = 0.7) +
+    geom_vline(xintercept = c(1.01, 1.1), color = c("red", "orange"), linetype = "dashed", size = 1) +
+    labs(title = "Histogram of R-hat Statistics", x = "R-hat Statistic", y = "Frequency") +
+    theme_minimal()
+  
+  # Save the plot
+  ggsave(filename = file.path(output_path, "grrhat_histogram.png"), 
+        plot = plot, 
+        width = 10, 
+        height = 6)
+  ggsave(filename = file.path(output_path, "grrhat_histogram.pdf"), 
+        plot = plot, 
+        width = 10, 
+        height = 6)
+}
+
 ### CORE ANALYSIS WRAPPER ######################################################
 
 run_scaling_analysis <- function(df = df,
@@ -2027,8 +2098,8 @@ Inits <- list(scaling = rep(1, K),
             intercept0 = 1,
             scaling0 = 1,
             size = 1,
-            sd0 = 1,
-            sd1 = 1,
+            sd0 = 0.5,
+            sd1 = 0.5,
             b0 = 4,
             b1 = 0.8,
             sigma_pop = 0.5)
@@ -2042,7 +2113,7 @@ run_scaling_analysis(df = df,
                 Consts = Consts,
                 Data = Data,
                 inits = Inits,
-                niter = niter,
+                niter = niter * 2,
                 thin = thin,
                 thin2 = thin2,
                 nchains = nchains,
@@ -2342,3 +2413,16 @@ if(length(outliers_idx) != 0){
 }else{
         warning("No outlier cities in list. Skipping this analysis.")
 }
+
+### PLOT CONVERGENCE DIAGNOSTIC OVERVIEW #######################################
+# Here we are plotting, at a high level, convergence diagnostics for the whole 
+# analysis, including supplementals
+
+# Paths to input files and output directory
+geweke_files <- list.files("Output", pattern = "geweke_.*\\.csv", full.names = TRUE)
+rhat_files <- list.files("Output", pattern = "grrhat_.*\\.csv", full.names = TRUE)
+output_path <- "Output/"
+
+# Generate the plots
+plot_geweke_stats(geweke_files, output_path)
+plot_rhat_stats(rhat_files, output_path)
