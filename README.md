@@ -6,9 +6,15 @@ This repo contains the data and code used for the study presented in the followi
 
 ** This paper is currently under review **
 
+## Archive
+
+This Repository has been archived with Zenodo:
+
+[![DOI](https://zenodo.org/badge/620744563.svg)](https://doi.org/10.5281/zenodo.10925901)
+
 ## Abstract
 
-With rapid urbanization and rising inequality worldwide, it is vital that we explore potential long-term, systemic links between these phenomena. We present an inter-temporal scaling analysis involving ancient Roman and modern proxies for urban elite wealth concentration to identify universal patterns in how elite wealth concentration may scale with city size. Using advanced Bayesian models to address archaeological uncertainties, we found that the relationship between population size and elite wealth exhibits consistent power-law behaviour across both contexts, despite the vast differences in time, culture, and economics. Supported by a custom agent-based network simulation and guided by Settlement Scaling Theory, we propose that the observed patterns are the product of a common, fundamental principle of human social interaction: preferential attachment in social networks. Our findings suggest new directions in urban scaling research and highlight the need to understand the universal dynamics that contribute to urban inequality over the long-term.
+Rapid urbanization and rising inequality are pressing global concerns, yet inequality is an ancient trait of city life that may be intrinsictly connected to the urbanism itself. Here we investigate how elite wealth scales with urban population size across culture and time by analysing ancient Roman and modern cities. Using Bayesian models to address archaeological uncertainties, we uncovered a consistent correlation between population size and physical expressions of elite wealth in urban spaces. These patterns suggest the presence of an ancient, enduring mechanism underlying urban inequality. Supported by an agent-based network simulation and informed by Settlement Scaling Theory, we propose that the observed patterns arise from simple, common preferential attachment in social networks---a simple, yet powerful driver of unequal access to interaction potential. Our findings open up new directions in urban scaling research and underscore the importance of understanding long-term urban dynamics to chart a course toward a fairer urban future.
 
 ## Software
 The R and Python scripts contained in this repository are intended for replication efforts and to improve the transparency of research. They are, of course, provided without warranty or technical support. That said, questions about the code can be directed to me, Chris Carleton, at ccarleton@protonmail.com.
