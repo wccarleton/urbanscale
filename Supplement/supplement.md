@@ -8,48 +8,11 @@ fontsize: 11pt  # Default size
 geometry: [a4paper, margin=1in]  # Use A4 paper size
 header-includes:
   - \usepackage{graphicx}  # Needed for image compression
-  - \usepackage{epstopdf}  # Ensures EPS images are handled correctly (if used)
+  - \usepackage{tabularx}    # For automatic column width adjustment
+  - \renewcommand{\arraystretch}{1.2} # Adjust row height (optional)
 ---
 
-# Supplementary Information for:
-**Parallel Scaling of Elite Wealth in Ancient Roman and Modern Cities with Implications for Inequality and Sustainability**
-
-## Authors
-- **W. Christopher Carleton** (Max Planck Institute of Geoanthropology, Jena, Germany)
-- Hugh Elton (Trent University, Peterborough, Canada)
-- Will Miranda (Council on Tall Buildings and Urban Habitat, Chicago, USA)
-- Isaac Work (Council on Tall Buildings and Urban Habitat, Chicago, USA)
-- Daniel Safarik (Council on Tall Buildings and Urban Habitat, Chicago, USA)
-- Ricarda Winkelmann (Max Planck Institute of Geoanthropology, Jena, Germany; Potsdam Institute for Climate Impact Research, Potsdam, Germany)
-- Manfred Laubichler (Arizona State University; Santa Fe Institute, USA)
-- Jürgen Renn (Max Planck Institute for the History of Science, Berlin, Germany)
-- Patrick Roberts (Max Planck Institute of Geoanthropology, Jena, Germany; University of the Philippines, Quezon City)
-
----
-
-## Introduction
-
-This document serves as the supplementary material for the study **"Parallel Scaling of Elite Wealth in Ancient Roman and Modern Cities with Implications for Inequality and Sustainability."** It provides detailed information about the data, methods, and analytical approaches employed in the study, along with additional results, figures, and tables to support the primary findings.
-
-The supplementary material complements the main text by documenting the technical aspects of the analysis, ensuring reproducibility and transparency. It includes scripts, data summaries, model diagnostics, and additional plots that underpin the conclusions drawn in the manuscript. For users interested in reanalyzing the data or adapting the methods, the required code is available in the project repository on [Github](https://github.com/wccarleton/urbanscale), which has also been archived with Zenodo.
-
-### Replication
-To replicate the analyses described in the main paper, you can:
-
-1. Get the code and data by, 
-- Downloading or cloning the main branch of the [Github](https://github.com/wccarleton/urbanscale) repo; or
-- Downloading the compressed repository folder from Zenodo (DOI and URL only provided after the paper has been accepted, so see the [Github](https://github.com/wccarleton/urbanscale) repo for that link if desired since the repo README will be updated accordingly)
-
-2. Run the R script.
-- In the Src folder of the repo, you will find an R script called `urban_wealth_scale.R`. This is the only script required to run the core anlayses and it can be run with the R::source() function or by copy-pasting into an R session. The script assumes the entire repo is present and uses relative paths within the repo to find files it needs and output results and plots.
-- If needed, see the `R_environment_info.txt` file to get all pertinent information about the R environmnet in which the script was created and run for the project.
-
-3. Run the Python notebook.
-- If desired, you can recreate the Python, [Mesa](https://mesa.readthedocs.io/stable/) agent-based model described in the paper and you can then explore various options and extensions as desired.
-- There are several ways to go about this, but the simplest is to just use your own Python Jupyter notebook ensuring that, minimally, Mesa and the other packages imported at the top of the notebook are intalled in your Python environment.
-- To ensure complete reproducibility, you can also use conda/miniconda to recreate the Python environment in which the Python code was produced and run for the paper/project. To do this, use the `conda_environment.yml` file in the Src directory of the project [Github](https://github.com/wccarleton/urbanscale) repo to create an identical conda environment. Then, select the created enviornment as the kernel in your Jupyter notebook before running the notebook cells.
-
-### Document Structure
+## Document Structure
 - **[Summary Tables of Outputs](#summary-table-of-outputs)**: Consolidated tables listing all output files generated during the analysis.
 - **[Summary Table of Key Model Posteriors](#summary-table-of-key-model-posteriors)**: A table summarizing the posterior densities for the key scaling parameters from each analysis.
 - **[High-level Convergence Statistis Overview](#high-level-convergence-statistis-overview)**: Plots summarizing standard MCMC convergence diagnostics.
@@ -59,10 +22,6 @@ To replicate the analyses described in the main paper, you can:
   - **[2. Model Fitting](#2-model-fitting)**: Bayesian modeling approaches and diagnostics.
   - **[3. Results](#3-results)**: Extended tables and plots supporting the main manuscript.
   - **[4. Supplemental Analyses](#4-supplemental-analyses)**: Alternative model testing and additional robustness checks.
-
-For any questions or additional support, please contact the corresponding authors:
-- **W. Christopher Carleton** at [carleton@gea.mpg.de](mailto:carleton@gea.mpg.de)
-- **Patrick Roberts** at [roberts@gea.mpg.de](mailto:roberts@gea.mpg.de)
 
 ---
 
@@ -74,20 +33,22 @@ Please refer to this table to understand the file naming conventions used in the
 
 | File Name Convention           | Description                                                                 |
 |--------------------------------|-----------------------------------------------------------------------------|
-| `post_summary_<model>.csv`     | Contains parameter summaries (e.g., mean, confidence intervals) for a model.|
-| `tplots_<model>.png`           | Trace plots of MCMC chains for the specified model.                         |
-| `geweke_<model>.csv`           | Geweke diagnostic results for the specified model.                          |
-| `grrhat_<model>.csv`           | R-hat convergence diagnostic for the specified model.                       |
-| `resid_<model>.png`            | Residual diagnostic plots for the specified model.                          |
-| `waic_<model>.csv`             | WAIC model comparison metrics for the specified model.                      |
-| `loo_<model>.csv`              | Leave-One-Out cross-validation results for the specified model.             |
-| `city_outliers_<model>.csv`    | Identifies cities considered outliers for the specified model.              |
-| `scaling_posteriors.png`       | Posterior density plots for scaling parameters.                             |
-| `analysis_results_summary.csv` | Summary of main results across all models.                                  |
-| `lppd.csv`                     | Log Point-wise Predictive Density for all models and all observations.      |
+| post_summary_`<model>`.csv      | Contains parameter summaries (e.g., mean, confidence intervals) for a model.|
+| tplots_`<model>`.png           | Trace plots of MCMC chains for the specified model.                         |
+| geweke_`<model>`.csv           | Geweke diagnostic results for the specified model.                          |
+| grrhat_`<model>`.csv           | R-hat convergence diagnostic for the specified model.                       |
+| resid_`<model>`.png            | Residual diagnostic plots for the specified model.                          |
+| waic_`<model>`.csv             | WAIC model comparison metrics for the specified model.                      |
+| loo_`<model>`.csv              | Leave-One-Out cross-validation results for the specified model.             |
+| city_outliers_`<model>`.csv    | Identifies cities considered outliers for the specified model.              |
+| scaling_posteriors.png       | Posterior density plots for scaling parameters.                             |
+| analysis_results_summary .csv | Summary of main results across all models.                                  |
+| lppd.csv`                     | Log Point-wise Predictive Density for all models and all observations.      |
 
-**NOTE**
-In the tables that follow, we split repetitive filename prefixes in order to avoid excessive oveflow from long filenames. The prefixes are in bold in the rows immediately preceeding the relevant files that all share the given prefix.
+**NOTES**
+- This PDF was generated from a Markdown (.md) file with Quarto and then compressed with Ghostscript:
+  (gswin64c -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=supplement_compressed.pdf supplement.pdf)
+- In the tables that follow, we split repetitive filename prefixes in order to avoid excessive oveflow from long filenames. The prefixes are in bold in the rows immediately preceeding the relevant files that all share the given prefix.
 
 ### Main Analyses, Plot Files
 {{< include grouped_main_plot.md >}}
@@ -118,10 +79,10 @@ In the table below, the focal posterior summaries (lower and upper 95% CI, mean,
 In this section we present two plots below that summarize, at a high level, the convergence diagnostics from MCMC chains for all parameters and all models in our analysis. The first is a histogram of $\hat{R}$ statistics, while the second is a histogram of Geweke statistics. Together with the trace plots in the following section, these plots indicate good convergence throughout the analysis and suggest robust estimates of model posteriors. The Geweke histogram does show some extreme values, but these are only slightly more frequent than what would be expected by random chance at the 95% and 99% thresholds. Importantly, the $\hat{R}$ statistics provide strong evidence of convergence, and the trace plots reveal no signs of drift. Taken together, these results suggest that the few extreme Geweke values do not raise significant concerns about the reliability of the analysis.
 
 ### rhat_histogram.png
-![grrhat_histogram.png](../Output/grrhat_histogram.png){width=50%}
+![grrhat_histogram.png](../Output/grrhat_histogram.png)
 
 ### geweke_histogram.png
-![geweke_histogram.png](../Output/geweke_histogram.png){width=50%}
+![geweke_histogram.png](../Output/geweke_histogram.png)
 
 ---
 
