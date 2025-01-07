@@ -7,13 +7,11 @@ This repo contains the data and code used for the study presented in the followi
 ** This paper is currently under review **
 
 ## Archive
-
 This Repository has been archived with Zenodo:
 
 [![DOI](https://zenodo.org/badge/620744563.svg)](https://doi.org/10.5281/zenodo.10925901)
 
 ## Abstract
-
 Rapid urbanization and rising inequality are pressing global concerns, yet inequality is an ancient trait of city life that may be intrinsictly connected to the urbanism itself. Here we investigate how elite wealth scales with urban population size across culture and time by analysing ancient Roman and modern cities. Using Bayesian models to address archaeological uncertainties, we uncovered a consistent correlation between population size and physical expressions of elite wealth in urban spaces. These patterns suggest the presence of an ancient, enduring mechanism underlying urban inequality. Supported by an agent-based network simulation and informed by Settlement Scaling Theory, we propose that the observed patterns arise from simple, common preferential attachment in social networks---a simple, yet powerful driver of unequal access to interaction potential. Our findings open up new directions in urban scaling research and underscore the importance of understanding long-term urban dynamics to chart a course toward a fairer urban future.
 
 ## Software
@@ -28,8 +26,8 @@ Some analyses were also conductd using [Python](https://www.python.org/) in a [J
 ### Nimble
 This project made use of a Bayesian Analysis package called [Nimble](https://r-nimble.org/). See the Nimble website for documentation and a tutorial. Then, refer to the R scripts in this repo.
 
-### Supplementary Information
-See the `Supplement` folder within this repo for further supplementary documentation and information about how that document was produced. More specifically, the main supplementary information published with the associated research paper is `Supplement/supplement.pdf` and it contains a guide to this repo, supplementary results supporting the main analysis, a detailed outline of the analyses run in the main `Src/urban_wealth_scale.R` script, and summaries of MCMC convergence diagnostics. The document itself was created paritally by automation with python and details about that process are located in `Supplement/supplement_builder.ipynb`. IT was built with [Quarto](https://quarto.org/) from markdown files in VS Code.
+## Supplementary Information
+See the `Supplement` folder within this repo for further supplementary documentation and information about how that document was produced. More specifically, the main supplementary information published with the associated research paper is `Supplement/supplement_compressed.pdf` and it contains a guide to this repo, supplementary results supporting the main analysis, a detailed outline of the analyses run in the main `Src/urban_wealth_scale.R` script, and summaries of MCMC convergence diagnostics. The document itself was created paritally by automation with Python and details about that process are located in `Supplement/supplement_builder.ipynb`. It was built with [Quarto](https://quarto.org/) from markdown files in VS Code.
 
 ## Contact
 
